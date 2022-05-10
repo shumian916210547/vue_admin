@@ -9,13 +9,13 @@ module.exports = defineConfig({
     host: "localhost",
     port: 4200,
     open: false,
-    proxy: {
+    /* proxy: {
       URL: {
         target: API,
         pathRewrite: {
           ["^" + URL]: "",
         },
       },
-    },
+    }, */
   },
 });

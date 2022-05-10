@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 axios.defaults.timeout = 5000;
-axios.defaults.baseURL = process.env.VUE_APP_BASE_URL;
+axios.defaults.baseURL = "http://localhost:3000/admin";
 
 //http request 拦截器
 axios.interceptors.request.use(
