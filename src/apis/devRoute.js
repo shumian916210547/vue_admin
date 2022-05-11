@@ -10,7 +10,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function findAll({ pageSize, pageNum }) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findAll", { pageSize, pageNum })
+    get("/devRoute/findAll", { pageSize, pageNum })
       .then((result) => {
         resolve(result);
       })
@@ -21,14 +21,14 @@ export function findAll({ pageSize, pageNum }) {
 }
 
 /**
- * 所有模块列表
+ * 所有路由列表
  * @path /findList
  * @method GET
  * @returns {Pomise}
  */
 export function findList() {
   return new Promise((resolve, reject) => {
-    get("/devModule/findList")
+    get("/devRoute/findList")
       .then((result) => {
         resolve(result);
       })
@@ -39,15 +39,15 @@ export function findList() {
 }
 
 /**
- * 模块详情
+ * 路由详情
  * @path /findById
  * @method GET
- * @param {String} objectId 模块Id
+ * @param {String} objectId 路由Id
  * @returns {Promise}
  */
 export function findById(params) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findById", params)
+    get("/devRoute/findById", params)
       .then((result) => {
         resolve(result);
       })
@@ -58,17 +58,17 @@ export function findById(params) {
 }
 
 /**
- * 新增模块
- * @path /insertDevModule
+ * 新增路由
+ * @path /insertDevRoute
  * @method POST
- * @param {Object} meta 模块参数
- * @param {String} name 模块名称
- * @param {Array} routes 路由列表
+ * @param {String} pagePath 页面路径
+ * @param {String} name 路由名称
+ * @param {String} path 路由路径
  * @returns {Promise}
  */
-export function insertDevModule(params) {
+export function insertDevRoute(params) {
   return new Promise((resolve, reject) => {
-    post("/devModule/insertDevModule", params)
+    post("/devRoute/insertDevRoute", params)
       .then((result) => {
         resolve(result);
       })
@@ -79,18 +79,18 @@ export function insertDevModule(params) {
 }
 
 /**
- * 修改模块
+ * 修改路由
  * @path /updateById
  * @method POST
- * @param {String} objectId 模块Id
- * @param {Object} meta 模块参数
- * @param {String} name 模块名称
- * @param {Array} routes 路由列表
+ * @param {String} objectId 路由Id
+ * @param {String} pagePath 页面路径
+ * @param {String} name 路由名称
+ * @param {String} path 路由路径
  * @returns {Promise}
  */
 export function updateById(params) {
   return new Promise((resolve, reject) => {
-    put("/devModule/updateById", params)
+    put("/devRoute/updateById", params)
       .then((result) => {
         resolve(result);
       })
@@ -101,15 +101,15 @@ export function updateById(params) {
 }
 
 /**
- * 模块详情
+ * 路由详情
  * @path /removeById
  * @method DELETE
- * @param {String} objectId 模块Id
+ * @param {String} objectId 路由Id
  * @returns {Promise}
  */
 export function removeById(params) {
   return new Promise((resolve, reject) => {
-    remove("/devModule/removeById", params)
+    remove("/devRoute/removeById", params)
       .then((result) => {
         resolve(result);
       })

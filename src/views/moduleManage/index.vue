@@ -11,13 +11,13 @@
       </a-col>
 
       <a-col :span="8" :offset="1">
-        <a-form-item label="是否删除">
+        <!-- <a-form-item label="是否删除">
           <a-select v-model:value="filterForm.isDelete">
             <a-select-option :value="true"> 是 </a-select-option>
             <a-select-option :value="false"> 否 </a-select-option>
             <a-select-option value="all"> 全部 </a-select-option>
           </a-select>
-        </a-form-item>
+        </a-form-item> -->
       </a-col>
       <a-col
         :span="2"
@@ -76,10 +76,25 @@
   </a-table>
 
   <!-- 表单 -->
-  <a-modal v-model:visible="visible" @ok="handleOk">
-    <a-form :model="formValue" :key="formValue.objectId">
-      <a-form-item label="模块名称">
+  <a-modal v-model:visible="visible" @ok="handleSubmit">
+    <a-form
+      ref="formRef"
+      :rules="rules"
+      :model="formValue"
+      :key="formValue.objectId"
+    >
+      <a-form-item label="模块名称" name="name">
         <a-input v-model:value="formValue.name" placeholder="请输入模块名称" />
+      </a-form-item>
+
+      <a-form-item label="模块路由" name="router">
+        <a-select
+          v-model:value="formValue.router"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="请选择模块路由"
+          :options="routes"
+        ></a-select>
       </a-form-item>
     </a-form>
 
@@ -91,9 +106,16 @@
 
 <script>
 import { defineComponent, onMounted, reactive, ref } from "vue";
+import { debounce } from "lodash";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
-import { findAll, removeById } from "@/apis/devModule";
+import {
+  findAll,
+  removeById,
+  insertDevModule,
+  updateById,
+} from "@/apis/devModule";
+import { findList } from "@/apis/devRoute";
 const columns = [
   {
     title: "模块名称",
@@ -118,6 +140,17 @@ const columns = [
   },
 ];
 
+/* 表单验证 */
+const rules = {
+  name: [
+    {
+      required: true,
+      trigger: "change",
+      message: "请输入模块名称",
+    },
+  ],
+};
+
 export default defineComponent({
   components: {
     SmileOutlined,
@@ -125,6 +158,8 @@ export default defineComponent({
   },
   setup() {
     const visible = ref(false);
+
+    const formRef = ref();
 
     /* 添加/修改数据表单 */
     let formValue = reactive({
@@ -138,13 +173,58 @@ export default defineComponent({
     ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
-        formValue[key] = params[key];
+        if (key == "router") {
+          formValue[key] = params[key].map((route) => {
+            return route.objectId;
+          });
+        } else {
+          formValue[key] = params[key];
+        }
       });
     };
 
-    const handleOk = (e) => {
-      console.log(e);
-      visible.value = false;
+    /* 表单提交 */
+    const handleSubmit = debounce(async (e) => {
+      try {
+        await formRef.value.validateFields();
+        visible.value = false;
+        console.log(formValue);
+        const { code, msg, data } = await submitForm(formValue);
+        if (code == 200) {
+          notification["success"]({
+            message: "提醒",
+            description: msg,
+          });
+        } else {
+          throw {
+            msg,
+          };
+        }
+        loadModule(pagination);
+      } catch (errorInfo) {
+        notification["error"]({
+          message: "提醒",
+          description: errorInfo.msg || "缺少必填项",
+        });
+      }
+    }, 100);
+
+    /* 修改/新增 */
+    const submitForm = (params) => {
+      return new Promise((resolve, reject) => {
+        switch (params.objectId != undefined) {
+          case true:
+            updateById(params).then((result) => {
+              resolve(result);
+            });
+            break;
+          case false:
+            insertDevModule(params).then((result) => {
+              resolve(result);
+            });
+            break;
+        }
+      });
     };
 
     /* 筛选数据表单 */
@@ -197,9 +277,19 @@ export default defineComponent({
       }
     };
 
+    /* 加载路由下拉选择列表 */
+    let routes = ref([]);
+    const loadSelectOption = async () => {
+      const { code, data } = await findList();
+      if (code == 200) {
+        routes.value = data;
+      }
+    };
+
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
       loadModule(pagination);
+      loadSelectOption();
     });
 
     return {
@@ -209,8 +299,11 @@ export default defineComponent({
       tableData,
       columns,
       visible,
+      routes,
+      formRef,
+      rules,
       showModal,
-      handleOk,
+      handleSubmit,
       confirmDelete,
     };
   },
