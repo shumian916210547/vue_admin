@@ -18,7 +18,7 @@
           </template>
           首页
         </a-menu-item>
-        <a-sub-menu v-for="module in modules" :key="module.objectId">
+        <a-sub-menu v-for="module in modules" :key="module.meta.companyId">
           <template #icon>
             <MailOutlined />
           </template>
@@ -26,7 +26,7 @@
           <a-menu-item
             v-for="route in module.router"
             :key="route.path"
-            @click="toPage(route.path)"
+            @click="toPage(route.path, { companyId: module?.meta?.companyId })"
             >{{ route.name }}</a-menu-item
           >
         </a-sub-menu>
@@ -71,7 +71,14 @@ import {
   AppstoreOutlined,
   HomeOutlined,
 } from "@ant-design/icons-vue";
-import { computed, defineComponent, onMounted, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+  toRefs,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { useStore } from "vuex";
@@ -91,18 +98,31 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const toPage = (path, params) => {
-      router.push(path, params);
+      router.push({ path, query: params });
     };
 
     const store = useStore();
-    let selectedKeys = ref([route.path]);
+
+    let state = reactive({
+      selectedKeys: [route.path],
+      openKeys: [],
+      rootSubmenuKeys: [],
+    });
 
     const modules = computed(() => {
       return store.getters["GETMODULES"];
     });
 
+    onMounted(() => {
+      let company = JSON.parse(sessionStorage.getItem("company"));
+      if (!company) {
+        store.dispatch("SETCOMPANY");
+      } else {
+        store.commit("SETCOMPANY", company);
+      }
+    });
     return {
-      selectedKeys,
+      ...toRefs(state),
       collapsed: ref(false),
       modules,
       toPage,

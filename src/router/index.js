@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import store from "@/store/index";
 const routes = [
   {
     path: "/",
@@ -28,6 +29,10 @@ router.beforeEach(async (to, from, next) => {
   if (oneEnter) {
     oneEnter = false;
     next({ ...to, replace: true });
+  }
+
+  if (to.path != "/home" && to.path != "/") {
+    store.commit("SETCURRENTCOMPANY", to.meta.companyId);
   }
   next();
 });

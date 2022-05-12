@@ -56,6 +56,7 @@
               objectId: record.objectId,
               name: record.name,
               router: record.router,
+              companyId: record?.meta?.companyId,
             })
           "
           >编辑</a-button
@@ -95,6 +96,15 @@
           :options="routes"
         ></a-select>
       </a-form-item>
+
+      <a-form-item label="模块所属公司" name="companyId">
+        <a-select
+          v-model:value="formValue.companyId"
+          style="width: 100%"
+          placeholder="请选择模块所属公司"
+          :options="company"
+        ></a-select>
+      </a-form-item>
     </a-form>
 
     <template #title>
@@ -104,7 +114,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, reactive, ref } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref } from "vue";
 import { debounce } from "lodash";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
@@ -115,6 +125,7 @@ import {
   updateById,
 } from "@/apis/devModule";
 import { findList } from "@/apis/devRoute";
+import { useStore } from "vuex";
 const columns = [
   {
     title: "模块名称",
@@ -148,6 +159,13 @@ const rules = {
       message: "请输入模块名称",
     },
   ],
+  companyId: [
+    {
+      required: true,
+      trigger: "change",
+      message: "请选择模块所属公司",
+    },
+  ],
 };
 
 export default defineComponent({
@@ -160,15 +178,23 @@ export default defineComponent({
 
     const formRef = ref();
 
+    const store = useStore();
+
     /* 添加/修改数据表单 */
     let formValue = reactive({
       router: [],
       name: "",
+      companyId: "",
       objectId: undefined,
     });
 
     const showModal = (
-      params = { router: [], name: "", objectId: undefined }
+      params = {
+        router: [],
+        name: "",
+        objectId: undefined,
+        companyId: "",
+      }
     ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
@@ -184,11 +210,17 @@ export default defineComponent({
 
     /* 表单提交 */
     const handleSubmit = debounce(async (e) => {
+      console.log(formValue);
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        console.log(formValue);
-        const { code, msg, data } = await submitForm(formValue);
+        const { router, name, objectId, companyId } = formValue;
+        const { code, msg, data } = await submitForm({
+          router,
+          name,
+          objectId,
+          meta: { companyId },
+        });
         if (code == 200) {
           notification["success"]({
             message: "提醒",
@@ -279,6 +311,11 @@ export default defineComponent({
       }
     };
 
+    /* 公司列表 */
+    let company = computed(() => {
+      return store.getters["GETCOMPANY"];
+    });
+
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
       loadModule(pagination);
@@ -294,6 +331,7 @@ export default defineComponent({
       routes,
       formRef,
       rules,
+      company,
       showModal,
       handleSubmit,
       loadModule,

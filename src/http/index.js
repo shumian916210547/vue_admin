@@ -1,14 +1,22 @@
 import axios from "axios";
-
-import { useRouter } from "vue-router";
+import store from "@/store";
+import { useRoute, useRouter } from "vue-router";
+import { computed } from "vue";
 const router = useRouter();
 
 axios.defaults.timeout = 5000;
 axios.defaults.baseURL = "http://localhost:3000/admin";
-
+let companyId = computed(() => {
+  return store.getters["GETCURRENTCOMPANY"];
+});
 //http request 拦截器
 axios.interceptors.request.use(
   (config) => {
+    if (companyId) {
+      config.data = Object.assign({}, config.data, {
+        companyId: companyId.value,
+      });
+    }
     return config;
   },
   (error) => {}
