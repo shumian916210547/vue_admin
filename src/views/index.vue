@@ -12,6 +12,12 @@
         theme="dark"
         :inline-collapsed="collapsed"
       >
+        <a-menu-item key="/home" @click="toPage('/home')">
+          <template #icon>
+            <HomeOutlined />
+          </template>
+          首页
+        </a-menu-item>
         <a-sub-menu v-for="module in modules" :key="module.objectId">
           <template #icon>
             <MailOutlined />
@@ -63,6 +69,7 @@ import {
   DesktopOutlined,
   InboxOutlined,
   AppstoreOutlined,
+  HomeOutlined,
 } from "@ant-design/icons-vue";
 import { computed, defineComponent, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -77,6 +84,7 @@ export default defineComponent({
     DesktopOutlined,
     InboxOutlined,
     AppstoreOutlined,
+    HomeOutlined,
   },
 
   setup() {
