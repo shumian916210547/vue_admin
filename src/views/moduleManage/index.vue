@@ -1,31 +1,30 @@
 <template>
-  <a-form :model="filterForm">
+  <a-form :model="pagination">
     <a-row>
       <a-col :span="8">
         <a-form-item label="模块名称">
           <a-input
-            v-model:value="filterForm.name"
+            v-model:value="pagination.name"
             placeholder="请输入模块名称"
           />
         </a-form-item>
       </a-col>
 
-      <a-col :span="8" :offset="1">
-        <!-- <a-form-item label="是否删除">
-          <a-select v-model:value="filterForm.isDelete">
-            <a-select-option :value="true"> 是 </a-select-option>
-            <a-select-option :value="false"> 否 </a-select-option>
-            <a-select-option value="all"> 全部 </a-select-option>
-          </a-select>
-        </a-form-item> -->
-      </a-col>
+      <a-col :span="8" :offset="1"> </a-col>
       <a-col
         :span="2"
         :offset="1"
         style="justify-content: space-evenly; display: flex"
       >
-        <a-button type="primary">查询</a-button>
-        <a-button>重置</a-button>
+        <a-button type="primary" @click="loadModule(pagination)">查询</a-button>
+        <a-button
+          @click="
+            () => {
+              pagination.name = '';
+            }
+          "
+          >重置</a-button
+        >
       </a-col>
       <a-col :span="2" :offset="2">
         <a-button type="primary" @click="showModal()">新建</a-button>
@@ -227,12 +226,6 @@ export default defineComponent({
       });
     };
 
-    /* 筛选数据表单 */
-    let filterForm = reactive({
-      name: "",
-      isDelete: "all",
-    });
-
     /* 删除模块 */
     const confirmDelete = async ({ objectId }) => {
       const { msg, code, data } = await removeById({ objectId });
@@ -293,7 +286,6 @@ export default defineComponent({
     });
 
     return {
-      filterForm,
       formValue,
       pagination,
       tableData,
@@ -304,6 +296,7 @@ export default defineComponent({
       rules,
       showModal,
       handleSubmit,
+      loadModule,
       confirmDelete,
     };
   },

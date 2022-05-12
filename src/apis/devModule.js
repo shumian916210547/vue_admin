@@ -8,9 +8,9 @@ import { get, post, remove, put } from "@/http/index";
  * @param {number} pageNum 默认1
  * @returns {Promise}
  */
-export function findAll({ pageSize, pageNum }) {
+export function findAll({ pageSize, pageNum, name }) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findAll", { pageSize, pageNum })
+    get("/devModule/findAll", { pageSize, pageNum, name })
       .then((result) => {
         resolve(result);
       })
@@ -45,9 +45,9 @@ export function findList() {
  * @param {String} objectId 模块Id
  * @returns {Promise}
  */
-export function findById(params) {
+export function findById({ objectId }) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findById", params)
+    get("/devModule/findById", { objectId })
       .then((result) => {
         resolve(result);
       })
@@ -61,14 +61,13 @@ export function findById(params) {
  * 新增模块
  * @path /insertDevModule
  * @method POST
- * @param {Object} meta 模块参数
  * @param {String} name 模块名称
- * @param {Array} routes 路由列表
+ * @param {Array} router 路由列表
  * @returns {Promise}
  */
-export function insertDevModule(params) {
+export function insertDevModule({ name, router }) {
   return new Promise((resolve, reject) => {
-    post("/devModule/insertDevModule", params)
+    post("/devModule/insertDevModule", { name, router })
       .then((result) => {
         resolve(result);
       })
@@ -83,14 +82,13 @@ export function insertDevModule(params) {
  * @path /updateById
  * @method POST
  * @param {String} objectId 模块Id
- * @param {Object} meta 模块参数
  * @param {String} name 模块名称
- * @param {Array} routes 路由列表
+ * @param {Array} router 路由列表
  * @returns {Promise}
  */
-export function updateById(params) {
+export function updateById({ objectId, name, router }) {
   return new Promise((resolve, reject) => {
-    put("/devModule/updateById", params)
+    put("/devModule/updateById", { objectId, name, router })
       .then((result) => {
         resolve(result);
       })
@@ -107,9 +105,9 @@ export function updateById(params) {
  * @param {String} objectId 模块Id
  * @returns {Promise}
  */
-export function removeById(params) {
+export function removeById({ objectId }) {
   return new Promise((resolve, reject) => {
-    remove("/devModule/removeById", params)
+    remove("/devModule/removeById", { objectId })
       .then((result) => {
         resolve(result);
       })

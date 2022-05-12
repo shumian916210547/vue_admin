@@ -8,9 +8,9 @@ import { get, post, remove, put } from "@/http/index";
  * @param {number} pageNum 默认1
  * @returns {Promise}
  */
-export function findAll({ pageSize, pageNum }) {
+export function findAll({ pageSize, pageNum, name }) {
   return new Promise((resolve, reject) => {
-    get("/devRoute/findAll", { pageSize, pageNum })
+    get("/devRoute/findAll", { pageSize, pageNum, name })
       .then((result) => {
         resolve(result);
       })
@@ -45,9 +45,9 @@ export function findList() {
  * @param {String} objectId 路由Id
  * @returns {Promise}
  */
-export function findById(params) {
+export function findById({ objectId }) {
   return new Promise((resolve, reject) => {
-    get("/devRoute/findById", params)
+    get("/devRoute/findById", { objectId })
       .then((result) => {
         resolve(result);
       })
@@ -66,9 +66,9 @@ export function findById(params) {
  * @param {String} path 路由路径
  * @returns {Promise}
  */
-export function insertDevRoute(params) {
+export function insertDevRoute({ pagePath, name, path }) {
   return new Promise((resolve, reject) => {
-    post("/devRoute/insertDevRoute", params)
+    post("/devRoute/insertDevRoute", { pagePath, name, path })
       .then((result) => {
         resolve(result);
       })
@@ -88,9 +88,9 @@ export function insertDevRoute(params) {
  * @param {String} path 路由路径
  * @returns {Promise}
  */
-export function updateById(params) {
+export function updateById({ objectId, pagePath, name, path }) {
   return new Promise((resolve, reject) => {
-    put("/devRoute/updateById", params)
+    put("/devRoute/updateById", { objectId, pagePath, name, path })
       .then((result) => {
         resolve(result);
       })
@@ -107,9 +107,9 @@ export function updateById(params) {
  * @param {String} objectId 路由Id
  * @returns {Promise}
  */
-export function removeById(params) {
+export function removeById({ objectId }) {
   return new Promise((resolve, reject) => {
-    remove("/devRoute/removeById", params)
+    remove("/devRoute/removeById", { objectId })
       .then((result) => {
         resolve(result);
       })
