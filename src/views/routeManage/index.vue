@@ -49,7 +49,20 @@
       </template>
 
       <template v-else-if="column.key === 'operation'">
-        <a-button type="primary" @click="showModal(record)">编辑</a-button>
+        <a-button
+          type="primary"
+          @click="
+            showModal({
+              path: record.path,
+              name: record.name,
+              objectId: record.objectId,
+              pagePath: record.pagePath,
+              className: record?.option?.className,
+              column: record?.option?.columns,
+            })
+          "
+          >编辑</a-button
+        >
         <a-popconfirm
           title="确定删除此路由"
           ok-text="Yes"
@@ -86,6 +99,25 @@
           placeholder="请输入页面路径"
         />
       </a-form-item>
+
+      <a-form-item label="路由Schema" name="className">
+        <a-select
+          v-model:value="formValue.className"
+          style="width: 100%"
+          placeholder="请选择路由Schema"
+          :options="schema"
+        ></a-select>
+      </a-form-item>
+
+      <a-form-item label="表头信息" name="column" v-show="formValue.className">
+        <a-select
+          v-model:value="formValue.column"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="请选择表头信息"
+          :options="fields[formValue.className]"
+        ></a-select>
+      </a-form-item>
     </a-form>
 
     <template #title>
@@ -95,7 +127,7 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, reactive, ref } from "vue";
+import { computed, defineComponent, onMounted, reactive, ref } from "vue";
 import { debounce } from "lodash";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
@@ -105,6 +137,7 @@ import {
   insertDevRoute,
   updateById,
 } from "@/apis/devRoute";
+import { useStore } from "vuex";
 
 /* 表头 */
 const columns = [
@@ -174,6 +207,7 @@ export default defineComponent({
   setup() {
     const visible = ref(false);
 
+    const store = useStore();
     /* 表单 */
     let formRef = ref();
 
@@ -183,10 +217,19 @@ export default defineComponent({
       name: "",
       objectId: undefined,
       pagePath: "",
+      className: "",
+      column: [],
     });
 
     const showModal = (
-      params = { path: "", name: "", objectId: undefined, pagePath: "" }
+      params = {
+        path: "",
+        name: "",
+        objectId: undefined,
+        pagePath: "",
+        className: "",
+        column: [],
+      }
     ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
@@ -199,7 +242,14 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        const { code, msg, data } = await submitForm(formValue);
+        const { path, name, objectId, pagePath, className, column } = formValue;
+        const { code, msg, data } = await submitForm({
+          path,
+          name,
+          objectId,
+          pagePath,
+          option: { className, columns: column },
+        });
         if (code == 200) {
           notification["success"]({
             message: "提醒",
@@ -282,6 +332,16 @@ export default defineComponent({
       }
     };
 
+    /* schema */
+    let schema = computed(() => {
+      return store.getters["GETSCHEMA"];
+    });
+
+    /* fields */
+    let fields = computed(() => {
+      return store.getters["GETFIELDS"];
+    });
+
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
       loadRoute(pagination);
@@ -295,6 +355,8 @@ export default defineComponent({
       columns,
       visible,
       rules,
+      schema,
+      fields,
       showModal,
       handleSubmit,
       loadRoute,

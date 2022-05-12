@@ -26,7 +26,7 @@
           <a-menu-item
             v-for="route in module.router"
             :key="route.path"
-            @click="toPage(route.path, { companyId: module?.meta?.companyId })"
+            @click="toPage(route.path)"
             >{{ route.name }}</a-menu-item
           >
         </a-sub-menu>
@@ -119,6 +119,18 @@ export default defineComponent({
         store.dispatch("SETCOMPANY");
       } else {
         store.commit("SETCOMPANY", company);
+      }
+
+      let schema = JSON.parse(sessionStorage.getItem("schema"));
+      if (!schema) {
+        store.dispatch("SETSCHEMA");
+      } else {
+        store.commit("SETSCHEMA", schema);
+      }
+
+      let fields = JSON.parse(sessionStorage.getItem("fields"));
+      if (fields) {
+        store.commit("SETFIELDS", fields);
       }
     });
     return {

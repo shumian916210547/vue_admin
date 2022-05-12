@@ -64,11 +64,12 @@ export function findById({ objectId }) {
  * @param {String} pagePath 页面路径
  * @param {String} name 路由名称
  * @param {String} path 路由路径
+ * @param {Object} option 路由配置
  * @returns {Promise}
  */
-export function insertDevRoute({ pagePath, name, path }) {
+export function insertDevRoute({ pagePath, name, path, option }) {
   return new Promise((resolve, reject) => {
-    post("/devRoute/insertDevRoute", { pagePath, name, path })
+    post("/devRoute/insertDevRoute", { pagePath, name, path, option })
       .then((result) => {
         resolve(result);
       })
@@ -86,11 +87,12 @@ export function insertDevRoute({ pagePath, name, path }) {
  * @param {String} pagePath 页面路径
  * @param {String} name 路由名称
  * @param {String} path 路由路径
+ * @param {Object} option 路由配置
  * @returns {Promise}
  */
-export function updateById({ objectId, pagePath, name, path }) {
+export function updateById({ objectId, pagePath, name, path, option }) {
   return new Promise((resolve, reject) => {
-    put("/devRoute/updateById", { objectId, pagePath, name, path })
+    put("/devRoute/updateById", { objectId, pagePath, name, path, option })
       .then((result) => {
         resolve(result);
       })
