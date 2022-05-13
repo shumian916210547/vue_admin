@@ -132,6 +132,11 @@ export default defineComponent({
       if (fields) {
         store.commit("SETFIELDS", fields);
       }
+
+      let tables = JSON.parse(sessionStorage.getItem("tables"));
+      if (tables) {
+        store.commit("SETTABLES", tables);
+      }
     });
     return {
       ...toRefs(state),

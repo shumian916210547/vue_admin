@@ -59,6 +59,7 @@
               pagePath: record.pagePath,
               className: record?.option?.className,
               column: record?.option?.columns,
+              fields: record?.option?.fields,
             })
           "
           >编辑</a-button
@@ -116,7 +117,23 @@
           style="width: 100%"
           placeholder="请选择表头信息"
           :options="fields[formValue.className]"
-        ></a-select>
+        >
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="可编辑字段"
+        name="fields"
+        v-show="formValue.className"
+      >
+        <a-select
+          v-model:value="formValue.fields"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="请选择可编辑字段"
+          :options="fields[formValue.className]"
+        >
+        </a-select>
       </a-form-item>
     </a-form>
 
@@ -219,6 +236,7 @@ export default defineComponent({
       pagePath: "",
       className: "",
       column: [],
+      fields: [],
     });
 
     const showModal = (
@@ -229,11 +247,16 @@ export default defineComponent({
         pagePath: "",
         className: "",
         column: [],
+        fields: [],
       }
     ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
-        formValue[key] = params[key];
+        if (key == "fields" && params[key]) {
+          formValue[key] = Object.keys(params[key]);
+        } else {
+          formValue[key] = params[key];
+        }
       });
     };
 
@@ -242,13 +265,20 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        const { path, name, objectId, pagePath, className, column } = formValue;
+        let { path, name, objectId, pagePath, className, column, fields } =
+          formValue;
+
+        let fls = {};
+        fields.forEach((field) => {
+          fls[field] = tables.value[className][field];
+        });
+
         const { code, msg, data } = await submitForm({
           path,
           name,
           objectId,
           pagePath,
-          option: { className, columns: column },
+          option: { className, columns: column, fields: fls },
         });
         if (code == 200) {
           notification["success"]({
@@ -340,6 +370,10 @@ export default defineComponent({
     /* fields */
     let fields = computed(() => {
       return store.getters["GETFIELDS"];
+    });
+
+    const tables = computed(() => {
+      return store.getters["GETTABLES"];
     });
 
     /* 生命周期， 页面挂在后 */

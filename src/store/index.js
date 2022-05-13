@@ -8,6 +8,7 @@ export default createStore({
     company: [],
     schema: [],
     fields: [],
+    tables: {},
     currentCompany: "",
   },
   getters: {
@@ -29,6 +30,10 @@ export default createStore({
 
     GETFIELDS: (state) => {
       return state.fields;
+    },
+
+    GETTABLES: (state) => {
+      return state.tables;
     },
   },
   mutations: {
@@ -73,6 +78,10 @@ export default createStore({
     SETFIELDS(state, value) {
       state.fields = value;
     },
+
+    SETTABLES(state, value) {
+      state.tables = value;
+    },
   },
   actions: {
     SETCOMPANY(ctx) {
@@ -88,7 +97,9 @@ export default createStore({
       schema.findList().then((result) => {
         if (result.code == 200) {
           let fields = {};
+          let tables = {};
           result.data.rows.forEach((s) => {
+            tables[s.className] = s.schema.fields;
             fields[s.className] = Object.keys(s.schema.fields).map((key) => {
               return {
                 label: key,
@@ -98,8 +109,10 @@ export default createStore({
           });
           ctx.commit("SETFIELDS", fields);
           ctx.commit("SETSCHEMA", result.data.rows);
+          ctx.commit("SETTABLES", tables);
           sessionStorage.setItem("schema", JSON.stringify(result.data.rows));
           sessionStorage.setItem("fields", JSON.stringify(fields));
+          sessionStorage.setItem("tables", JSON.stringify(tables));
         }
       });
     },
