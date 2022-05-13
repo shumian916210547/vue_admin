@@ -5,7 +5,7 @@ import { computed } from "vue";
 const router = useRouter();
 
 axios.defaults.timeout = 5000;
-axios.defaults.baseURL = "http://localhost:3000/admin";
+axios.defaults.baseURL = "http://localhost:3000";
 let companyId = computed(() => {
   return store.getters["GETCURRENTCOMPANY"];
 });

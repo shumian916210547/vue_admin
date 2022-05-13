@@ -10,7 +10,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function findAll({ pageSize, pageNum, name }) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findAll", { pageSize, pageNum, name })
+    get("/admin/devModule/findAll", { pageSize, pageNum, name })
       .then((result) => {
         resolve(result);
       })
@@ -28,7 +28,7 @@ export function findAll({ pageSize, pageNum, name }) {
  */
 export function findList() {
   return new Promise((resolve, reject) => {
-    get("/devModule/findList")
+    get("/admin/devModule/findList")
       .then((result) => {
         resolve(result);
       })
@@ -47,7 +47,7 @@ export function findList() {
  */
 export function findById({ objectId }) {
   return new Promise((resolve, reject) => {
-    get("/devModule/findById", { objectId })
+    get("/admin/devModule/findById", { objectId })
       .then((result) => {
         resolve(result);
       })
@@ -68,7 +68,7 @@ export function findById({ objectId }) {
  */
 export function insertDevModule({ name, router, meta }) {
   return new Promise((resolve, reject) => {
-    post("/devModule/insertDevModule", { name, router, meta })
+    post("/admin/devModule/insertDevModule", { name, router, meta })
       .then((result) => {
         resolve(result);
       })
@@ -90,7 +90,7 @@ export function insertDevModule({ name, router, meta }) {
  */
 export function updateById({ objectId, name, router, meta }) {
   return new Promise((resolve, reject) => {
-    put("/devModule/updateById", { objectId, name, router, meta })
+    put("/admin/devModule/updateById", { objectId, name, router, meta })
       .then((result) => {
         resolve(result);
       })
@@ -109,7 +109,7 @@ export function updateById({ objectId, name, router, meta }) {
  */
 export function removeById({ objectId }) {
   return new Promise((resolve, reject) => {
-    remove("/devModule/removeById", { objectId })
+    remove("/admin/devModule/removeById", { objectId })
       .then((result) => {
         resolve(result);
       })

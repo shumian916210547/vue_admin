@@ -7,7 +7,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function findList() {
   return new Promise((resolve, reject) => {
-    get("/company/findList")
+    get("/admin/company/findList")
       .then((result) => {
         resolve(result);
       })

@@ -7,7 +7,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function findList() {
   return new Promise((resolve, reject) => {
-    get("/schema/findList")
+    get("/admin/schema/findList")
       .then((result) => {
         resolve(result);
       })

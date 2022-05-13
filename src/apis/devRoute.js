@@ -10,7 +10,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function findAll({ pageSize, pageNum, name }) {
   return new Promise((resolve, reject) => {
-    get("/devRoute/findAll", { pageSize, pageNum, name })
+    get("/admin/devRoute/findAll", { pageSize, pageNum, name })
       .then((result) => {
         resolve(result);
       })
@@ -28,7 +28,7 @@ export function findAll({ pageSize, pageNum, name }) {
  */
 export function findList() {
   return new Promise((resolve, reject) => {
-    get("/devRoute/findList")
+    get("/admin/devRoute/findList")
       .then((result) => {
         resolve(result);
       })
@@ -47,7 +47,7 @@ export function findList() {
  */
 export function findById({ objectId }) {
   return new Promise((resolve, reject) => {
-    get("/devRoute/findById", { objectId })
+    get("/admin/devRoute/findById", { objectId })
       .then((result) => {
         resolve(result);
       })
@@ -69,7 +69,7 @@ export function findById({ objectId }) {
  */
 export function insertDevRoute({ pagePath, name, path, option }) {
   return new Promise((resolve, reject) => {
-    post("/devRoute/insertDevRoute", { pagePath, name, path, option })
+    post("/admin/devRoute/insertDevRoute", { pagePath, name, path, option })
       .then((result) => {
         resolve(result);
       })
@@ -92,7 +92,13 @@ export function insertDevRoute({ pagePath, name, path, option }) {
  */
 export function updateById({ objectId, pagePath, name, path, option }) {
   return new Promise((resolve, reject) => {
-    put("/devRoute/updateById", { objectId, pagePath, name, path, option })
+    put("/admin/devRoute/updateById", {
+      objectId,
+      pagePath,
+      name,
+      path,
+      option,
+    })
       .then((result) => {
         resolve(result);
       })
@@ -111,7 +117,7 @@ export function updateById({ objectId, pagePath, name, path, option }) {
  */
 export function removeById({ objectId }) {
   return new Promise((resolve, reject) => {
-    remove("/devRoute/removeById", { objectId })
+    remove("/admin/devRoute/removeById", { objectId })
       .then((result) => {
         resolve(result);
       })
