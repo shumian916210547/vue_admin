@@ -16,3 +16,56 @@ export function findList() {
       });
   });
 }
+
+/**
+ * 新增Schema
+ * @path /insertSchema
+ * @method POST
+ * @param {String} name Schema名称
+ * @returns {Promise}
+ */
+export function insertSchema({ name }) {
+  return new Promise((resolve, reject) => {
+    post("/admin/schema/insertSchema", { name })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * 更新Schema
+ * @path /updateById
+ * @method PUT
+ * @returns {Promise}
+ */
+export function updateById({
+  name,
+  type,
+  required,
+  chineseName,
+  targetClass,
+  schemaId,
+  defaultValue,
+}) {
+  return new Promise((resolve, reject) => {
+    put("/admin/schema/updateById", {
+      name,
+      type,
+      required,
+      chineseName,
+      targetClass,
+      schemaId,
+      defaultValue,
+    })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}

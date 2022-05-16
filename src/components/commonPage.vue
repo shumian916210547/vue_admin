@@ -24,7 +24,7 @@
         >
       </a-col>
       <a-col :span="2" :offset="2">
-        <a-button type="primary">新建</a-button>
+        <a-button type="primary" @click="showModal()">新建</a-button>
       </a-col>
     </a-row>
   </a-form>
@@ -40,7 +40,7 @@
       </template>
 
       <template v-else-if="column.key === 'operation'">
-        <a-button type="primary">编辑</a-button>
+        <a-button type="primary" @click="showModal(record)">编辑</a-button>
         <a-popconfirm
           title="确定删除此行"
           ok-text="Yes"
@@ -54,9 +54,17 @@
       </template>
     </template>
   </a-table>
+  <!-- 表单 -->
+  <a-modal v-model:visible="visible" :width="modalWidth" @ok="handleSubmit()">
+    <slot name="form"></slot>
+    <template #title>
+      <span>{{ formValue.objectId != undefined ? "修改" : "新增" }}</span>
+    </template>
+  </a-modal>
 </template>
 <script>
 import { computed, defineComponent, onMounted, reactive, ref } from "vue";
+import { debounce } from "lodash";
 import { notification } from "ant-design-vue";
 import * as base from "@/apis/base";
 export default defineComponent({
@@ -65,10 +73,31 @@ export default defineComponent({
     companyId: String,
     className: String,
     columns: Array,
+    modalWidth: {
+      type: Number,
+      default: 520,
+    },
+    fields: {
+      type: Object,
+      default: function () {
+        return {};
+      },
+    },
+    formValue: {
+      type: Object,
+      default: function () {
+        return {
+          objectId: undefined,
+        };
+      },
+    },
   },
 
-  setup(props) {
-    const { companyId, className, columns } = props;
+  emits: ["update:formValue", "handleOk"],
+
+  setup(props, ctx) {
+    let { companyId, className, columns, formValue, fields } = props;
+    const visible = ref(false);
     /* 表头 */
     let tableColums = computed(() => {
       let c = columns.map((field) => {
@@ -133,13 +162,46 @@ export default defineComponent({
       }
     };
 
+    const showModal = (row) => {
+      row
+        ? Object.keys(row).map((key) => {
+            if (key == "objectId") {
+              formValue[key] = row[key];
+            } else {
+              if (fields[key]) {
+                formValue[key] = row[key];
+              }
+            }
+          })
+        : (() => {
+            Object.keys(fields).map((key) => {
+              formValue[key] = fields[key].default || "";
+            });
+            formValue["objectId"] = undefined;
+          })();
+      ctx.emit("update:formValue", formValue);
+      visible.value = true;
+    };
+
+    /* 表单提交 */
+    const formRef = ref();
+    const handleSubmit = debounce((e) => {
+      ctx.emit("handleOk");
+    }, 100);
+
     onMounted(() => {
       loadData(pagination);
     });
+
     return {
       tableData,
       tableColums,
       pagination,
+      visible,
+      formValue,
+      handleSubmit,
+      formRef,
+      showModal,
       loadData,
       handleDelete,
     };

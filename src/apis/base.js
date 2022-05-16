@@ -19,6 +19,24 @@ export function findAll({ className, pageNum, pageSize, name, companyId }) {
 }
 
 /**
+ * 所有列表
+ * @path /findList
+ * @method GET
+ * @returns {Pomise}
+ */
+export function findList({ className, name, companyId }) {
+  return new Promise((resolve, reject) => {
+    get("/cmn/findList", { className, name, companyId })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
  * 删除
  * @path /removeById
  * @method DELETE

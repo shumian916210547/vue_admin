@@ -98,9 +98,9 @@ export default createStore({
         if (result.code == 200) {
           let fields = {};
           let tables = {};
-          result.data.rows.forEach((s) => {
-            tables[s.className] = s.schema.fields;
-            fields[s.className] = Object.keys(s.schema.fields).map((key) => {
+          result.data.forEach((s) => {
+            tables[s.name] = s.fields;
+            fields[s.name] = Object.keys(s.fields).map((key) => {
               return {
                 label: key,
                 value: key,
@@ -108,9 +108,9 @@ export default createStore({
             });
           });
           ctx.commit("SETFIELDS", fields);
-          ctx.commit("SETSCHEMA", result.data.rows);
+          ctx.commit("SETSCHEMA", result.data);
           ctx.commit("SETTABLES", tables);
-          sessionStorage.setItem("schema", JSON.stringify(result.data.rows));
+          sessionStorage.setItem("schema", JSON.stringify(result.data));
           sessionStorage.setItem("fields", JSON.stringify(fields));
           sessionStorage.setItem("tables", JSON.stringify(tables));
         }

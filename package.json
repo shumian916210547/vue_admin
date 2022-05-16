@@ -10,6 +10,8 @@
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@ant-design/icons-vue": "^6.1.0",
+    "@wangeditor/editor": "^5.0.1",
+    "@wangeditor/editor-for-vue": "^5.1.11",
     "ant-design-vue": "^3.2.3",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
