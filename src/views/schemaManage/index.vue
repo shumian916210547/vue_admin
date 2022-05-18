@@ -45,6 +45,16 @@
                 <a-button type="primary" @click="showModal('edit', field)">
                   编辑
                 </a-button>
+                <a-popconfirm
+                  title="确定删除此字段"
+                  ok-text="Yes"
+                  cancel-text="No"
+                  @confirm="handleDelete(field)"
+                >
+                  <a-button type="primary" danger style="margin: 0 0 0 10px">
+                    删除
+                  </a-button>
+                </a-popconfirm>
               </template>
               <a-descriptions-item label="字段名称" :span="3">
                 {{ field.name }}
@@ -186,7 +196,7 @@ import { defineComponent, onMounted, reactive, ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import * as base from "@/apis/base";
 import { notification } from "ant-design-vue";
-import { insertSchema, updateById } from "@/apis/schema";
+import { insertSchema, updateById, removeFields } from "@/apis/schema";
 import { useStore } from "vuex";
 export default defineComponent({
   setup() {
@@ -262,12 +272,9 @@ export default defineComponent({
       if (t == "add") {
         Object.keys(fieldState).forEach((key) => {
           fieldState[key] = undefined;
-          if (key == "required") {
-            fieldState[key] = false;
-          }
+          fieldState["required"] = false;
         });
       }
-
       modalType.value = t;
       fieldVisible.value = true;
     };
@@ -296,6 +303,18 @@ export default defineComponent({
         });
       }
     };
+    const handleDelete = async (field) => {
+      const fieldsName = field.name;
+      const schemaId = current.value[0];
+      const { code, msg } = await removeFields({ fieldsName, schemaId });
+      if (code == 200) {
+        notification["success"]({
+          message: "提醒",
+          description: msg,
+        });
+        loadSchema(meta);
+      }
+    };
     onMounted(() => {
       loadSchema(meta);
     });
@@ -315,6 +334,7 @@ export default defineComponent({
       fieldSubmit,
       handleClick,
       showModal,
+      handleDelete,
     };
   },
 });

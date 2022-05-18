@@ -69,8 +69,8 @@ export default createStore({
     SETSCHEMA(state, value) {
       state.schema = value.map((s) => {
         return {
-          label: s.className,
-          value: s.className,
+          label: s.name,
+          value: s.name,
         };
       });
     },

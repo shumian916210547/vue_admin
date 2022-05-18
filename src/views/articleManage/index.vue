@@ -40,6 +40,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const { meta } = route;
+    console.log(meta);
     let formRef = ref();
 
     let formValue = reactive({});

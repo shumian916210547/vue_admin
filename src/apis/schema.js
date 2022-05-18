@@ -69,3 +69,24 @@ export function updateById({
       });
   });
 }
+
+/**
+ * 删除Schema字段
+ * @path /removeFields
+ * @method DELETE
+ * @returns {Promise}
+ */
+export function removeFields({ schemaId, fieldsName }) {
+  return new Promise((resolve, reject) => {
+    remove("/admin/schema/removeFields", {
+      schemaId,
+      fieldsName,
+    })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
