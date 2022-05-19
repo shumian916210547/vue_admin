@@ -68,6 +68,9 @@
               <a-descriptions-item label="字段类型" :span="3">
                 {{ field.type }}
               </a-descriptions-item>
+              <a-descriptions-item label="编辑字段" :span="3">
+                {{ field.editComponent }}
+              </a-descriptions-item>
               <a-descriptions-item label="默认值" :span="3">
                 {{ field.defaultValue }}
               </a-descriptions-item>
@@ -175,6 +178,37 @@
         <a-input v-model:value="fieldState.defaultValue" />
       </a-form-item>
       <a-form-item
+        label="编辑组件"
+        name="editComponent"
+        :rules="[
+          { required: false, message: 'Please select your 字段编辑组件!' },
+        ]"
+      >
+        <a-select
+          v-model:value="fieldState.editComponent"
+          style="width: 100%"
+          placeholder="请选择字段编辑组件"
+          :options="[
+            {
+              label: 'Select',
+              value: 'a-select',
+            },
+            {
+              label: 'Switch',
+              value: 'a-switch',
+            },
+            {
+              label: 'Input',
+              value: 'a-input',
+            },
+            {
+              label: 'richText',
+              value: 'richText',
+            },
+          ]"
+        ></a-select>
+      </a-form-item>
+      <a-form-item
         v-if="fieldState.type == 'Pointer'"
         label="指向表名"
         name="type"
@@ -192,11 +226,19 @@
 </template>
 
 <script>
-import { defineComponent, onMounted, reactive, ref, computed } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+  computed,
+  onUpdated,
+} from "vue";
 import { useRoute } from "vue-router";
 import * as base from "@/apis/base";
 import { notification } from "ant-design-vue";
 import { insertSchema, updateById, removeFields } from "@/apis/schema";
+import { updateOption } from "@/apis/devRoute";
 import { useStore } from "vuex";
 export default defineComponent({
   setup() {
@@ -211,7 +253,14 @@ export default defineComponent({
     const schemas = ref([]);
     const schemaVisible = ref(false);
     const fieldVisible = ref(false);
-    const schemaState = reactive({ name: "" });
+    const schemaState = reactive({
+      chineseName: "",
+      defaultValue: undefined,
+      editComponent: "",
+      name: "",
+      required: false,
+      type: "",
+    });
     const loadSchema = async ({ className, companyId }) => {
       const { code, data } = await base.findList({ className, companyId });
       if (code == 200) {
@@ -255,6 +304,7 @@ export default defineComponent({
           defaultValue: record.fields[key]["default"],
           required: record.fields[key]["required"],
           chineseName: record.fields[key]["chineseName"],
+          editComponent: record.fields[key]["editComponent"],
         };
         return record.fields[key]["type"] == "Pointer"
           ? Object.assign({}, field, {
@@ -265,6 +315,7 @@ export default defineComponent({
     };
     const showModal = (t, record) => {
       if (t == "edit") {
+        fieldState["editComponent"] = record["editComponent"] || undefined;
         Object.keys(record).forEach((key) => {
           fieldState[key] = record[key];
         });
@@ -284,7 +335,6 @@ export default defineComponent({
     const fieldSubmit = async () => {
       try {
         const result = await fieldForm.value.validateFields();
-        console.log(result);
         const { code, data, msg } = await updateById(
           Object.assign({}, fieldState, { schemaId: current.value[0] })
         );
@@ -292,6 +342,15 @@ export default defineComponent({
           notification["success"]({
             message: "提醒",
             description: msg,
+          });
+
+          updateOption({
+            className: schemas.value.filter((item) => {
+              return item.objectId == current.value[0];
+            })?.[0].name,
+            fieldState,
+          }).then((res) => {
+            console.log(res);
           });
         }
         loadSchema(meta);
@@ -317,6 +376,10 @@ export default defineComponent({
     };
     onMounted(() => {
       loadSchema(meta);
+    });
+
+    onUpdated(() => {
+      store.dispatch("UpdateStore");
     });
     return {
       current,

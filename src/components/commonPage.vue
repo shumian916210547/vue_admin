@@ -56,7 +56,29 @@
   </a-table>
   <!-- 表单 -->
   <a-modal v-model:visible="visible" :width="modalWidth" @ok="handleSubmit()">
-    <slot name="form"></slot>
+    <slot name="form">
+      <a-form :model="formValue" ref="formRef" autocomplete="off">
+        <a-form-item
+          v-for="(item, index) in Object.keys(fields)"
+          :key="index"
+          :label="fields[item].chineseName"
+          :name="item"
+          :rules="[
+            {
+              required: fields[item].required,
+              message: 'Please input your ' + fields[item].chineseName,
+            },
+          ]"
+        >
+          <component
+            v-model:value="formValue[item]"
+            :key="formValue[item]"
+            :is="fields[item].editComponent"
+            :placeholder="'Please input your ' + fields[item].chineseName"
+          />
+        </a-form-item>
+      </a-form>
+    </slot>
     <template #title>
       <span>{{ formValue.objectId != undefined ? "修改" : "新增" }}</span>
     </template>
@@ -66,9 +88,10 @@
 import { computed, defineComponent, onMounted, reactive, ref } from "vue";
 import { debounce } from "lodash";
 import { notification } from "ant-design-vue";
+import richText from "./richText.vue";
 import * as base from "@/apis/base";
 export default defineComponent({
-  components: {},
+  components: { richText },
   props: {
     companyId: String,
     className: String,
@@ -83,20 +106,11 @@ export default defineComponent({
         return {};
       },
     },
-    formValue: {
-      type: Object,
-      default: function () {
-        return {
-          objectId: undefined,
-        };
-      },
-    },
   },
 
-  emits: ["update:formValue", "handleOk"],
-
   setup(props, ctx) {
-    let { companyId, className, columns, formValue, fields } = props;
+    let { companyId, className, columns, fields } = props;
+    const formValue = reactive({});
     const visible = ref(false);
     /* 表头 */
     let tableColums = computed(() => {
@@ -179,7 +193,6 @@ export default defineComponent({
             });
             formValue["objectId"] = undefined;
           })();
-      ctx.emit("update:formValue", formValue);
       visible.value = true;
     };
 
@@ -201,6 +214,7 @@ export default defineComponent({
       formValue,
       handleSubmit,
       formRef,
+      fields,
       showModal,
       loadData,
       handleDelete,

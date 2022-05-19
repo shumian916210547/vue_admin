@@ -126,3 +126,21 @@ export function removeById({ objectId }) {
       });
   });
 }
+
+/**
+ * 更新路由option
+ * @path /updateOption
+ * @method PUT
+ * @returns {Promise}
+ */
+export function updateOption({ className, fieldState }) {
+  return new Promise((resolve, reject) => {
+    put("/admin/devRoute/updateOption", { className, fieldState })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}

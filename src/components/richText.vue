@@ -8,7 +8,7 @@
     />
     <Editor
       style="height: 500px; overflow-y: hidden"
-      v-model="valueHtml"
+      v-model="value"
       :defaultConfig="editorConfig"
       :mode="mode"
       @onCreated="handleCreated"
@@ -30,13 +30,13 @@ import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 export default defineComponent({
   components: { Editor, Toolbar },
   props: {
-    valueHtml: {
+    value: {
       type: String,
       default: "",
     },
   },
   setup(props, ctx) {
-    let { valueHtml } = props;
+    let { value } = props;
     // 编辑器实例，必须用 shallowRef
     const editorRef = shallowRef();
 
@@ -58,11 +58,11 @@ export default defineComponent({
     };
 
     const handleChange = (editor) => {
-      ctx.emit("update:valueHtml", editor.getHtml());
+      ctx.emit("update:value", editor.getHtml());
     };
     return {
       editorRef,
-      valueHtml,
+      value,
       mode: "default", // 或 'simple'
       toolbarConfig,
       editorConfig,

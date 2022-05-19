@@ -2,12 +2,13 @@ import { createStore } from "vuex";
 import router from "@/router/index";
 import { findList } from "@/apis/company";
 import * as schema from "@/apis/schema";
+import * as devModule from "@/apis/devModule";
 export default createStore({
   state: {
     modules: [],
     company: [],
     schema: [],
-    fields: [],
+    fields: {},
     tables: {},
     currentCompany: "",
   },
@@ -68,9 +69,11 @@ export default createStore({
 
     SETSCHEMA(state, value) {
       state.schema = value.map((s) => {
+        let value, label;
+        value = label = s.name;
         return {
-          label: s.name,
-          value: s.name,
+          label,
+          value,
         };
       });
     },
@@ -84,11 +87,19 @@ export default createStore({
     },
   },
   actions: {
+    SETMODULES(ctx) {
+      devModule.findList().then((result) => {
+        if (result.code == 200) {
+          ctx.commit("SETMODULES", result.data);
+          sessionStorage.setItem("MODULES", JSON.stringify(result.data));
+        }
+      });
+    },
+
     SETCOMPANY(ctx) {
       findList().then((result) => {
         if (result.code == 200) {
           ctx.commit("SETCOMPANY", result.data);
-          sessionStorage.setItem("company", JSON.stringify(result.data));
         }
       });
     },
@@ -96,6 +107,7 @@ export default createStore({
     SETSCHEMA(ctx) {
       schema.findList().then((result) => {
         if (result.code == 200) {
+          ctx.commit("SETSCHEMA", result.data);
           let fields = {};
           let tables = {};
           result.data.forEach((s) => {
@@ -108,13 +120,15 @@ export default createStore({
             });
           });
           ctx.commit("SETFIELDS", fields);
-          ctx.commit("SETSCHEMA", result.data);
           ctx.commit("SETTABLES", tables);
-          sessionStorage.setItem("schema", JSON.stringify(result.data));
-          sessionStorage.setItem("fields", JSON.stringify(fields));
-          sessionStorage.setItem("tables", JSON.stringify(tables));
         }
       });
+    },
+
+    UpdateStore(ctx) {
+      ctx.dispatch("SETCOMPANY");
+      ctx.dispatch("SETSCHEMA");
+      ctx.dispatch("SETMODULES");
     },
   },
   modules: {},

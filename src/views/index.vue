@@ -114,30 +114,17 @@ export default defineComponent({
     });
 
     onMounted(() => {
-      let company = JSON.parse(sessionStorage.getItem("company"));
+      let company = store.getters["GETCOMPANY"];
       if (!company) {
         store.dispatch("SETCOMPANY");
-      } else {
-        store.commit("SETCOMPANY", company);
       }
 
-      let schema = JSON.parse(sessionStorage.getItem("schema"));
+      let schema = store.getters["GETSCHEMA"];
       if (!schema) {
         store.dispatch("SETSCHEMA");
-      } else {
-        store.commit("SETSCHEMA", schema);
-      }
-
-      let fields = JSON.parse(sessionStorage.getItem("fields"));
-      if (fields) {
-        store.commit("SETFIELDS", fields);
-      }
-
-      let tables = JSON.parse(sessionStorage.getItem("tables"));
-      if (tables) {
-        store.commit("SETTABLES", tables);
       }
     });
+
     return {
       ...toRefs(state),
       collapsed: ref(false),

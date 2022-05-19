@@ -9,13 +9,19 @@ module.exports = defineConfig({
     host: "localhost",
     port: 4200,
     open: false,
-    /* proxy: {
-      URL: {
+    proxy: {
+      "/admin": {
         target: API,
         pathRewrite: {
-          ["^" + URL]: "",
+          ["^" + URL]: "/admin",
         },
       },
-    }, */
+      "/cmn": {
+        target: API,
+        pathRewrite: {
+          ["^" + "/cmn"]: "/cmn",
+        },
+      },
+    },
   },
 });

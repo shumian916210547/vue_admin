@@ -144,7 +144,14 @@
 </template>
 
 <script>
-import { computed, defineComponent, onMounted, reactive, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+} from "vue";
 import { debounce } from "lodash";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
@@ -379,6 +386,10 @@ export default defineComponent({
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
       loadRoute(pagination);
+    });
+
+    onUpdated(() => {
+      store.dispatch("UpdateStore");
     });
 
     return {
