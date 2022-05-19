@@ -37,6 +37,42 @@ export function findList({ className, name, companyId }) {
 }
 
 /**
+ * 插入
+ * @path /insert
+ * @method POST
+ * @returns {Pomise}
+ */
+export function insert({ className, companyId, params }) {
+  return new Promise((resolve, reject) => {
+    post("/cmn/insert", { className, companyId, params })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * 更新
+ * @path /updateById
+ * @method PUT
+ * @returns {Pomise}
+ */
+export function updateById({ className, companyId, params, objectId }) {
+  return new Promise((resolve, reject) => {
+    put("/cmn/updateById", { className, companyId, params, objectId })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
  * 删除
  * @path /removeById
  * @method DELETE

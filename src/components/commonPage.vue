@@ -66,15 +66,15 @@
           :rules="[
             {
               required: fields[item].required,
-              message: 'Please input your ' + fields[item].chineseName,
+              message: 'Please input your' + fields[item].chineseName,
             },
           ]"
         >
           <component
             v-model:value="formValue[item]"
-            :key="formValue[item]"
+            :key="visible"
             :is="fields[item].editComponent"
-            :placeholder="'Please input your ' + fields[item].chineseName"
+            :placeholder="'Please input your' + fields[item].chineseName"
           />
         </a-form-item>
       </a-form>
@@ -198,8 +198,38 @@ export default defineComponent({
 
     /* 表单提交 */
     const formRef = ref();
-    const handleSubmit = debounce((e) => {
-      ctx.emit("handleOk");
+    const handleSubmit = debounce(async (e) => {
+      try {
+        const params = await formRef.value.validateFields();
+        let code, msg;
+        if (formValue.objectId) {
+          ({ code, msg } = await base.updateById({
+            companyId,
+            className,
+            objectId: formValue.objectId,
+            params,
+          }));
+        } else {
+          ({ code, msg } = await base.insert({
+            companyId,
+            className,
+            params,
+          }));
+        }
+        if (code == 200) {
+          notification["success"]({
+            message: "提醒",
+            description: msg,
+          });
+          loadData(pagination);
+        }
+        visible.value = false;
+      } catch (errorInfo) {
+        notification["error"]({
+          message: "提醒",
+          description: errorInfo.msg || "缺少必填项",
+        });
+      }
     }, 100);
 
     onMounted(() => {
