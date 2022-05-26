@@ -106,8 +106,10 @@
         <a-select
           v-model:value="formValue.className"
           style="width: 100%"
-          placeholder="请选择路由Schema"
           :options="schema"
+          placeholder="请选择路由Schema"
+          show-search
+          allowClear
         ></a-select>
       </a-form-item>
 
@@ -116,6 +118,7 @@
           id="inputNumber"
           placeholder="请输入弹窗宽度"
           v-model:value="formValue.modalWidth"
+          style="width: 100%"
           :min="520"
           :max="1920"
         />
@@ -128,6 +131,8 @@
           style="width: 100%"
           placeholder="请选择表头信息"
           :options="fields[formValue.className]"
+          show-search
+          allowClear
         >
         </a-select>
       </a-form-item>
@@ -143,6 +148,8 @@
           style="width: 100%"
           placeholder="请选择可编辑字段"
           :options="fields[formValue.className]"
+          show-search
+          allowClear
         >
         </a-select>
       </a-form-item>
@@ -252,7 +259,7 @@ export default defineComponent({
       name: "",
       objectId: undefined,
       pagePath: "",
-      className: "",
+      className: undefined,
       column: [],
       fields: [],
       modalWidth: 520,
@@ -264,7 +271,7 @@ export default defineComponent({
         name: "",
         objectId: undefined,
         pagePath: "",
-        className: "",
+        className: undefined,
         column: [],
         fields: [],
         modalWidth: 520,

@@ -107,7 +107,7 @@
         name="name"
         :rules="[{ required: true, message: 'Please input your schema名称!' }]"
       >
-        <a-input v-model:value="schemaState.name" />
+        <a-input placeholder="请输入表名" v-model:value="schemaState.name" />
       </a-form-item>
     </a-form>
   </a-modal>
@@ -126,6 +126,7 @@
       >
         <a-input
           v-model:value="fieldState.name"
+          placeholder="请输入字段名称"
           :disabled="modalType == 'edit'"
         />
       </a-form-item>
@@ -134,7 +135,10 @@
         name="chineseName"
         :rules="[{ required: true, message: 'Please input your 中文名称!' }]"
       >
-        <a-input v-model:value="fieldState.chineseName" />
+        <a-input
+          placeholder="请输入字段中文名称"
+          v-model:value="fieldState.chineseName"
+        />
       </a-form-item>
       <a-form-item
         label="是否必填"
@@ -156,6 +160,8 @@
           style="width: 100%"
           placeholder="请选择字段类型"
           :disabled="modalType == 'edit'"
+          show-search
+          allowClear
           :options="[
             {
               label: 'String',
@@ -191,6 +197,7 @@
       <a-form-item label="字段默认值" name="defaultValue">
         <a-input
           v-model:value="fieldState.defaultValue"
+          placeholder="请输入字段默认值"
           :disabled="modalType == 'edit'"
         />
       </a-form-item>
@@ -206,6 +213,8 @@
           style="width: 100%"
           placeholder="请选择字段编辑组件"
           :options="antdComponents"
+          show-search
+          allowClear
         ></a-select>
       </a-form-item>
       <a-form-item
@@ -219,6 +228,8 @@
           style="width: 100%"
           placeholder="请选择数据源"
           :options="dataOrigin"
+          show-search
+          allowClear
         ></a-select>
       </a-form-item>
       <a-form-item
@@ -233,6 +244,8 @@
           style="width: 100%"
           placeholder="请选择指向表名"
           :options="schemaOptions"
+          show-search
+          allowClear
         ></a-select>
       </a-form-item>
     </a-form>

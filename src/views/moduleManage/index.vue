@@ -57,6 +57,7 @@
               name: record.name,
               router: record.router,
               companyId: record?.meta?.companyId,
+              icon: record?.meta?.icon,
             })
           "
           >编辑</a-button
@@ -94,6 +95,8 @@
           style="width: 100%"
           placeholder="请选择模块路由"
           :options="routes"
+          show-search
+          allowClear
         ></a-select>
       </a-form-item>
 
@@ -103,7 +106,26 @@
           style="width: 100%"
           placeholder="请选择模块所属公司"
           :options="company"
+          show-search
+          allowClear
         ></a-select>
+      </a-form-item>
+
+      <a-form-item label="模块图标" name="icon">
+        <a-select
+          v-model:value="formValue.icon"
+          style="width: 100%"
+          :options="antdIconOptions"
+          option-label-prop="label"
+          placeholder="请选择模块图标"
+          show-search
+          allowClear
+        >
+          <template #option="{ label, value }">
+            <component :is="antdIcons[value]" />
+            &nbsp;{{ label }}
+          </template>
+        </a-select>
       </a-form-item>
     </a-form>
 
@@ -123,7 +145,7 @@ import {
   ref,
 } from "vue";
 import { debounce } from "lodash";
-import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
+import * as antdIcons from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import {
   findAll,
@@ -176,23 +198,35 @@ const rules = {
 };
 
 export default defineComponent({
-  components: {
-    SmileOutlined,
-    DownOutlined,
-  },
+  components: {},
   setup() {
     const visible = ref(false);
 
     const formRef = ref();
 
     const store = useStore();
+    let antdIconOptions = Object.keys(antdIcons).map((key) => {
+      return {
+        label: key,
+        value: key,
+      };
+    });
+    antdIconOptions = antdIconOptions.filter((item) => {
+      return (
+        item.label != "createFromIconfontCN" &&
+        item.label != "default" &&
+        item.label != "getTwoToneColor" &&
+        item.label != "setTwoToneColor"
+      );
+    });
 
     /* 添加/修改数据表单 */
     let formValue = reactive({
       router: [],
       name: "",
-      companyId: "",
+      companyId: undefined,
       objectId: undefined,
+      icon: undefined,
     });
 
     const showModal = (
@@ -200,7 +234,8 @@ export default defineComponent({
         router: [],
         name: "",
         objectId: undefined,
-        companyId: "",
+        companyId: undefined,
+        icon: undefined,
       }
     ) => {
       visible.value = true;
@@ -220,12 +255,12 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        const { router, name, objectId, companyId } = formValue;
+        const { router, name, objectId, companyId, icon } = formValue;
         const { code, msg, data } = await submitForm({
           router,
           name,
           objectId,
-          meta: { companyId },
+          meta: { companyId, icon },
         });
         if (code == 200) {
           notification["success"]({
@@ -342,6 +377,8 @@ export default defineComponent({
       formRef,
       rules,
       company,
+      antdIconOptions,
+      antdIcons,
       showModal,
       handleSubmit,
       loadModule,
