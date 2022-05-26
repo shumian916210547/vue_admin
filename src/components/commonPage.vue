@@ -75,6 +75,7 @@
             :key="visible"
             :is="fields[item].editComponent"
             :placeholder="'Please input your' + fields[item].chineseName"
+            :options="getSelectOptions(fields[item].dataSource)"
           />
         </a-form-item>
       </a-form>
@@ -90,30 +91,21 @@ import { debounce } from "lodash";
 import { notification } from "ant-design-vue";
 import richText from "./richText.vue";
 import * as base from "@/apis/base";
+import { useRoute } from "vue-router";
+import { useStore } from "vuex";
 export default defineComponent({
   components: { richText },
-  props: {
-    companyId: String,
-    className: String,
-    columns: Array,
-    modalWidth: {
-      type: Number,
-      default: 520,
-    },
-    fields: {
-      type: Object,
-      default: function () {
-        return {};
-      },
-    },
-  },
+  props: {},
 
   setup(props, ctx) {
-    let { companyId, className, columns, fields } = props;
+    const route = useRoute();
+    const store = useStore();
+    let { meta } = route;
+    let { companyId, className, columns, fields, modalWidth } = meta;
     const formValue = reactive({});
     const visible = ref(false);
     /* 表头 */
-    let tableColums = computed(() => {
+    const tableColums = computed(() => {
       let c = columns.map((field) => {
         return {
           key: field,
@@ -130,9 +122,8 @@ export default defineComponent({
 
       return c;
     });
-
     /* 分页器配置 */
-    let pagination = reactive({
+    const pagination = reactive({
       position: ["bottomRight"],
       pageSize: 10,
       pageNum: 1,
@@ -149,9 +140,8 @@ export default defineComponent({
       },
       name: "",
     });
-
     /* 加载数据 */
-    let tableData = ref([]);
+    const tableData = ref([]);
     const loadData = async (params) => {
       const { data, code, msg } = await base.findAll(params);
       if (code == 200) {
@@ -159,7 +149,6 @@ export default defineComponent({
         pagination.total = data.count;
       }
     };
-
     /* 删除 */
     const handleDelete = async ({ objectId }) => {
       const { msg, code, data } = await base.removeById({
@@ -175,7 +164,6 @@ export default defineComponent({
         loadData(pagination);
       }
     };
-
     const showModal = (row) => {
       row
         ? Object.keys(row).map((key) => {
@@ -195,7 +183,9 @@ export default defineComponent({
           })();
       visible.value = true;
     };
-
+    const getSelectOptions = (key) => {
+      return store.getters[key];
+    };
     /* 表单提交 */
     const formRef = ref();
     const handleSubmit = debounce(async (e) => {
@@ -231,11 +221,9 @@ export default defineComponent({
         });
       }
     }, 100);
-
     onMounted(() => {
       loadData(pagination);
     });
-
     return {
       tableData,
       tableColums,
@@ -245,9 +233,11 @@ export default defineComponent({
       handleSubmit,
       formRef,
       fields,
+      modalWidth,
       showModal,
       loadData,
       handleDelete,
+      getSelectOptions,
     };
   },
 });

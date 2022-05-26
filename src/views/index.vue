@@ -71,6 +71,7 @@ import {
   AppstoreOutlined,
   HomeOutlined,
 } from "@ant-design/icons-vue";
+import * as antd from "ant-design-vue";
 import {
   computed,
   defineComponent,
@@ -100,19 +101,32 @@ export default defineComponent({
     const toPage = (path, params) => {
       router.push({ path, query: params });
     };
-
     const store = useStore();
-
+    let antdComponents = Object.keys(antd).map((key) => {
+      return {
+        label: key,
+        value: key,
+      };
+    });
+    antdComponents = [
+      ...antdComponents.filter((item) => {
+        return (
+          item.label != "version" &&
+          item.label != "default" &&
+          item.label != "install"
+        );
+      }),
+    ];
+    antdComponents.push({ label: "richText", value: "richText" });
+    store.commit("SETANTDCOMPONENTS", antdComponents);
     let state = reactive({
       selectedKeys: [route.path],
       openKeys: [],
       rootSubmenuKeys: [],
     });
-
     const modules = computed(() => {
       return store.getters["GETMODULES"];
     });
-
     onMounted(() => {
       let company = store.getters["GETCOMPANY"];
       if (!company) {

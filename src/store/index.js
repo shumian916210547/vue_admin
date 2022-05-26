@@ -11,8 +11,13 @@ export default createStore({
     fields: {},
     tables: {},
     currentCompany: "",
+    antdComponents: [],
   },
   getters: {
+    GETANTDCOMPONENTS: (state) => {
+      return state.antdComponents;
+    },
+
     GETMODULES: (state) => {
       return state.modules;
     },
@@ -38,10 +43,19 @@ export default createStore({
     },
   },
   mutations: {
+    SETANTDCOMPONENTS(state, value) {
+      state.antdComponents = value;
+    },
+
     SETMODULES(state, value) {
       state.modules = value.map((module) => {
         module.router = module.router.map((route) => {
-          route["component"] = () => import("@/views" + route.pagePath);
+          try {
+            require("@/views" + route.pagePath);
+            route["component"] = () => import("@/views" + route.pagePath);
+          } catch (error) {
+            route["component"] = () => import("@/components" + route.pagePath);
+          }
           route["meta"] = Object.assign(
             {},
             { companyId: module?.meta?.companyId },

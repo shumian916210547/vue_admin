@@ -60,6 +60,7 @@
               className: record?.option?.className,
               column: record?.option?.columns,
               fields: record?.option?.fields,
+              modalWidth: record?.option?.modalWidth,
             })
           "
           >编辑</a-button
@@ -108,6 +109,16 @@
           placeholder="请选择路由Schema"
           :options="schema"
         ></a-select>
+      </a-form-item>
+
+      <a-form-item label="弹窗宽度" name="modalWidth">
+        <a-input-number
+          id="inputNumber"
+          placeholder="请输入弹窗宽度"
+          v-model:value="formValue.modalWidth"
+          :min="520"
+          :max="1920"
+        />
       </a-form-item>
 
       <a-form-item label="表头信息" name="column" v-show="formValue.className">
@@ -244,6 +255,7 @@ export default defineComponent({
       className: "",
       column: [],
       fields: [],
+      modalWidth: 520,
     });
 
     const showModal = (
@@ -255,6 +267,7 @@ export default defineComponent({
         className: "",
         column: [],
         fields: [],
+        modalWidth: 520,
       }
     ) => {
       visible.value = true;
@@ -272,8 +285,16 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        let { path, name, objectId, pagePath, className, column, fields } =
-          formValue;
+        let {
+          path,
+          name,
+          objectId,
+          pagePath,
+          className,
+          column,
+          fields,
+          modalWidth,
+        } = formValue;
 
         let fls = {};
         fields.forEach((field) => {
@@ -285,7 +306,7 @@ export default defineComponent({
           name,
           objectId,
           pagePath,
-          option: { className, columns: column, fields: fls },
+          option: { className, columns: column, fields: fls, modalWidth },
         });
         if (code == 200) {
           notification["success"]({

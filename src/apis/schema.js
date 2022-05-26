@@ -51,6 +51,7 @@ export function updateById({
   schemaId,
   defaultValue,
   editComponent,
+  dataSource,
 }) {
   return new Promise((resolve, reject) => {
     put("/admin/schema/updateById", {
@@ -62,6 +63,7 @@ export function updateById({
       schemaId,
       defaultValue,
       editComponent,
+      dataSource,
     })
       .then((result) => {
         resolve(result);

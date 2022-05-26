@@ -68,8 +68,15 @@
               <a-descriptions-item label="字段类型" :span="3">
                 {{ field.type }}
               </a-descriptions-item>
-              <a-descriptions-item label="编辑字段" :span="3">
+              <a-descriptions-item label="编辑组件" :span="3">
                 {{ field.editComponent }}
+              </a-descriptions-item>
+              <a-descriptions-item
+                v-if="field.editComponent == 'a-select'"
+                label="组件数据源"
+                :span="3"
+              >
+                {{ field.dataSource }}
               </a-descriptions-item>
               <a-descriptions-item label="默认值" :span="3">
                 {{ field.defaultValue }}
@@ -117,7 +124,10 @@
         name="name"
         :rules="[{ required: true, message: 'Please input your 字段名称!' }]"
       >
-        <a-input v-model:value="fieldState.name" />
+        <a-input
+          v-model:value="fieldState.name"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
       <a-form-item
         label="中文名称"
@@ -131,7 +141,10 @@
         name="required"
         :rules="[{ required: true, message: 'Please select your 是否必填!' }]"
       >
-        <a-switch v-model:checked="fieldState.required" />
+        <a-switch
+          v-model:checked="fieldState.required"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
       <a-form-item
         label="字段类型"
@@ -142,6 +155,7 @@
           v-model:value="fieldState.type"
           style="width: 100%"
           placeholder="请选择字段类型"
+          :disabled="modalType == 'edit'"
           :options="[
             {
               label: 'String',
@@ -175,7 +189,10 @@
         ></a-select>
       </a-form-item>
       <a-form-item label="字段默认值" name="defaultValue">
-        <a-input v-model:value="fieldState.defaultValue" />
+        <a-input
+          v-model:value="fieldState.defaultValue"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
       <a-form-item
         label="编辑组件"
@@ -188,24 +205,20 @@
           v-model:value="fieldState.editComponent"
           style="width: 100%"
           placeholder="请选择字段编辑组件"
-          :options="[
-            {
-              label: 'Select',
-              value: 'a-select',
-            },
-            {
-              label: 'Switch',
-              value: 'a-switch',
-            },
-            {
-              label: 'Input',
-              value: 'a-input',
-            },
-            {
-              label: 'richText',
-              value: 'richText',
-            },
-          ]"
+          :options="antdComponents"
+        ></a-select>
+      </a-form-item>
+      <a-form-item
+        v-if="fieldState.editComponent == 'a-select'"
+        label="数据源"
+        name="type"
+        :rules="[{ required: true, message: 'Please select your 数据源!' }]"
+      >
+        <a-select
+          v-model:value="fieldState.dataSource"
+          style="width: 100%"
+          placeholder="请选择数据源"
+          :options="dataOrigin"
         ></a-select>
       </a-form-item>
       <a-form-item
@@ -215,6 +228,7 @@
         :rules="[{ required: true, message: 'Please select your 指向表名!' }]"
       >
         <a-select
+          :disabled="modalType == 'edit'"
           v-model:value="fieldState.targetClass"
           style="width: 100%"
           placeholder="请选择指向表名"
@@ -305,6 +319,7 @@ export default defineComponent({
           required: record.fields[key]["required"],
           chineseName: record.fields[key]["chineseName"],
           editComponent: record.fields[key]["editComponent"],
+          dataSource: record.fields[key]["dataSource"],
         };
         return record.fields[key]["type"] == "Pointer"
           ? Object.assign({}, field, {
@@ -329,6 +344,19 @@ export default defineComponent({
       modalType.value = t;
       fieldVisible.value = true;
     };
+    const antdComponents = computed(() => {
+      return store.getters["GETANTDCOMPONENTS"];
+    });
+    const dataOrigin = computed(() => {
+      return Object.keys(store.getters).map((key) => {
+        let value, label;
+        value = label = key;
+        return {
+          value,
+          label,
+        };
+      });
+    });
     const schemaOptions = computed(() => {
       return store.getters["GETSCHEMA"];
     });
@@ -393,6 +421,8 @@ export default defineComponent({
       fieldState,
       modalType,
       schemaOptions,
+      dataOrigin,
+      antdComponents,
       schemaSubmit,
       fieldSubmit,
       handleClick,
