@@ -73,7 +73,7 @@
           <component
             v-model:value="formValue[item]"
             :key="visible"
-            :is="fields[item].editComponent"
+            :is="antd[fields[item].editComponent]"
             :placeholder="'Please input your' + fields[item].chineseName"
             :options="getSelectOptions(fields[item].dataSource)"
           />
@@ -86,7 +86,16 @@
   </a-modal>
 </template>
 <script>
-import { computed, defineComponent, onMounted, reactive, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+  watchEffect,
+} from "vue";
+import * as antdComponent from "ant-design-vue";
 import { debounce } from "lodash";
 import { notification } from "ant-design-vue";
 import richText from "./richText.vue";
@@ -94,7 +103,9 @@ import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 export default defineComponent({
-  components: { richText },
+  components: {
+    /* richText */
+  },
   props: {},
 
   setup(props, ctx) {
@@ -104,24 +115,34 @@ export default defineComponent({
     let { companyId, className, columns, fields, modalWidth } = meta;
     const formValue = reactive({});
     const visible = ref(false);
+    let antd = antdComponent;
+    antd["richText"] = richText;
     /* 表头 */
-    const tableColums = computed(() => {
-      let c = columns.map((field) => {
-        return {
-          key: field,
-          dataIndex: field,
-          title: field,
-        };
-      });
-      c.push({
-        title: "操作",
-        key: "operation",
-        fixed: "right",
-        width: 200,
-      });
-
-      return c;
+    const tables = computed(() => {
+      return store.getters["GETTABLES"];
     });
+    let tableColums = ref([]);
+    watch(
+      tables,
+      (n, o) => {
+        if (n) {
+          tableColums.value = columns.map((field) => {
+            return {
+              key: field,
+              dataIndex: field,
+              title: n?.[className]?.[field]?.chineseName,
+            };
+          });
+          tableColums.value.push({
+            title: "操作",
+            key: "operation",
+            fixed: "right",
+            width: 200,
+          });
+        }
+      },
+      { deep: true, immediate: true }
+    );
     /* 分页器配置 */
     const pagination = reactive({
       position: ["bottomRight"],
@@ -234,6 +255,7 @@ export default defineComponent({
       formRef,
       fields,
       modalWidth,
+      antd,
       showModal,
       loadData,
       handleDelete,

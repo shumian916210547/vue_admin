@@ -139,15 +139,7 @@ export default defineComponent({
       return store.getters["GETMODULES"];
     });
     onMounted(() => {
-      let company = store.getters["GETCOMPANY"];
-      if (!company) {
-        store.dispatch("SETCOMPANY");
-      }
-
-      let schema = store.getters["GETSCHEMA"];
-      if (!schema) {
-        store.dispatch("SETSCHEMA");
-      }
+      store.dispatch("UpdateStore");
     });
 
     return {
