@@ -55,6 +55,24 @@ export function insert({ className, companyId, params }) {
 }
 
 /**
+ * 批量插入
+ * @path /insertList
+ * @method POST
+ * @returns {Pomise}
+ */
+export function insertList({ className, companyId, columns, columnsData }) {
+  return new Promise((resolve, reject) => {
+    post("/cmn/insertList", { className, companyId, columns, columnsData })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
  * 更新
  * @path /updateById
  * @method PUT

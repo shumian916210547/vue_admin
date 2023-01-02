@@ -7,7 +7,7 @@
         </a-form-item>
       </a-col>
 
-      <a-col :span="8" :offset="1"> </a-col>
+      <a-col :span="5" :offset="1"> </a-col>
       <a-col
         :span="2"
         :offset="1"
@@ -23,8 +23,15 @@
           >重置</a-button
         >
       </a-col>
-      <a-col :span="2" :offset="2">
+      <a-col
+        :span="5"
+        :offset="2"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-button type="primary" @click="showModal()">新建</a-button>
+        <a-button @click="exportTemplate()">导出模板</a-button>
+        <a-button @click="showIncModal()">导入</a-button>
+        <a-button @click="exportData()">导出</a-button>
       </a-col>
     </a-row>
   </a-form>
@@ -86,6 +93,37 @@
       <span>{{ formValue.objectId != undefined ? "修改" : "新增" }}</span>
     </template>
   </a-modal>
+
+  <!-- 导入 -->
+  <a-modal
+    v-model:visible="incVisible"
+    width="1200px"
+    title="导入"
+    @ok="handleConfirmUpload"
+  >
+    <a-upload-dragger
+      v-model:fileList="fileList"
+      :customRequest="upload"
+      @remove="fileRemove"
+      name="file"
+      :multiple="false"
+      :max-count="1"
+    >
+      <p class="ant-upload-drag-icon">
+        <inbox-outlined></inbox-outlined>
+      </p>
+      <p class="ant-upload-text">Click or drag file to this area to upload</p>
+      <p class="ant-upload-hint">
+        Support for a single or bulk upload. Strictly prohibit from uploading
+        company data or other band files
+      </p>
+    </a-upload-dragger>
+    <a-table :columns="incHeader" :data-source="incData" bordered>
+      <template #bodyCell="{ column, record }">
+        <div>{{ record[column.key] }}</div>
+      </template>
+    </a-table>
+  </a-modal>
 </template>
 <script>
 import {
@@ -97,16 +135,18 @@ import {
   watch,
   watchEffect,
 } from "vue";
+import { InboxOutlined } from "@ant-design/icons-vue";
 import * as antdComponent from "ant-design-vue";
+import * as xlsx from "xlsx";
 import { debounce } from "lodash";
-import { notification } from "ant-design-vue";
+import { notification, message } from "ant-design-vue";
 import richText from "./richText.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 export default defineComponent({
   components: {
-    /* richText */
+    InboxOutlined,
   },
   props: {},
 
@@ -124,10 +164,19 @@ export default defineComponent({
       return store.getters["GETTABLES"];
     });
     let tableColums = ref([]);
+    const incHeader = ref([]);
     watch(
       tables,
       (n, o) => {
         if (n) {
+          Object.keys(n?.[className]).forEach((item) => {
+            if (item != "company" && n?.[className]?.[item]?.chineseName) {
+              incHeader.value.push({
+                title: n?.[className]?.[item]?.chineseName,
+                key: item,
+              });
+            }
+          });
           tableColums.value = columns.map((field) => {
             return {
               key: field,
@@ -212,8 +261,93 @@ export default defineComponent({
     const getSelectOptions = (key) => {
       return store.getters[key];
     };
-    /* 表单提交 */
+
     const formRef = ref();
+    /* 模板导出 */
+    const exportTemplate = () => {
+      let keys = tables.value?.[className];
+      delete keys["company"];
+      const worksheet = xlsx.utils.json_to_sheet([], {
+        header: Object.keys(keys).map((key) => {
+          return keys[key].chineseName;
+        }),
+      });
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, "Template");
+      xlsx.writeFile(workbook, "导入模板.xlsx");
+    };
+    /* 导入数据 */
+    let incVisible = ref(false);
+    const fileList = ref([]);
+    const showIncModal = () => {
+      incVisible.value = true;
+    };
+    const incData = ref([]);
+    const upload = (e) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = e.target.result;
+        const workbook = xlsx.read(data, { type: "binary" });
+        incData.value = xlsx.utils
+          .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
+          .map((item) => {
+            Object.keys(item).forEach((k) => {
+              incHeader.value.forEach((l) => {
+                Object.keys(l).forEach((v) => {
+                  k == l[v] ? ((item[l.key] = item[k]), delete item[k]) : "";
+                });
+              });
+            });
+            return item;
+          });
+      };
+      reader.readAsArrayBuffer(e.file);
+      const timer = setTimeout(() => {
+        fileList.value = [
+          {
+            uid: e.file.uid,
+            name: e.file.name,
+            status: "done",
+            percent: 100,
+          },
+        ];
+        message.success("上传成功");
+        clearTimeout(timer);
+      }, 200);
+    };
+    /* 确认上传数据 */
+    const handleConfirmUpload = debounce(async () => {
+      incVisible.value = false;
+      let code, msg;
+      try {
+        ({ code, msg } = await base.insertList({
+          className,
+          companyId,
+          columns: incHeader.value.map((item) => {
+            return item.key;
+          }),
+          columnsData: incData.value,
+        }));
+        if (code == 200) {
+          notification["success"]({
+            message: "提醒",
+            description: msg,
+          });
+          loadData(pagination);
+        }
+      } catch (error) {
+        notification["error"]({
+          message: "提醒",
+          description: errorInfo.msg || "缺少必填项",
+        });
+      }
+    }, 500);
+
+    /* 文件移除 */
+    const fileRemove = (e) => {
+      incData.value = [];
+    };
+    /* 表单提交 */
     const handleSubmit = debounce(async (e) => {
       try {
         const params = await formRef.value.validateFields();
@@ -247,6 +381,32 @@ export default defineComponent({
         });
       }
     }, 100);
+
+    const exportData = debounce(async () => {
+      const { total } = pagination;
+      let { data, code, msg } = await base.findAll({
+        pageSize: total,
+        pageNum: 1,
+        companyId,
+        className,
+      });
+      let keys = tables.value?.[className];
+      delete keys["company"];
+      const worksheet = xlsx.utils.json_to_sheet(
+        data.list.map((item) => {
+          let t = new Object();
+          Object.keys(keys).forEach((key) => {
+            item[key] != null
+              ? (t[JSON.stringify(keys[key].chineseName)] = item[key])
+              : "";
+          });
+          return t;
+        })
+      );
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, "Template");
+      xlsx.writeFile(workbook, "导出数据.xlsx");
+    }, 500);
     onMounted(() => {
       loadData(pagination);
     });
@@ -261,10 +421,20 @@ export default defineComponent({
       fields,
       modalWidth,
       antd,
+      fileList,
+      incVisible,
+      incData,
+      incHeader,
       showModal,
       loadData,
       handleDelete,
       getSelectOptions,
+      exportTemplate,
+      showIncModal,
+      upload,
+      fileRemove,
+      handleConfirmUpload,
+      exportData,
     };
   },
 });
