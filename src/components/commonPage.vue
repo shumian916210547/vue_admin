@@ -41,12 +41,12 @@
     :data-source="tableData"
   >
     <template #bodyCell="{ column, record }">
-      <span>{{ record[column.key]?.name || record[column.key] }}</span>
-      <template v-if="column.key === 'isDelete'">
+      <span>{{ record[column?.key]?.name || record[column?.key] }}</span>
+      <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
         <span v-else>否</span>
       </template>
-      <template v-else-if="column.key === 'operation'">
+      <template v-else-if="column?.key === 'operation'">
         <a-button type="primary" @click="showModal(record)">编辑</a-button>
         <a-popconfirm
           title="确定删除此行"
@@ -168,7 +168,7 @@ export default defineComponent({
     watch(
       tables,
       (n, o) => {
-        if (n) {
+        if (Object.keys(n).length) {
           Object.keys(n?.[className]).forEach((item) => {
             if (item != "company" && n?.[className]?.[item]?.chineseName) {
               incHeader.value.push({

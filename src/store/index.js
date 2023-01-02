@@ -16,6 +16,7 @@ export default createStore({
     schools: [],
     departments: [],
     class: [],
+    majors: [],
   },
   getters: {
     GETANTDCOMPONENTS: (state) => {
@@ -56,6 +57,10 @@ export default createStore({
 
     GETCLASS: (state) => {
       return state.class;
+    },
+
+    GETMAJORS: (state) => {
+      return state.majors;
     },
   },
   mutations: {
@@ -126,6 +131,10 @@ export default createStore({
 
     SETCLASS(state, value) {
       state.class = value;
+    },
+
+    SETMAJORS(state, value) {
+      state.majors = value;
     },
   },
   actions: {
@@ -205,6 +214,20 @@ export default createStore({
         });
     },
 
+    SETMAJORS(ctx) {
+      commonAPI
+        .findList({
+          className: "Major",
+          companyId: "RIZjCRsWcZ",
+          name: "",
+        })
+        .then((result) => {
+          if (result.code == 200) {
+            ctx.commit("SETMAJORS", result.data);
+          }
+        });
+    },
+
     UpdateStore(ctx) {
       ctx.dispatch("SETCOMPANY");
       ctx.dispatch("SETSCHEMA");
@@ -212,6 +235,7 @@ export default createStore({
       ctx.dispatch("SETSCHOOLS");
       ctx.dispatch("SETDEPARTMENTS");
       ctx.dispatch("SETCLASS");
+      ctx.dispatch("SETMAJORS");
     },
   },
   modules: {},

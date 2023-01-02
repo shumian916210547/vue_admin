@@ -56,7 +56,14 @@
             flexDirection: 'column',
           }"
         >
-          <router-view :key="route.path"></router-view>
+          <router-view v-slot="{ Component, route }">
+            <suspense>
+              <template #default>
+                <component :is="Component" :key="route.path" />
+              </template>
+              <template #fallback> Loading... </template>
+            </suspense>
+          </router-view>
         </a-layout-content>
       </a-layout>
     </a-layout>
@@ -140,7 +147,7 @@ export default defineComponent({
     });
     onMounted(() => {
       store.dispatch("UpdateStore");
-      console.log('index mounted');
+      console.log("index mounted");
     });
 
     return {
