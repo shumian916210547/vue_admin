@@ -34,11 +34,11 @@
     :data-source="tableData"
   >
     <template #bodyCell="{ column, record }">
+      <span>{{ record[column.key]?.name || record[column.key] }}</span>
       <template v-if="column.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
         <span v-else>否</span>
       </template>
-
       <template v-else-if="column.key === 'operation'">
         <a-button type="primary" @click="showModal(record)">编辑</a-button>
         <a-popconfirm
@@ -75,7 +75,9 @@
             :key="visible"
             :is="antd[fields[item].editComponent]"
             :placeholder="'Please input your' + fields[item].chineseName"
+            :field-names="{ label: 'name', value: 'objectId' }"
             :options="getSelectOptions(fields[item].dataSource)"
+            style="width: 100%"
           />
         </a-form-item>
       </a-form>
@@ -193,6 +195,9 @@ export default defineComponent({
             } else {
               if (fields[key]) {
                 formValue[key] = row[key];
+              }
+              if (row[key].className && row[key].className !== "Company") {
+                formValue[key] = row[key].objectId;
               }
             }
           })

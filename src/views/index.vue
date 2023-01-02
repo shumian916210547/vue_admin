@@ -56,7 +56,7 @@
             flexDirection: 'column',
           }"
         >
-          <router-view></router-view>
+          <router-view :key="route.path"></router-view>
         </a-layout-content>
       </a-layout>
     </a-layout>
@@ -140,6 +140,7 @@ export default defineComponent({
     });
     onMounted(() => {
       store.dispatch("UpdateStore");
+      console.log('index mounted');
     });
 
     return {
@@ -148,6 +149,7 @@ export default defineComponent({
       modules,
       zhcn,
       antdIcons,
+      route,
       toPage,
       getPopupContainer,
     };

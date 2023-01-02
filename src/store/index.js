@@ -3,6 +3,7 @@ import router from "@/router/index";
 import { findList } from "@/apis/company";
 import * as schema from "@/apis/schema";
 import * as devModule from "@/apis/devModule";
+import * as commonAPI from "@/apis/base";
 export default createStore({
   state: {
     modules: [],
@@ -12,6 +13,9 @@ export default createStore({
     tables: {},
     currentCompany: "",
     antdComponents: [],
+    schools: [],
+    departments: [],
+    class: [],
   },
   getters: {
     GETANTDCOMPONENTS: (state) => {
@@ -40,6 +44,18 @@ export default createStore({
 
     GETTABLES: (state) => {
       return state.tables;
+    },
+
+    GETSCHOOLS: (state) => {
+      return state.schools;
+    },
+
+    GETDEPARTMENTS: (state) => {
+      return state.departments;
+    },
+
+    GETCLASS: (state) => {
+      return state.class;
     },
   },
   mutations: {
@@ -99,6 +115,18 @@ export default createStore({
     SETTABLES(state, value) {
       state.tables = value;
     },
+
+    SETSCHOOLS(state, value) {
+      state.schools = value;
+    },
+
+    SETDEPARTMENTS(state, value) {
+      state.departments = value;
+    },
+
+    SETCLASS(state, value) {
+      state.class = value;
+    },
   },
   actions: {
     SETMODULES(ctx) {
@@ -139,10 +167,51 @@ export default createStore({
       });
     },
 
+    SETSCHOOLS(ctx) {
+      commonAPI
+        .findList({ className: "School", companyId: "RIZjCRsWcZ", name: "" })
+        .then((result) => {
+          if (result.code == 200) {
+            ctx.commit("SETSCHOOLS", result.data);
+          }
+        });
+    },
+
+    SETDEPARTMENTS(ctx) {
+      commonAPI
+        .findList({
+          className: "Department",
+          companyId: "RIZjCRsWcZ",
+          name: "",
+        })
+        .then((result) => {
+          if (result.code == 200) {
+            ctx.commit("SETDEPARTMENTS", result.data);
+          }
+        });
+    },
+
+    SETCLASS(ctx) {
+      commonAPI
+        .findList({
+          className: "Class",
+          companyId: "RIZjCRsWcZ",
+          name: "",
+        })
+        .then((result) => {
+          if (result.code == 200) {
+            ctx.commit("SETCLASS", result.data);
+          }
+        });
+    },
+
     UpdateStore(ctx) {
       ctx.dispatch("SETCOMPANY");
       ctx.dispatch("SETSCHEMA");
       ctx.dispatch("SETMODULES");
+      ctx.dispatch("SETSCHOOLS");
+      ctx.dispatch("SETDEPARTMENTS");
+      ctx.dispatch("SETCLASS");
     },
   },
   modules: {},

@@ -218,7 +218,7 @@
         ></a-select>
       </a-form-item>
       <a-form-item
-        v-if="fieldState.editComponent == 'a-select'"
+        v-if="fieldState.editComponent == 'Select'"
         label="数据源"
         name="type"
         :rules="[{ required: true, message: 'Please select your 数据源!' }]"
@@ -362,6 +362,7 @@ export default defineComponent({
     });
     const dataOrigin = computed(() => {
       return Object.keys(store.getters).map((key) => {
+        console.log(key);
         let value, label;
         value = label = key;
         return {
