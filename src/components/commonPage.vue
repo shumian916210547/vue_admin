@@ -78,12 +78,39 @@
           ]"
         >
           <component
+            v-if="fields[item].editComponent == 'Switch'"
+            v-model:checked="formValue[item]"
+            :is="antd[fields[item].editComponent]"
+            :placeholder="'Please input your' + fields[item].chineseName"
+          />
+          <component
+            v-else-if="fields[item].editComponent == 'TimePicker'"
             v-model:value="formValue[item]"
-            :key="visible"
+            :is="antd[fields[item].editComponent]"
+            :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="HH:mm:ss"
+            style="width: 100%"
+          />
+          <component
+            v-else-if="fields[item].editComponent == 'DatePicker'"
+            v-model:value="formValue[item]"
+            :is="antd[fields[item].editComponent]"
+            :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="YYYY/MM/DD"
+            style="width: 100%"
+          />
+          <component
+            v-else
+            v-model:value="formValue[item]"
             :is="antd[fields[item].editComponent]"
             :placeholder="'Please input your' + fields[item].chineseName"
             :field-names="{ label: 'name', value: 'objectId' }"
             :options="getSelectOptions(fields[item].dataSource)"
+            :value-format="
+              fields[item].editComponent == 'TimePicker'
+                ? 'HH:mm:ss'
+                : 'YYYY/MM/DD'
+            "
             style="width: 100%"
           />
         </a-form-item>
