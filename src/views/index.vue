@@ -48,7 +48,7 @@
         </a-layout-header>
         <a-layout-content
           :style="{
-            margin: '24px 16px',
+            margin: '10px 10px',
             padding: '24px',
             background: '#fff',
             minHeight: '280px',

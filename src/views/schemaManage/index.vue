@@ -275,7 +275,14 @@ export default defineComponent({
     const fieldForm = ref();
     const route = useRoute();
     const modalType = ref("");
-    const fieldState = reactive({});
+    const fieldState = reactive({
+      chineseName: "",
+      defaultValue: undefined,
+      editComponent: "",
+      name: "",
+      required: false,
+      type: "",
+    });
     const { meta } = route;
     const schemas = ref([]);
     const schemaVisible = ref(false);

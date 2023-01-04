@@ -41,10 +41,13 @@
     :data-source="tableData"
   >
     <template #bodyCell="{ column, record }">
-      <span>{{ record[column?.key]?.name || record[column?.key] }}</span>
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
         <span v-else>否</span>
+      </template>
+      <template v-else-if="column?.key === 'status'">
+        <span v-if="record.status">已完成</span>
+        <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
         <a-button type="primary" @click="showModal(record)">编辑</a-button>
@@ -59,10 +62,16 @@
           </a-button>
         </a-popconfirm>
       </template>
+      <span v-else>{{ record[column?.key]?.name || record[column?.key] }}</span>
     </template>
   </a-table>
   <!-- 表单 -->
-  <a-modal v-model:visible="visible" :width="modalWidth" @ok="handleSubmit()">
+  <a-modal
+    v-model:visible="visible"
+    :width="modalWidth"
+    @cancel="onCancel()"
+    @ok="handleSubmit()"
+  >
     <slot name="form">
       <a-form :model="formValue" ref="formRef" autocomplete="off">
         <a-form-item
@@ -285,6 +294,13 @@ export default defineComponent({
           })();
       visible.value = true;
     };
+
+    const onCancel = () => {
+      for (const k of Object.keys(formValue)) {
+        formValue[k] = undefined;
+      }
+      visible.value = false;
+    };
     const getSelectOptions = (key) => {
       return store.getters[key];
     };
@@ -460,6 +476,7 @@ export default defineComponent({
       showIncModal,
       upload,
       fileRemove,
+      onCancel,
       handleConfirmUpload,
       exportData,
     };
