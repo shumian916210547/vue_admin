@@ -53,6 +53,7 @@ export default {
     },
 
     SETMODULES(state, value) {
+      sessionStorage.setItem("MODULES", JSON.stringify(value));
       state.modules = value.map((module) => {
         module.router = module.router.map((route) => {
           try {
@@ -110,15 +111,6 @@ export default {
     },
   },
   actions: {
-    SETMODULES(ctx) {
-      devModule.findList().then((result) => {
-        if (result.code == 200) {
-          ctx.commit("SETMODULES", result.data);
-          sessionStorage.setItem("MODULES", JSON.stringify(result.data));
-        }
-      });
-    },
-
     SETCOMPANY(ctx) {
       findList().then((result) => {
         if (result.code == 200) {

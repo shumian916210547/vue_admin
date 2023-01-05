@@ -9,7 +9,6 @@ export default createStore({
     UpdateStore(ctx) {
       ctx.dispatch("SETCOMPANY");
       ctx.dispatch("SETIDENTITY");
-      ctx.dispatch("SETMODULES");
       ctx.dispatch("SETSCHEMA");
     },
   },

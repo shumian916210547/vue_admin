@@ -62,13 +62,14 @@ export function findById({ objectId }) {
  * @path /insertDevModule
  * @method POST
  * @param {String} name 模块名称
+ * @param {String} user 模块所属用户
  * @param {Array} router 路由列表
  * @param {object} meta 模块参数
  * @returns {Promise}
  */
-export function insertDevModule({ name, router, meta }) {
+export function insertDevModule({ name, router, meta, user }) {
   return new Promise((resolve, reject) => {
-    post("/admin/devModule/insertDevModule", { name, router, meta })
+    post("/admin/devModule/insertDevModule", { name, router, meta, user })
       .then((result) => {
         resolve(result);
       })
@@ -83,14 +84,15 @@ export function insertDevModule({ name, router, meta }) {
  * @path /updateById
  * @method POST
  * @param {String} objectId 模块Id
+ * @param {String} user 模块所属用户
  * @param {String} name 模块名称
  * @param {Array} router 路由列表
  * @param {object} meta 模块参数
  * @returns {Promise}
  */
-export function updateById({ objectId, name, router, meta }) {
+export function updateById({ objectId, name, router, meta, user }) {
   return new Promise((resolve, reject) => {
-    put("/admin/devModule/updateById", { objectId, name, router, meta })
+    put("/admin/devModule/updateById", { objectId, name, router, meta, user })
       .then((result) => {
         resolve(result);
       })

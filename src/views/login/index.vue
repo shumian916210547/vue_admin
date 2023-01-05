@@ -42,9 +42,11 @@ import { defineComponent, reactive } from "vue";
 import { loggingIn } from "@/apis/user";
 import { notification } from "ant-design-vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 export default defineComponent({
   setup() {
     const router = useRouter();
+    const store = useStore();
     const formState = reactive({
       username: "",
       password: "",
@@ -55,6 +57,18 @@ export default defineComponent({
       let { code, data, msg } = await loggingIn(values);
       if (code == 200) {
         sessionStorage.setItem("token", data.sessionToken);
+        sessionStorage.setItem(
+          "userInfo",
+          JSON.stringify({
+            userid: data.objectId,
+            username: data.username,
+          })
+        );
+        store.commit("SETMODULES", data.modules);
+        notification["success"]({
+          message: "提醒",
+          description: "登录成功",
+        });
         router.push("/home");
       } else {
       }

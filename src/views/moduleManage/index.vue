@@ -58,6 +58,7 @@
               router: record.router,
               companyId: record?.meta?.companyId,
               icon: record?.meta?.icon,
+              user: record?.user?.objectId,
             })
           "
           >编辑</a-button
@@ -94,7 +95,20 @@
           mode="multiple"
           style="width: 100%"
           placeholder="请选择模块路由"
+          :field-names="{ label: 'name', value: 'objectId' }"
           :options="routes"
+          show-search
+          allowClear
+        ></a-select>
+      </a-form-item>
+
+      <a-form-item label="所属用户" name="user">
+        <a-select
+          v-model:value="formValue.user"
+          style="width: 100%"
+          placeholder="请选择模块所属用户"
+          :field-names="{ label: 'username', value: 'objectId' }"
+          :options="Users"
           show-search
           allowClear
         ></a-select>
@@ -153,6 +167,7 @@ import {
   insertDevModule,
   updateById,
 } from "@/apis/devModule";
+import * as commonAPI from "@/apis/base";
 import { findList } from "@/apis/devRoute";
 import { useStore } from "vuex";
 const columns = [
@@ -195,6 +210,13 @@ const rules = {
       message: "请选择模块所属公司",
     },
   ],
+  user: [
+    {
+      required: true,
+      trigger: "change",
+      message: "请选择模块所属用户",
+    },
+  ],
 };
 
 export default defineComponent({
@@ -227,6 +249,7 @@ export default defineComponent({
       companyId: undefined,
       objectId: undefined,
       icon: undefined,
+      user: undefined,
     });
 
     const showModal = (
@@ -236,6 +259,7 @@ export default defineComponent({
         objectId: undefined,
         companyId: undefined,
         icon: undefined,
+        user: undefined,
       }
     ) => {
       visible.value = true;
@@ -250,16 +274,29 @@ export default defineComponent({
       });
     };
 
+    const Users = ref([]);
+    const getUsers = async () => {
+      const result = await commonAPI.findList({
+        className: "_User",
+        name: "",
+      });
+      if (result.code == 200) {
+        Users.value = result.data;
+        console.log(Users.value);
+      }
+    };
+
     /* 表单提交 */
     const handleSubmit = debounce(async (e) => {
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        const { router, name, objectId, companyId, icon } = formValue;
+        const { router, name, objectId, companyId, icon, user } = formValue;
         const { code, msg, data } = await submitForm({
           router,
           name,
           objectId,
+          user,
           meta: { companyId, icon },
         });
         if (code == 200) {
@@ -361,6 +398,7 @@ export default defineComponent({
     onMounted(() => {
       loadModule(pagination);
       loadSelectOption();
+      getUsers();
     });
 
     onUpdated(() => {
@@ -383,6 +421,7 @@ export default defineComponent({
       handleSubmit,
       loadModule,
       confirmDelete,
+      Users,
     };
   },
 });

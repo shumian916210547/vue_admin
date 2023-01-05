@@ -151,7 +151,6 @@ export default {
       commonAPI
         .findList({
           className: "Teacher",
-
           name: "",
         })
         .then((result) => {

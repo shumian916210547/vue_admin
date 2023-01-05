@@ -34,7 +34,14 @@
         </a-menu>
       </a-layout-sider>
       <a-layout>
-        <a-layout-header style="background: #fff; padding: 0">
+        <a-layout-header
+          style="
+            background: #fff;
+            padding: 0;
+            display: flex;
+            justify-content: space-between;
+          "
+        >
           <menu-unfold-outlined
             v-if="collapsed"
             class="trigger"
@@ -45,6 +52,15 @@
             class="trigger"
             @click="() => (collapsed = !collapsed)"
           />
+          <div>
+            <span>{{ userInfo?.username }}</span>
+            <a-popover placement="bottom">
+              <template #content>
+                <a-button @click="loginOut()">退出登录</a-button>
+              </template>
+              <user-outlined class="trigger" />
+            </a-popover>
+          </div>
         </a-layout-header>
         <a-layout-content
           :style="{
@@ -79,6 +95,7 @@ import {
   InboxOutlined,
   AppstoreOutlined,
   HomeOutlined,
+  UserOutlined,
 } from "@ant-design/icons-vue";
 import * as antdIcons from "@ant-design/icons-vue";
 import * as antd from "ant-design-vue";
@@ -94,6 +111,7 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import zhCN from "ant-design-vue/es/locale/zh_CN";
 import { useStore } from "vuex";
+import { notification } from "ant-design-vue";
 export default defineComponent({
   components: {
     MenuFoldOutlined,
@@ -104,6 +122,7 @@ export default defineComponent({
     InboxOutlined,
     AppstoreOutlined,
     HomeOutlined,
+    UserOutlined,
   },
 
   setup() {
@@ -149,9 +168,19 @@ export default defineComponent({
       return store.getters["GETMODULES"];
     });
 
+    const loginOut = () => {
+      sessionStorage.removeItem("MODULES");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userInfo");
+      toPage("/login");
+      notification["success"]({
+        message: "提醒",
+        description: "退出登录成功",
+      });
+    };
+
     onMounted(() => {
       console.log("index mounted");
-      store.dispatch("SETMODULES");
       store.dispatch("SETSCHEMA");
     });
 
@@ -162,8 +191,10 @@ export default defineComponent({
       zhcn,
       antdIcons,
       route,
+      userInfo: JSON.parse(sessionStorage.getItem("userInfo")),
       toPage,
       getPopupContainer,
+      loginOut,
     };
   },
 });
