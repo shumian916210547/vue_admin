@@ -13,8 +13,6 @@ export default defineComponent({
       const modules = JSON.parse(sessionStorage.getItem("MODULES")) || [];
       if (modules && modules.length) {
         store.commit("SETMODULES", modules);
-      } else {
-        store.dispatch("UpdateStore");
       }
     });
   },

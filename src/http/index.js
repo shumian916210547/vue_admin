@@ -12,8 +12,8 @@ let companyId = computed(() => {
 //http request 拦截器
 axios.interceptors.request.use(
   (config) => {
-    if (companyId) {
-      config.data = Object.assign({}, config.data, {
+    if (companyId && config.params) {
+      config.params = Object.assign(config.params, {
         companyId: companyId.value,
       });
     }
@@ -32,6 +32,7 @@ axios.interceptors.response.use(
       }
     } else {
     }
+    return response;
   },
   (error) => {}
 );
@@ -69,7 +70,7 @@ export function post(url, data = {}) {
   return new Promise((resolve, reject) => {
     axios.post(url, data).then(
       (response) => {
-        resolve(response.data);
+        resolve(response?.data);
       },
       (err) => {
         reject(err);
@@ -89,7 +90,7 @@ export function patch(url, data = {}) {
   return new Promise((resolve, reject) => {
     axios.patch(url, data).then(
       (response) => {
-        resolve(response.data);
+        resolve(response?.data);
       },
       (err) => {
         reject(err);
@@ -109,7 +110,7 @@ export function put(url, data = {}) {
   return new Promise((resolve, reject) => {
     axios.put(url, data).then(
       (response) => {
-        resolve(response.data);
+        resolve(response?.data);
       },
       (err) => {
         reject(err);
@@ -129,7 +130,7 @@ export function remove(url, data) {
   return new Promise((resolve, reject) => {
     axios.delete(url, { data: data }).then(
       (response) => {
-        resolve(response.data);
+        resolve(response?.data);
       },
       (err) => {
         reject(err);

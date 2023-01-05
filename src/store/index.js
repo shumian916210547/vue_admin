@@ -8,14 +8,9 @@ export default createStore({
   actions: {
     UpdateStore(ctx) {
       ctx.dispatch("SETCOMPANY");
-      ctx.dispatch("SETSCHEMA");
+      ctx.dispatch("SETIDENTITY");
       ctx.dispatch("SETMODULES");
-      ctx.dispatch("SETSCHOOLS");
-      ctx.dispatch("SETDEPARTMENTS");
-      ctx.dispatch("SETCLASS");
-      ctx.dispatch("SETMAJORS");
-      ctx.dispatch("SETCOURSE");
-      ctx.dispatch("SETTEACHER");
+      ctx.dispatch("SETSCHEMA");
     },
   },
   modules: { school, system },

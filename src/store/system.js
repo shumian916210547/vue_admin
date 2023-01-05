@@ -2,6 +2,7 @@ import router from "@/router/index";
 import { findList } from "@/apis/company";
 import * as schema from "@/apis/schema";
 import * as devModule from "@/apis/devModule";
+import * as commonAPI from "@/apis/base";
 export default {
   state: {
     modules: [],
@@ -11,6 +12,7 @@ export default {
     tables: {},
     currentCompany: "",
     antdComponents: [],
+    identity: [],
   },
   getters: {
     GETANTDCOMPONENTS: (state) => {
@@ -39,6 +41,10 @@ export default {
 
     GETTABLES: (state) => {
       return state.tables;
+    },
+
+    GETIDENTITY: (state) => {
+      return state.identity;
     },
   },
   mutations: {
@@ -98,6 +104,10 @@ export default {
     SETTABLES(state, value) {
       state.tables = value;
     },
+
+    SETIDENTITY(state, value) {
+      state.identity = value;
+    },
   },
   actions: {
     SETMODULES(ctx) {
@@ -136,6 +146,20 @@ export default {
           ctx.commit("SETTABLES", tables);
         }
       });
+    },
+
+    SETIDENTITY(ctx) {
+      commonAPI
+        .findList({
+          className: "Identity",
+
+          name: "",
+        })
+        .then((result) => {
+          if (result.code == 200) {
+            ctx.commit("SETIDENTITY", result.data);
+          }
+        });
     },
   },
   modules: {},

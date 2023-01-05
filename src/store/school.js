@@ -79,7 +79,11 @@ export default {
   actions: {
     SETSCHOOLS(ctx) {
       commonAPI
-        .findList({ className: "School", companyId: "RIZjCRsWcZ", name: "" })
+        .findList({
+          className: "School",
+
+          name: "",
+        })
         .then((result) => {
           if (result.code == 200) {
             ctx.commit("SETSCHOOLS", result.data);
@@ -91,7 +95,7 @@ export default {
       commonAPI
         .findList({
           className: "Department",
-          companyId: "RIZjCRsWcZ",
+
           name: "",
         })
         .then((result) => {
@@ -105,7 +109,7 @@ export default {
       commonAPI
         .findList({
           className: "Class",
-          companyId: "RIZjCRsWcZ",
+
           name: "",
         })
         .then((result) => {
@@ -119,7 +123,7 @@ export default {
       commonAPI
         .findList({
           className: "Major",
-          companyId: "RIZjCRsWcZ",
+
           name: "",
         })
         .then((result) => {
@@ -133,7 +137,7 @@ export default {
       commonAPI
         .findList({
           className: "Course",
-          companyId: "RIZjCRsWcZ",
+
           name: "",
         })
         .then((result) => {
@@ -147,7 +151,7 @@ export default {
       commonAPI
         .findList({
           className: "Teacher",
-          companyId: "RIZjCRsWcZ",
+
           name: "",
         })
         .then((result) => {

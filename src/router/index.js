@@ -45,7 +45,7 @@ router.beforeEach(async (to, from, next) => {
       next({ ...to, replace: true });
     }
     if (to.path != "/home" && to.path != "/") {
-      store.commit("SETCURRENTCOMPANY", to.meta.companyId);
+      store.commit("SETCURRENTCOMPANY", to?.meta?.companyId);
     }
   }
   next();

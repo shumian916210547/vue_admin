@@ -101,25 +101,20 @@
             style="width: 100%"
           />
           <component
+            :is="antd[fields[item].editComponent]"
             v-else-if="fields[item].editComponent == 'DatePicker'"
             v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]"
             :placeholder="'Please input your' + fields[item].chineseName"
             value-format="YYYY/MM/DD"
             style="width: 100%"
           />
           <component
+            :is="antd[fields[item].editComponent]"
             v-else
             v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]"
+            :options="getSelectOptions(fields[item].dataSource)"
             :placeholder="'Please input your' + fields[item].chineseName"
             :field-names="{ label: 'name', value: 'objectId' }"
-            :options="getSelectOptions(fields[item].dataSource)"
-            :value-format="
-              fields[item].editComponent == 'TimePicker'
-                ? 'HH:mm:ss'
-                : 'YYYY/MM/DD'
-            "
             style="width: 100%"
           />
         </a-form-item>
@@ -251,10 +246,10 @@ export default defineComponent({
     /* 加载数据 */
     const tableData = ref([]);
     const loadData = async (params) => {
-      const { data, code, msg } = await base.findAll(params);
-      if (code == 200) {
-        tableData.value = data.list;
-        pagination.total = data.count;
+      const result = await base.findAll(params);
+      if (result?.code == 200) {
+        tableData.value = result?.data.list || [];
+        pagination.total = result?.data.count || 0;
       }
     };
     /* 删除 */
@@ -301,7 +296,19 @@ export default defineComponent({
       }
       visible.value = false;
     };
+    let once = ref(true);
+    let onceKey = ref([]);
     const getSelectOptions = (key) => {
+      if (once.value) {
+        if (!onceKey.value.includes(key)) {
+          if (key) {
+            onceKey.value.push(key);
+            store.dispatch("S" + key.slice(1));
+          }
+        } else {
+          once.value = false;
+        }
+      }
       return store.getters[key];
     };
 

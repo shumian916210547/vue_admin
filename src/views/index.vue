@@ -89,6 +89,7 @@ import {
   reactive,
   ref,
   toRefs,
+  watch,
 } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import zhCN from "ant-design-vue/es/locale/zh_CN";
@@ -137,17 +138,21 @@ export default defineComponent({
         return document.body;
       }
     };
+
     let state = reactive({
       selectedKeys: [route.path],
       openKeys: [],
       rootSubmenuKeys: [],
     });
+
     const modules = computed(() => {
       return store.getters["GETMODULES"];
     });
+
     onMounted(() => {
-      store.dispatch("UpdateStore");
       console.log("index mounted");
+      store.dispatch("SETMODULES");
+      store.dispatch("SETSCHEMA");
     });
 
     return {
