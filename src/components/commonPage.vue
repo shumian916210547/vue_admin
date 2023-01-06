@@ -2,7 +2,7 @@
   <a-form :model="pagination">
     <a-row>
       <a-col :span="8">
-        <a-form-item label="名称">
+        <a-form-item label="名称" v-openSwitch="'Search'">
           <a-input v-model:value="pagination.name" placeholder="请输入名称" />
         </a-form-item>
       </a-col>
@@ -13,25 +13,46 @@
         :offset="1"
         style="justify-content: space-evenly; display: flex"
       >
-        <a-button type="primary" @click="loadData(pagination)">查询</a-button>
-        <a-button
-          @click="
-            () => {
-              pagination.name = '';
-            }
-          "
-          >重置</a-button
-        >
+        <a-form-item v-openSwitch="'Search'">
+          <a-button
+            v-openSwitch="'Search'"
+            type="primary"
+            @click="loadData(pagination)"
+            >查询</a-button
+          >
+        </a-form-item>
+
+        <a-form-item v-openSwitch="'Search'">
+          <a-button
+            v-openSwitch="'Search'"
+            @click="
+              () => {
+                pagination.name = '';
+              }
+            "
+            >重置</a-button
+          >
+        </a-form-item>
       </a-col>
       <a-col
         :span="5"
         :offset="2"
         style="justify-content: space-evenly; display: flex"
       >
-        <a-button type="primary" @click="showModal()">新建</a-button>
-        <a-button @click="exportTemplate()">导出模板</a-button>
-        <a-button @click="showIncModal()">导入</a-button>
-        <a-button @click="exportData()">导出</a-button>
+        <a-form-item>
+          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()"
+            >新建</a-button
+          >
+          <a-button v-openSwitch="'Export_Template'" @click="exportTemplate()"
+            >导出模板</a-button
+          >
+          <a-button v-openSwitch="'Import'" @click="showIncModal()"
+            >导入</a-button
+          >
+          <a-button v-openSwitch="'Export'" @click="exportData()"
+            >导出</a-button
+          >
+        </a-form-item>
       </a-col>
     </a-row>
   </a-form>
@@ -50,14 +71,25 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button type="primary" @click="showModal(record)">编辑</a-button>
+        <a-button
+          v-openSwitch="'Edit'"
+          type="primary"
+          @click="showModal(record)"
+          >编辑</a-button
+        >
+
         <a-popconfirm
           title="确定删除此行"
           ok-text="Yes"
           cancel-text="No"
           @confirm="handleDelete(record)"
         >
-          <a-button type="primary" danger style="margin: 0 0 0 10px">
+          <a-button
+            v-openSwitch="'Delete'"
+            type="primary"
+            danger
+            style="margin: 0 0 0 10px"
+          >
             删除
           </a-button>
         </a-popconfirm>
@@ -175,7 +207,21 @@ import richText from "./richText.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
+let list = [];
 export default defineComponent({
+  directives: {
+    openSwitch: {
+      mounted(el, binding, vnode) {
+        const { value } = binding;
+        let f = list?.some((p) => {
+          return p.key == value;
+        });
+        if (!f) {
+          el.parentNode && el.parentNode.removeChild(el);
+        }
+      },
+    },
+  },
   components: {
     InboxOutlined,
   },
@@ -185,7 +231,8 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
-    let { companyId, className, columns, fields, modalWidth } = meta;
+    let { companyId, className, columns, fields, modalWidth, switchs } = meta;
+    list = switchs;
     const formValue = reactive({});
     const visible = ref(false);
     let antd = antdComponent;

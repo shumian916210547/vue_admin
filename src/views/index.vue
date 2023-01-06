@@ -7,6 +7,7 @@
         </div>
 
         <a-menu
+          style="flex: 1; overflow-y: scroll; overflow-x: hidden"
           v-model:openKeys="openKeys"
           v-model:selectedKeys="selectedKeys"
           mode="inline"
@@ -54,11 +55,11 @@
           />
           <div>
             <span>{{ userInfo?.username }}</span>
-            <a-popover placement="bottom">
+            <a-popover placement="bottomRight">
               <template #content>
                 <a-button @click="loginOut()">退出登录</a-button>
               </template>
-              <user-outlined class="trigger" />
+              <user-outlined style="font-size: 24px; margin: 0 24px" />
             </a-popover>
           </div>
         </a-layout-header>
@@ -220,5 +221,15 @@ export default defineComponent({
 
 .site-layout .site-layout-background {
   background: #fff;
+}
+
+:deep(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.ant-menu-inline::-webkit-scrollbar),
+:deep(.ant-menu-inline-collapsed::-webkit-scrollbar) {
+  width: 0;
 }
 </style>

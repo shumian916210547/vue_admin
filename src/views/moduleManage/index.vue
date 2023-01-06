@@ -56,9 +56,9 @@
               objectId: record.objectId,
               name: record.name,
               router: record.router,
-              companyId: record?.meta?.companyId,
-              icon: record?.meta?.icon,
-              user: record?.user?.objectId,
+              companyId: record?.meta?.companyId|| [],
+              icon: record?.meta?.icon|| [],
+              user: record?.user?.objectId|| [],
             })
           "
           >编辑</a-button
@@ -282,7 +282,6 @@ export default defineComponent({
       });
       if (result.code == 200) {
         Users.value = result.data;
-        console.log(Users.value);
       }
     };
 

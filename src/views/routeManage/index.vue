@@ -57,10 +57,11 @@
               name: record.name,
               objectId: record.objectId,
               pagePath: record.pagePath,
-              className: record?.option?.className,
-              column: record?.option?.columns,
-              fields: record?.option?.fields,
-              modalWidth: record?.option?.modalWidth,
+              className: record?.option?.className|| [],
+              column: record?.option?.columns|| [],
+              fields: record?.option?.fields|| [],
+              modalWidth: record?.option?.modalWidth || [],
+              switchs: record?.switchs || [],
             })
           "
           >编辑</a-button
@@ -153,6 +154,20 @@
         >
         </a-select>
       </a-form-item>
+
+      <a-form-item label="可使用功能" name="switchs">
+        <a-select
+          :field-names="{ label: 'name', value: 'objectId' }"
+          v-model:value="formValue.switchs"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="请选择可使用功能"
+          :options="switchs"
+          show-search
+          allowClear
+        >
+        </a-select>
+      </a-form-item>
     </a-form>
 
     <template #title>
@@ -179,6 +194,7 @@ import {
   insertDevRoute,
   updateById,
 } from "@/apis/devRoute";
+import * as commonAPI from "@/apis/base";
 import { useStore } from "vuex";
 
 /* 表头 */
@@ -263,6 +279,7 @@ export default defineComponent({
       column: [],
       fields: [],
       modalWidth: 520,
+      switchs: [],
     });
 
     const showModal = (
@@ -275,11 +292,16 @@ export default defineComponent({
         column: [],
         fields: [],
         modalWidth: 520,
+        switchs: [],
       }
     ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
-        if (key == "fields" && params[key]) {
+        if (key == "switchs") {
+          formValue[key] = params[key].map((item) => {
+            return item.objectId;
+          });
+        } else if (key == "fields" && params[key]) {
           formValue[key] = Object.keys(params[key]);
         } else {
           formValue[key] = params[key];
@@ -301,6 +323,7 @@ export default defineComponent({
           column,
           fields,
           modalWidth,
+          switchs,
         } = formValue;
 
         let fls = {};
@@ -314,6 +337,7 @@ export default defineComponent({
           objectId,
           pagePath,
           option: { className, columns: column, fields: fls, modalWidth },
+          switchs,
         });
         if (code == 200) {
           notification["success"]({
@@ -397,6 +421,18 @@ export default defineComponent({
       }
     };
 
+    /* 获取开关列表 */
+    const switchs = ref([]);
+    const getSwitchs = async () => {
+      const result = await commonAPI.findList({
+        className: "Switch",
+        name: "",
+      });
+      if (result.code == 200) {
+        switchs.value = result.data;
+      }
+    };
+
     /* schema */
     let schema = computed(() => {
       return store.getters["GETSCHEMA"];
@@ -414,6 +450,7 @@ export default defineComponent({
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
       loadRoute(pagination);
+      getSwitchs();
     });
 
     onUpdated(() => {
@@ -430,6 +467,7 @@ export default defineComponent({
       rules,
       schema,
       fields,
+      switchs,
       showModal,
       handleSubmit,
       loadRoute,

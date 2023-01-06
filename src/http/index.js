@@ -12,11 +12,6 @@ let companyId = computed(() => {
 //http request 拦截器
 axios.interceptors.request.use(
   (config) => {
-    if (companyId && config.params) {
-      config.params = Object.assign(config.params, {
-        companyId: companyId.value,
-      });
-    }
     return config;
   },
   (error) => {}
@@ -48,7 +43,9 @@ export function get(url, params = {}) {
   return new Promise((resolve, reject) => {
     axios
       .get(url, {
-        params: params,
+        params: Object.assign(params, {
+          companyId: companyId.value,
+        }),
       })
       .then((response) => {
         resolve(response?.data);
@@ -68,14 +65,21 @@ export function get(url, params = {}) {
 
 export function post(url, data = {}) {
   return new Promise((resolve, reject) => {
-    axios.post(url, data).then(
-      (response) => {
-        resolve(response?.data);
-      },
-      (err) => {
-        reject(err);
-      }
-    );
+    axios
+      .post(
+        url,
+        Object.assign(data, {
+          companyId: companyId.value,
+        })
+      )
+      .then(
+        (response) => {
+          resolve(response?.data);
+        },
+        (err) => {
+          reject(err);
+        }
+      );
   });
 }
 
@@ -88,14 +92,21 @@ export function post(url, data = {}) {
 
 export function patch(url, data = {}) {
   return new Promise((resolve, reject) => {
-    axios.patch(url, data).then(
-      (response) => {
-        resolve(response?.data);
-      },
-      (err) => {
-        reject(err);
-      }
-    );
+    axios
+      .patch(
+        url,
+        Object.assign(data, {
+          companyId: companyId.value,
+        })
+      )
+      .then(
+        (response) => {
+          resolve(response?.data);
+        },
+        (err) => {
+          reject(err);
+        }
+      );
   });
 }
 
@@ -108,14 +119,21 @@ export function patch(url, data = {}) {
 
 export function put(url, data = {}) {
   return new Promise((resolve, reject) => {
-    axios.put(url, data).then(
-      (response) => {
-        resolve(response?.data);
-      },
-      (err) => {
-        reject(err);
-      }
-    );
+    axios
+      .put(
+        url,
+        Object.assign(data, {
+          companyId: companyId.value,
+        })
+      )
+      .then(
+        (response) => {
+          resolve(response?.data);
+        },
+        (err) => {
+          reject(err);
+        }
+      );
   });
 }
 
@@ -128,13 +146,19 @@ export function put(url, data = {}) {
 
 export function remove(url, data) {
   return new Promise((resolve, reject) => {
-    axios.delete(url, { data: data }).then(
-      (response) => {
-        resolve(response?.data);
-      },
-      (err) => {
-        reject(err);
-      }
-    );
+    axios
+      .delete(url, {
+        data: Object.assign(data, {
+          companyId: companyId.value,
+        }),
+      })
+      .then(
+        (response) => {
+          resolve(response?.data);
+        },
+        (err) => {
+          reject(err);
+        }
+      );
   });
 }

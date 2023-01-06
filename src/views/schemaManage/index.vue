@@ -15,7 +15,11 @@
           </a-button>
         </a-col>
       </a-row>
-      <a-menu v-model:selectedKeys="current" mode="inline">
+      <a-menu
+        v-model:selectedKeys="current"
+        mode="inline"
+        style="flex: 1; overflow-y: scroll; overflow-x: hidden"
+      >
         <a-menu-item
           v-for="schema in schemas"
           :key="schema.objectId"
@@ -454,6 +458,15 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+:deep(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.ant-menu-inline::-webkit-scrollbar) {
+  width: 0;
+}
+
 .ant-layout-sider {
   background: white;
 }

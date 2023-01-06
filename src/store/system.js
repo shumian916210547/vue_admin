@@ -65,7 +65,8 @@ export default {
           route["meta"] = Object.assign(
             {},
             { companyId: module?.meta?.companyId },
-            route.option
+            route.option,
+            { switchs: route.switchs }
           );
           router.addRoute("index", route);
           return route;
