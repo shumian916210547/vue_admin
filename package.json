@@ -8,6 +8,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vue/cli-service": "~5.0.0",
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@ant-design/icons-vue": "^6.1.0",
     "@wangeditor/editor": "^5.0.1",
