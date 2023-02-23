@@ -20,7 +20,7 @@
             </template>
             首页
           </a-menu-item>
-          <a-sub-menu v-for="module in modules" :key="module.meta.companyId">
+          <a-sub-menu v-for="module in modules" :key="module.objectId">
             <template #icon>
               <component :is="antdIcons[module.meta.icon]"></component>
             </template>
