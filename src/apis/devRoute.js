@@ -1,4 +1,9 @@
-import { get, post, remove, put } from "@/http/index";
+import {
+  get,
+  post,
+  remove,
+  put
+} from "@/http/index";
 
 /**
  * 分页
@@ -8,9 +13,17 @@ import { get, post, remove, put } from "@/http/index";
  * @param {number} pageNum 默认1
  * @returns {Promise}
  */
-export function findAll({ pageSize, pageNum, name }) {
+export function findAll({
+  pageSize,
+  pageNum,
+  name
+}) {
   return new Promise((resolve, reject) => {
-    get("/admin/devRoute/findAll", { pageSize, pageNum, name })
+    get("/admin/devRoute/findAll", {
+        pageSize,
+        pageNum,
+        name
+      })
       .then((result) => {
         resolve(result);
       })
@@ -45,9 +58,13 @@ export function findList() {
  * @param {String} objectId 路由Id
  * @returns {Promise}
  */
-export function findById({ objectId }) {
+export function findById({
+  objectId
+}) {
   return new Promise((resolve, reject) => {
-    get("/admin/devRoute/findById", { objectId })
+    get("/admin/devRoute/findById", {
+        objectId
+      })
       .then((result) => {
         resolve(result);
       })
@@ -68,15 +85,21 @@ export function findById({ objectId }) {
  * @param {Array} switchs 页面开关
  * @returns {Promise}
  */
-export function insertDevRoute({ pagePath, name, path, option, switchs }) {
+export function insertDevRoute({
+  pagePath,
+  name,
+  path,
+  option,
+  switchs
+}) {
   return new Promise((resolve, reject) => {
     post("/admin/devRoute/insertDevRoute", {
-      pagePath,
-      name,
-      path,
-      option,
-      switchs,
-    })
+        pagePath,
+        name,
+        path,
+        option,
+        switchs,
+      })
       .then((result) => {
         resolve(result);
       })
@@ -96,6 +119,7 @@ export function insertDevRoute({ pagePath, name, path, option, switchs }) {
  * @param {String} path 路由路径
  * @param {Array} switchs 页面开关
  * @param {Object} option 路由配置
+ * @param {Boolean} isDelete 路由是否删除
  * @returns {Promise}
  */
 export function updateById({
@@ -105,16 +129,18 @@ export function updateById({
   path,
   option,
   switchs,
+  isDelete
 }) {
   return new Promise((resolve, reject) => {
     put("/admin/devRoute/updateById", {
-      objectId,
-      pagePath,
-      name,
-      path,
-      option,
-      switchs,
-    })
+        objectId,
+        pagePath,
+        name,
+        path,
+        option,
+        switchs,
+        isDelete
+      })
       .then((result) => {
         resolve(result);
       })
@@ -131,9 +157,13 @@ export function updateById({
  * @param {String} objectId 路由Id
  * @returns {Promise}
  */
-export function removeById({ objectId }) {
+export function removeById({
+  objectId
+}) {
   return new Promise((resolve, reject) => {
-    remove("/admin/devRoute/removeById", { objectId })
+    remove("/admin/devRoute/removeById", {
+        objectId
+      })
       .then((result) => {
         resolve(result);
       })
@@ -149,9 +179,15 @@ export function removeById({ objectId }) {
  * @method PUT
  * @returns {Promise}
  */
-export function updateOption({ className, fieldState }) {
+export function updateOption({
+  className,
+  fieldState
+}) {
   return new Promise((resolve, reject) => {
-    put("/admin/devRoute/updateOption", { className, fieldState })
+    put("/admin/devRoute/updateOption", {
+        className,
+        fieldState
+      })
       .then((result) => {
         resolve(result);
       })

@@ -57,9 +57,10 @@
               name: record.name,
               objectId: record.objectId,
               pagePath: record.pagePath,
-              className: record?.option?.className|| [],
-              column: record?.option?.columns|| [],
-              fields: record?.option?.fields|| [],
+              isDelete: record.isDelete,
+              className: record?.option?.className || [],
+              column: record?.option?.columns || [],
+              fields: record?.option?.fields || [],
               modalWidth: record?.option?.modalWidth || [],
               switchs: record?.switchs || [],
             })
@@ -167,6 +168,14 @@
           allowClear
         >
         </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="路由是否删除"
+        name="isDelete"
+        :hidden="formValue.isDelete == null"
+      >
+        <a-switch v-model:checked="formValue.isDelete" />
       </a-form-item>
     </a-form>
 
@@ -293,6 +302,7 @@ export default defineComponent({
         fields: [],
         modalWidth: 520,
         switchs: [],
+        isDelete: undefined,
       }
     ) => {
       visible.value = true;
@@ -324,6 +334,7 @@ export default defineComponent({
           fields,
           modalWidth,
           switchs,
+          isDelete,
         } = formValue;
 
         let fls = {};
@@ -338,6 +349,7 @@ export default defineComponent({
           pagePath,
           option: { className, columns: column, fields: fls, modalWidth },
           switchs,
+          isDelete,
         });
         if (code == 200) {
           notification["success"]({
