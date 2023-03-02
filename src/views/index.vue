@@ -71,6 +71,8 @@
             minHeight: '280px',
             display: 'flex',
             flexDirection: 'column',
+            height: '100%',
+            overflowY: 'scroll',
           }"
         >
           <router-view v-slot="{ Component, route }">

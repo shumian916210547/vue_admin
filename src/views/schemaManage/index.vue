@@ -292,12 +292,7 @@ export default defineComponent({
     const schemaVisible = ref(false);
     const fieldVisible = ref(false);
     const schemaState = reactive({
-      chineseName: "",
-      defaultValue: undefined,
-      editComponent: "",
       name: "",
-      required: false,
-      type: "",
     });
     const loadSchema = async ({ className, companyId }) => {
       const { code, data } = await base.findList({ className, companyId });
@@ -325,6 +320,7 @@ export default defineComponent({
           });
         }
         loadSchema(meta);
+        schemaState["name"] = undefined;
         schemaVisible.value = false;
       } catch (errorInfo) {
         notification["error"]({
