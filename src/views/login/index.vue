@@ -71,6 +71,10 @@ export default defineComponent({
         });
         router.push("/home");
       } else {
+        notification["error"]({
+          message: "提醒",
+          description: msg,
+        });
       }
     };
 
