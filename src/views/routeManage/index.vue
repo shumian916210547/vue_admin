@@ -73,7 +73,12 @@
           cancel-text="No"
           @confirm="confirmDelete(record)"
         >
-          <a-button type="primary" danger style="margin: 0 0 0 10px">
+          <a-button
+            type="primary"
+            danger
+            style="margin: 0 0 0 10px"
+            :hidden="record.isDelete"
+          >
             删除
           </a-button>
         </a-popconfirm>
