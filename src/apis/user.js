@@ -44,6 +44,27 @@ export function signUp({ username, password, email, companyId, identity, nicknam
   });
 }
 
+/**
+ * 用户删除
+ * @path /admin/user/signUp
+ * @method DELETE
+ * @param objectId 用户id
+ * @param up
+ * @returns {Pomise}
+ */
+export function removeUser({ objectId, up }) {
+  return new Promise((resolve, reject) => {
+    remove("/admin/user/removeUser", { objectId, up })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+
 
 
 

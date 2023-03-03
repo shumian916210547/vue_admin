@@ -56,9 +56,9 @@
               objectId: record.objectId,
               name: record.name,
               router: record.router,
-              companyId: record?.meta?.companyId|| [],
-              icon: record?.meta?.icon|| [],
-              user: record?.user?.objectId|| [],
+              companyId: record?.meta?.companyId || [],
+              icon: record?.meta?.icon || [],
+              user: record?.user?.objectId || [],
             })
           "
           >编辑</a-button
@@ -107,7 +107,7 @@
           v-model:value="formValue.user"
           style="width: 100%"
           placeholder="请选择模块所属用户"
-          :field-names="{ label: 'username', value: 'objectId' }"
+          :field-names="{ label: 'name', value: 'objectId' }"
           :options="Users"
           show-search
           allowClear
@@ -274,16 +274,9 @@ export default defineComponent({
       });
     };
 
-    const Users = ref([]);
-    const getUsers = async () => {
-      const result = await commonAPI.findList({
-        className: "_User",
-        name: "",
-      });
-      if (result.code == 200) {
-        Users.value = result.data;
-      }
-    };
+    const Users = computed(() => {
+      return store.getters["GETUSERS"];
+    });
 
     /* 表单提交 */
     const handleSubmit = debounce(async (e) => {
@@ -397,7 +390,9 @@ export default defineComponent({
     onMounted(() => {
       loadModule(pagination);
       loadSelectOption();
-      getUsers();
+      store.getters["GETUSERS"].length
+        ? store.getters["GETUSERS"]
+        : store.dispatch("SETUSERS");
     });
 
     onUpdated(() => {

@@ -258,15 +258,14 @@ export default defineComponent({
     };
     /* 删除 */
     const handleDelete = async ({ objectId }) => {
-      const { msg, code, data } = await base.removeById({
+      const { msg, code, data } = await user.removeUser({
         objectId,
-        companyId,
-        className,
+        up: sessionStorage.getItem("To"),
       });
       if (code == 200) {
         notification["success"]({
           message: "删除提醒",
-          description: data.name + "删除成功",
+          description: data.username + "删除成功",
         });
         loadData(pagination);
       }

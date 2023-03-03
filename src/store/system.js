@@ -1,5 +1,7 @@
 import router from "@/router/index";
-import { findList } from "@/apis/company";
+import {
+  findList
+} from "@/apis/company";
 import * as schema from "@/apis/schema";
 import * as devModule from "@/apis/devModule";
 import * as commonAPI from "@/apis/base";
@@ -13,8 +15,13 @@ export default {
     currentCompany: "",
     antdComponents: [],
     identity: [],
+    users: []
   },
   getters: {
+    GETUSERS: state => {
+      return state.users;
+    },
+
     GETANTDCOMPONENTS: (state) => {
       return state.antdComponents;
     },
@@ -47,7 +54,13 @@ export default {
       return state.identity;
     },
   },
+
   mutations: {
+
+    SETUSERS(state, value) {
+      state.users = value;
+    },
+
     SETANTDCOMPONENTS(state, value) {
       state.antdComponents = value;
     },
@@ -62,11 +75,12 @@ export default {
           } catch (error) {
             route["component"] = () => import("@/components" + route.pagePath);
           }
-          route["meta"] = Object.assign(
-            {},
-            { companyId: module?.meta?.companyId },
-            route.option,
-            { switchs: route.switchs }
+          route["meta"] = Object.assign({}, {
+              companyId: module?.meta?.companyId
+            },
+            route.option, {
+              switchs: route.switchs
+            }
           );
           router.addRoute("index", route);
           return route;
@@ -111,9 +125,27 @@ export default {
       state.identity = value;
     },
   },
+
   actions: {
+
+    SETUSERS(ctx) {
+      commonAPI.findList({
+        className: "_User",
+        name: "",
+      }).then(result => {
+        if (result.code == 200) {
+          ctx.commit("SETUSERS", result.data.map(item => {
+            item.name = item.username
+            return item
+          }));
+        }
+      })
+    },
+
     SETCOMPANY(ctx) {
-      findList().then((result) => {
+      findList({
+        isDelete: false
+      }).then((result) => {
         if (result.code == 200) {
           ctx.commit("SETCOMPANY", result.data);
         }

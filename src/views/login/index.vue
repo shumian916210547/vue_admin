@@ -69,6 +69,13 @@ export default defineComponent({
           message: "提醒",
           description: "登录成功",
         });
+        sessionStorage.setItem(
+          "To",
+          JSON.stringify({
+            username: formState.username,
+            password: formState.password,
+          })
+        );
         router.push("/home");
       } else {
         notification["error"]({

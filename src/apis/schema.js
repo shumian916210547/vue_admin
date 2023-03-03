@@ -1,4 +1,9 @@
-import { get, post, remove, put } from "@/http/index";
+import {
+  get,
+  post,
+  remove,
+  put
+} from "@/http/index";
 /**
  * 所有schema列表
  * @path /findList
@@ -24,9 +29,13 @@ export function findList() {
  * @param {String} name Schema名称
  * @returns {Promise}
  */
-export function insertSchema({ name }) {
+export function insertSchema({
+  name
+}) {
   return new Promise((resolve, reject) => {
-    post("/admin/schema/insertSchema", { name })
+    post("/admin/schema/insertSchema", {
+        name
+      })
       .then((result) => {
         resolve(result);
       })
@@ -52,19 +61,21 @@ export function updateById({
   defaultValue,
   editComponent,
   dataSource,
+  isOneself
 }) {
   return new Promise((resolve, reject) => {
     put("/admin/schema/updateById", {
-      name,
-      type,
-      required,
-      chineseName,
-      targetClass,
-      schemaId,
-      defaultValue,
-      editComponent,
-      dataSource,
-    })
+        name,
+        type,
+        required,
+        chineseName,
+        targetClass,
+        schemaId,
+        defaultValue,
+        editComponent,
+        dataSource,
+        isOneself
+      })
       .then((result) => {
         resolve(result);
       })
@@ -80,12 +91,15 @@ export function updateById({
  * @method DELETE
  * @returns {Promise}
  */
-export function removeFields({ schemaId, fieldsName }) {
+export function removeFields({
+  schemaId,
+  fieldsName
+}) {
   return new Promise((resolve, reject) => {
     remove("/admin/schema/removeFields", {
-      schemaId,
-      fieldsName,
-    })
+        schemaId,
+        fieldsName,
+      })
       .then((result) => {
         resolve(result);
       })

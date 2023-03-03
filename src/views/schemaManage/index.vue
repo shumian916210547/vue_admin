@@ -252,6 +252,18 @@
           allowClear
         ></a-select>
       </a-form-item>
+
+      <a-form-item
+        v-if="fieldState.targetClass === '_User'"
+        label="仅自己"
+        name="type"
+      >
+        <a-switch
+          v-model:checked="fieldState.isOneself"
+          checked-children="是"
+          un-checked-children="否"
+        />
+      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -264,6 +276,7 @@ import {
   ref,
   computed,
   onUpdated,
+  watch,
 } from "vue";
 import { useRoute } from "vue-router";
 import * as base from "@/apis/base";
@@ -271,6 +284,7 @@ import { notification } from "ant-design-vue";
 import { insertSchema, updateById, removeFields } from "@/apis/schema";
 import { updateOption } from "@/apis/devRoute";
 import { useStore } from "vuex";
+import { string } from "vue-types";
 export default defineComponent({
   setup() {
     const store = useStore();
@@ -294,6 +308,7 @@ export default defineComponent({
     const schemaState = reactive({
       name: "",
     });
+
     const loadSchema = async ({ className, companyId }) => {
       const { code, data } = await base.findList({ className, companyId });
       if (code == 200) {
@@ -344,6 +359,10 @@ export default defineComponent({
         return record.fields[key]["type"] == "Pointer"
           ? Object.assign({}, field, {
               targetClass: record.fields[key]["targetClass"],
+              isOneself:
+                record.fields[key]["targetClass"] === "_User"
+                  ? record.fields[key]["isOneself"]
+                  : false,
             })
           : field;
       });
@@ -351,6 +370,9 @@ export default defineComponent({
     const showModal = (t, record) => {
       if (t == "edit") {
         fieldState["editComponent"] = record["editComponent"] || undefined;
+        Object.keys(fieldState).forEach((key) => {
+          fieldState[key] = undefined;
+        });
         Object.keys(record).forEach((key) => {
           fieldState[key] = record[key];
         });

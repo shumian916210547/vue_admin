@@ -1,4 +1,9 @@
-import { get, post, remove, put } from "@/http/index";
+import {
+  get,
+  post,
+  remove,
+  put
+} from "@/http/index";
 
 /**
  * 分页列表
@@ -6,9 +11,21 @@ import { get, post, remove, put } from "@/http/index";
  * @method GET
  * @returns {Pomise}
  */
-export function findAll({ className, pageNum, pageSize, name, companyId }) {
+export function findAll({
+  className,
+  pageNum,
+  pageSize,
+  name,
+  companyId
+}) {
   return new Promise((resolve, reject) => {
-    get("/cmn/findAll", { className, pageNum, pageSize, name, companyId })
+    get("/cmn/findAll", {
+        className,
+        pageNum,
+        pageSize,
+        name,
+        companyId
+      })
       .then((result) => {
         resolve(result);
       })
@@ -24,9 +41,17 @@ export function findAll({ className, pageNum, pageSize, name, companyId }) {
  * @method GET
  * @returns {Pomise}
  */
-export function findList({ className, name, companyId }) {
+export function findList({
+  className,
+  name,
+  companyId
+}) {
   return new Promise((resolve, reject) => {
-    get("/cmn/findList", { className, name, companyId })
+    get("/cmn/findList", {
+        className,
+        name,
+        companyId
+      })
       .then((result) => {
         resolve(result);
       })
@@ -42,9 +67,17 @@ export function findList({ className, name, companyId }) {
  * @method POST
  * @returns {Pomise}
  */
-export function insert({ className, companyId, params }) {
+export function insert({
+  className,
+  companyId,
+  params
+}) {
   return new Promise((resolve, reject) => {
-    post("/cmn/insert", { className, companyId, params })
+    post("/cmn/insert", {
+        className,
+        companyId,
+        params
+      })
       .then((result) => {
         resolve(result);
       })
@@ -60,9 +93,19 @@ export function insert({ className, companyId, params }) {
  * @method POST
  * @returns {Pomise}
  */
-export function insertList({ className, companyId, columns, columnsData }) {
+export function insertList({
+  className,
+  companyId,
+  columns,
+  columnsData
+}) {
   return new Promise((resolve, reject) => {
-    post("/cmn/insertList", { className, companyId, columns, columnsData })
+    post("/cmn/insertList", {
+        className,
+        companyId,
+        columns,
+        columnsData
+      })
       .then((result) => {
         resolve(result);
       })
@@ -78,9 +121,19 @@ export function insertList({ className, companyId, columns, columnsData }) {
  * @method PUT
  * @returns {Pomise}
  */
-export function updateById({ className, companyId, params, objectId }) {
+export function updateById({
+  className,
+  companyId,
+  params,
+  objectId
+}) {
   return new Promise((resolve, reject) => {
-    put("/cmn/updateById", { className, companyId, params, objectId })
+    put("/cmn/updateById", {
+        className,
+        companyId,
+        params,
+        objectId
+      })
       .then((result) => {
         resolve(result);
       })
@@ -96,9 +149,37 @@ export function updateById({ className, companyId, params, objectId }) {
  * @method DELETE
  * @returns {Pomise}
  */
-export function removeById({ className, companyId, objectId }) {
+export function removeById({
+  className,
+  companyId,
+  objectId
+}) {
   return new Promise((resolve, reject) => {
-    remove("/cmn/removeById", { className, companyId, objectId })
+    remove("/cmn/removeById", {
+        className,
+        companyId,
+        objectId
+      })
+      .then((result) => {
+        resolve(result);
+      })
+      .then((err) => {
+        reject(err);
+      });
+  });
+}
+
+/**
+ * 文件上传
+ * @path / uploadFile
+ * @method post
+ * @returns {Pomise}
+ */
+export function uploadFile(param) {
+  return new Promise((resolve, reject) => {
+    post("/cmn/uploadFile", {
+        file: param
+      })
       .then((result) => {
         resolve(result);
       })

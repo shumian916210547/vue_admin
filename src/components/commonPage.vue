@@ -3,7 +3,11 @@
     <a-row>
       <a-col :span="8">
         <a-form-item label="名称" v-openSwitch="'Search'">
-          <a-input v-model:value="pagination.name" placeholder="请输入名称" />
+          <a-input
+            :disabled="false"
+            v-model:value="pagination.name"
+            placeholder="请输入名称"
+          />
         </a-form-item>
       </a-col>
 
@@ -94,7 +98,11 @@
           </a-button>
         </a-popconfirm>
       </template>
-      <span v-else>{{ record[column?.key]?.name || record[column?.key] }}</span>
+      <span v-else>{{
+        record[column?.key]?.name ||
+        record[column?.key]?.username ||
+        record[column?.key]
+      }}</span>
     </template>
   </a-table>
   <!-- 表单 -->
@@ -141,12 +149,34 @@
             style="width: 100%"
           />
           <component
+            v-else-if="fields[item].editComponent == 'Select'"
+            :disabled="String(fields[item]) ? true : false"
             :is="antd[fields[item].editComponent]"
-            v-else
+            :placeholder="'Please input your' + fields[item].chineseName"
             v-model:value="formValue[item]"
             :options="getSelectOptions(fields[item].dataSource)"
-            :placeholder="'Please input your' + fields[item].chineseName"
             :field-names="{ label: 'name', value: 'objectId' }"
+            style="width: 100%"
+          />
+
+          <a-upload
+            v-else-if="fields[item].editComponent == 'Upload'"
+            v-model:file-list="formValue[item]"
+            :action="baseUrl + '/cmn/uploadFile'"
+            list-type="picture-card"
+          >
+            <div>
+              <plus-outlined />
+              <div style="margin-top: 8px">Upload</div>
+            </div>
+          </a-upload>
+
+          <component
+            v-else
+            :is="antd[fields[item].editComponent]"
+            :placeholder="'Please input your' + fields[item].chineseName"
+            :disabled="false"
+            v-model:value="formValue[item]"
             style="width: 100%"
           />
         </a-form-item>
@@ -198,7 +228,7 @@ import {
   watch,
   watchEffect,
 } from "vue";
-import { InboxOutlined } from "@ant-design/icons-vue";
+import { InboxOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import * as antdComponent from "ant-design-vue";
 import * as xlsx from "xlsx";
 import { debounce } from "lodash";
@@ -224,6 +254,7 @@ export default defineComponent({
   },
   components: {
     InboxOutlined,
+    PlusOutlined,
   },
   props: {},
 
@@ -243,6 +274,8 @@ export default defineComponent({
     });
     let tableColums = ref([]);
     const incHeader = ref([]);
+    let baseUrl = ref();
+    let fileField = [];
     watch(
       tables,
       (n, o) => {
@@ -329,8 +362,16 @@ export default defineComponent({
             }
           })
         : (() => {
-            Object.keys(fields).map((key) => {
+            Object.keys(fields).forEach((key) => {
               formValue[key] = fields[key].default || "";
+              if (fields[key].targetClass == "_User" && fields[key].isOneself) {
+                formValue[key] = JSON.parse(
+                  sessionStorage.getItem("userInfo")
+                ).userid;
+              }
+              if (fields[key].editComponent === "Upload") {
+                formValue[key] = [];
+              }
             });
             formValue["objectId"] = undefined;
           })();
@@ -448,6 +489,14 @@ export default defineComponent({
     const handleSubmit = debounce(async (e) => {
       try {
         const params = await formRef.value.validateFields();
+        fileField.forEach((k) => {
+          params[k] = params[k].map((item) => {
+            if (item.response) {
+              item = item.response?.data;
+            }
+            return item;
+          });
+        });
         let code, msg;
         if (formValue.objectId) {
           ({ code, msg } = await base.updateById({
@@ -474,7 +523,7 @@ export default defineComponent({
       } catch (errorInfo) {
         notification["error"]({
           message: "提醒",
-          description: errorInfo.msg || "缺少必填项",
+          description: errorInfo.msg || errorInfo || "缺少必填项",
         });
       }
     }, 100);
@@ -504,7 +553,14 @@ export default defineComponent({
       xlsx.utils.book_append_sheet(workbook, worksheet, "Template");
       xlsx.writeFile(workbook, "导出数据.xlsx");
     }, 500);
+
     onMounted(() => {
+      baseUrl.value = process.env.VUE_APP_BASE_API;
+      Object.keys(fields).forEach((k) => {
+        if (fields[k].editComponent === "Upload") {
+          fileField.push(k);
+        }
+      });
       loadData(pagination);
     });
     return {
@@ -522,6 +578,7 @@ export default defineComponent({
       incVisible,
       incData,
       incHeader,
+      baseUrl,
       showModal,
       loadData,
       handleDelete,
