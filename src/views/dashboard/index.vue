@@ -1,14 +1,22 @@
 <template>
   <iframe
-    src="http://localhost:3000/dashboard"
+    :src="baseUrl + '/dashboard'"
     frameborder="0"
     style="height: 100%; width: 100%"
   ></iframe>
 </template>
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 
 export default defineComponent({
-  setup() {},
+  setup() {
+    let baseUrl = ref("");
+    onMounted(() => {
+      baseUrl.value = process.env.VUE_APP_BASE_API;
+    });
+    return {
+      baseUrl,
+    };
+  },
 });
 </script>
