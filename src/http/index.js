@@ -14,10 +14,6 @@ axios.defaults.baseURL = process.env.VUE_APP_BASE_API;
 let companyId = computed(() => {
   return store.getters["GETCURRENTCOMPANY"];
 });
-
-let userid = computed(() => {
-  return JSON.parse(sessionStorage.getItem("userInfo")).userid
-})
 //http request 拦截器
 axios.interceptors.request.use(
   (config) => {
@@ -52,7 +48,7 @@ export function get(url, params = {}) {
       .get(url, {
         params: Object.assign(params, {
           companyId: companyId.value,
-          userid: userid.value
+          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
         }),
       })
       .then((response) => {
@@ -78,7 +74,7 @@ export function post(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: userid.value
+          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
         })
       )
       .then(
@@ -106,7 +102,7 @@ export function patch(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: userid.value
+          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
         })
       )
       .then(
@@ -134,7 +130,7 @@ export function put(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: userid.value
+          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
         })
       )
       .then(
@@ -161,7 +157,7 @@ export function remove(url, data) {
       .delete(url, {
         data: Object.assign(data, {
           companyId: companyId.value,
-          userid: userid.value
+          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
         }),
       })
       .then(

@@ -163,6 +163,9 @@
             v-else-if="fields[item].editComponent == 'Upload'"
             v-model:file-list="formValue[item]"
             :action="baseUrl + '/cmn/uploadFile'"
+            :data="{
+              userid: userInfo.userid,
+            }"
             accept="video/*,image/*"
           >
             <!-- <div>
@@ -594,6 +597,7 @@ export default defineComponent({
       onCancel,
       handleConfirmUpload,
       exportData,
+      userInfo: JSON.parse(sessionStorage.getItem("userInfo")),
     };
   },
 });
