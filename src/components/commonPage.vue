@@ -163,12 +163,16 @@
             v-else-if="fields[item].editComponent == 'Upload'"
             v-model:file-list="formValue[item]"
             :action="baseUrl + '/cmn/uploadFile'"
-            list-type="picture-card"
+            accept="video/*,image/*"
           >
-            <div>
+            <!-- <div>
               <plus-outlined />
               <div style="margin-top: 8px">Upload</div>
-            </div>
+            </div> -->
+            <a-button>
+              <upload-outlined></upload-outlined>
+              Upload
+            </a-button>
           </a-upload>
 
           <component

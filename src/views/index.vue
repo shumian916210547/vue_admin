@@ -4,6 +4,12 @@
       <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
         <div class="logo">
           <!-- VUE ADMIN -->
+          <img
+            style="height: 100%; width: 100%; object-fit: contain"
+            src="http://api.shumian.top:4200/cmn/readFile/resources/2023/3/3/logo.png"
+            alt=""
+            srcset=""
+          />
         </div>
 
         <a-menu

@@ -175,11 +175,9 @@ export function removeById({
  * @method post
  * @returns {Pomise}
  */
-export function uploadFile(param) {
+export function uploadFile(params) {
   return new Promise((resolve, reject) => {
-    post("/cmn/uploadFile", {
-        file: param
-      })
+    post("/cmn/uploadFile", params)
       .then((result) => {
         resolve(result);
       })

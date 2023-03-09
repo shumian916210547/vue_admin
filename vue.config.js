@@ -1,4 +1,6 @@
-const { defineConfig } = require("@vue/cli-service");
+const {
+  defineConfig
+} = require("@vue/cli-service");
 const URL = process.env.VUE_APP_BASE_URL;
 const API = process.env.VUE_APP_BASE_API;
 module.exports = defineConfig({

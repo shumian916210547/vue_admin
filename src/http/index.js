@@ -1,11 +1,16 @@
 import axios from "axios";
 import store from "@/store";
-import { useRoute, useRouter } from "vue-router";
-import { computed } from "vue";
+import {
+  useRoute,
+  useRouter
+} from "vue-router";
+import {
+  computed
+} from "vue";
 const router = useRouter();
 
 axios.defaults.timeout = 5000;
-axios.defaults.baseURL = process.env.VUE_APP_BASE_API;;
+/* axios.defaults.baseURL = '/'; */
 let companyId = computed(() => {
   return store.getters["GETCURRENTCOMPANY"];
 });
@@ -23,10 +28,8 @@ axios.interceptors.response.use(
     if (response) {
       if (response.data.code == 200) {
         return response;
-      } else {
-      }
-    } else {
-    }
+      } else {}
+    } else {}
     return response;
   },
   (error) => {}
