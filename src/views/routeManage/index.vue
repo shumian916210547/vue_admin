@@ -175,13 +175,13 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item
+      <!--  <a-form-item
         label="路由是否删除"
         name="isDelete"
         :hidden="formValue.isDelete == null"
       >
         <a-switch v-model:checked="formValue.isDelete" />
-      </a-form-item>
+      </a-form-item> -->
     </a-form>
 
     <template #title>

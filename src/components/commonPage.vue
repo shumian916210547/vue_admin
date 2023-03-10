@@ -235,11 +235,6 @@ import {
   watch,
   watchEffect,
 } from "vue";
-import {
-  InboxOutlined,
-  PlusOutlined,
-  UploadOutlined,
-} from "@ant-design/icons-vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import { notification, message } from "ant-design-vue";
 import * as antdComponent from "ant-design-vue";
