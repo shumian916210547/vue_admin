@@ -6,7 +6,7 @@
           <!-- VUE ADMIN -->
           <img
             style="height: 100%; width: 100%; object-fit: contain"
-            src="http://api.shumian.top:4200/cmn/readFile/resources/2023/3/3/logo.png"
+            src="http://api.shumian.top:4200/cmn/readFile/resources/uJArJaY5Hw/2023/3/9/logo.png"
             alt=""
             srcset=""
           />
