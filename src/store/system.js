@@ -134,9 +134,22 @@ export default {
         name: "",
       }).then(result => {
         if (result.code == 200) {
-          ctx.commit("SETUSERS", result.data.map(item => {
+          let users = []
+          const res = new Map()
+          const {
+            userid: objectId,
+            username: name
+          } = JSON.parse(sessionStorage.getItem('userInfo'))
+          users = result.data.map(item => {
             item.name = item.username
             return item
+          })
+          users.push({
+            objectId,
+            name
+          })
+          ctx.commit("SETUSERS", users.filter(u => {
+            return !res.has(u.objectId) && res.set(u.objectId, 1) && !res.has(u.name) && res.set(u.name, 1)
           }));
         }
       })

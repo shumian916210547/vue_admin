@@ -235,11 +235,16 @@ import {
   watch,
   watchEffect,
 } from "vue";
-import { InboxOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  InboxOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons-vue";
+import * as antdIcon from "@ant-design/icons-vue";
+import { notification, message } from "ant-design-vue";
 import * as antdComponent from "ant-design-vue";
 import * as xlsx from "xlsx";
 import { debounce } from "lodash";
-import { notification, message } from "ant-design-vue";
 import richText from "./richText.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
@@ -260,8 +265,7 @@ export default defineComponent({
     },
   },
   components: {
-    InboxOutlined,
-    PlusOutlined,
+    ...antdIcon,
   },
   props: {},
 

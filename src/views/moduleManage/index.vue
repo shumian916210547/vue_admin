@@ -176,11 +176,11 @@ const columns = [
     dataIndex: "name",
     key: "name",
   },
-  {
+  /*   {
     title: "是否删除",
     dataIndex: "isDelete",
     key: "isDelete",
-  },
+  }, */
   {
     title: "创建时间",
     dataIndex: "createdAt",
@@ -275,6 +275,7 @@ export default defineComponent({
     };
 
     const Users = computed(() => {
+      console.log(store.getters["GETUSERS"]);
       return store.getters["GETUSERS"];
     });
 

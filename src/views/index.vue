@@ -181,6 +181,7 @@ export default defineComponent({
       sessionStorage.removeItem("MODULES");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("userInfo");
+      localStorage.removeItem("To");
       toPage("/login");
       notification["success"]({
         message: "提醒",

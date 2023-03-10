@@ -20,13 +20,18 @@
         mode="inline"
         style="flex: 1; overflow-y: scroll; overflow-x: hidden"
       >
-        <a-menu-item
-          v-for="schema in schemas"
-          :key="schema.objectId"
-          @click="handleClick(schema)"
-        >
-          {{ schema.name }}
-        </a-menu-item>
+        <template v-if="schemas.length">
+          <a-menu-item
+            v-for="schema in schemas"
+            :key="schema.objectId"
+            @click="handleClick(schema)"
+          >
+            {{ schema.name }}
+          </a-menu-item>
+        </template>
+        <template v-else>
+          <a-empty :image="simpleImage" />
+        </template>
       </a-menu>
     </a-layout-sider>
     <a-layout-content style="display: flex; flex-direction: column">
@@ -35,65 +40,93 @@
         <a-col span="6"></a-col>
         <a-col span="6"></a-col>
         <a-col span="4" offset="2">
-          <a-button type="primary" @click="showModal('add')">添加字段</a-button>
+          <a-button
+            type="primary"
+            @click="showModal('add')"
+            v-if="current.length"
+            >添加字段</a-button
+          >
         </a-col>
       </a-row>
 
-      <div style="display: flex; flex-wrap: wrap; overflow-y: scroll; flex: 1">
-        <template v-for="field in fields" :key="field.name">
-          <a-card
-            style="width: 300px; height: min-content; margin-bottom: 10px"
-          >
-            <a-descriptions :title="field.chineseName" bordered>
-              <template #extra>
-                <a-button type="primary" @click="showModal('edit', field)">
-                  编辑
-                </a-button>
-                <a-popconfirm
-                  title="确定删除此字段"
-                  ok-text="Yes"
-                  cancel-text="No"
-                  @confirm="handleDelete(field)"
-                >
-                  <a-button type="primary" danger style="margin: 0 0 0 10px">
-                    删除
+      <div
+        :style="
+          fields.length
+            ? {
+                display: 'flex',
+                'flex-wrap': 'wrap',
+                'overflow-y': 'scroll',
+                flex: '1',
+              }
+            : {
+                display: 'flex',
+                'flex-wrap': 'wrap',
+                'overflow-y': 'scroll',
+                flex: '1',
+                'align-items': 'center',
+                'justify-content': 'center',
+              }
+        "
+      >
+        <template v-if="fields.length">
+          <template v-for="field in fields" :key="field.name">
+            <a-card
+              style="width: 300px; height: min-content; margin-bottom: 10px"
+            >
+              <a-descriptions :title="field.chineseName" bordered>
+                <template #extra>
+                  <a-button type="primary" @click="showModal('edit', field)">
+                    编辑
                   </a-button>
-                </a-popconfirm>
-              </template>
-              <a-descriptions-item label="字段名称" :span="3">
-                {{ field.name }}
-              </a-descriptions-item>
-              <a-descriptions-item label="中文名称" :span="3">
-                {{ field.chineseName }}
-              </a-descriptions-item>
-              <a-descriptions-item label="是否必填" :span="3">
-                {{ field.required }}
-              </a-descriptions-item>
-              <a-descriptions-item label="字段类型" :span="3">
-                {{ field.type }}
-              </a-descriptions-item>
-              <a-descriptions-item label="编辑组件" :span="3">
-                {{ field.editComponent }}
-              </a-descriptions-item>
-              <a-descriptions-item
-                v-if="field.editComponent == 'a-select'"
-                label="组件数据源"
-                :span="3"
-              >
-                {{ field.dataSource }}
-              </a-descriptions-item>
-              <a-descriptions-item label="默认值" :span="3">
-                {{ field.defaultValue }}
-              </a-descriptions-item>
-              <a-descriptions-item
-                label="指向表名"
-                v-if="field.type == 'Pointer'"
-                :span="3"
-              >
-                {{ field.targetClass }}
-              </a-descriptions-item>
-            </a-descriptions>
-          </a-card>
+                  <a-popconfirm
+                    title="确定删除此字段"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="handleDelete(field)"
+                  >
+                    <a-button type="primary" danger style="margin: 0 0 0 10px">
+                      删除
+                    </a-button>
+                  </a-popconfirm>
+                </template>
+                <a-descriptions-item label="字段名称" :span="3">
+                  {{ field.name }}
+                </a-descriptions-item>
+                <a-descriptions-item label="中文名称" :span="3">
+                  {{ field.chineseName }}
+                </a-descriptions-item>
+                <a-descriptions-item label="是否必填" :span="3">
+                  {{ field.required }}
+                </a-descriptions-item>
+                <a-descriptions-item label="字段类型" :span="3">
+                  {{ field.type }}
+                </a-descriptions-item>
+                <a-descriptions-item label="编辑组件" :span="3">
+                  {{ field.editComponent }}
+                </a-descriptions-item>
+                <a-descriptions-item
+                  v-if="field.editComponent == 'a-select'"
+                  label="组件数据源"
+                  :span="3"
+                >
+                  {{ field.dataSource }}
+                </a-descriptions-item>
+                <a-descriptions-item label="默认值" :span="3">
+                  {{ field.defaultValue }}
+                </a-descriptions-item>
+                <a-descriptions-item
+                  label="指向表名"
+                  v-if="field.type == 'Pointer'"
+                  :span="3"
+                >
+                  {{ field.targetClass }}
+                </a-descriptions-item>
+              </a-descriptions>
+            </a-card>
+          </template>
+        </template>
+        <template v-else>
+          <a-empty :image="simpleImage" />
         </template>
       </div>
     </a-layout-content>
@@ -280,7 +313,7 @@ import {
 } from "vue";
 import { useRoute } from "vue-router";
 import * as base from "@/apis/base";
-import { notification } from "ant-design-vue";
+import { notification, Empty } from "ant-design-vue";
 import { insertSchema, updateById, removeFields } from "@/apis/schema";
 import { updateOption } from "@/apis/devRoute";
 import { useStore } from "vuex";
@@ -314,14 +347,15 @@ export default defineComponent({
       if (code == 200) {
         schemas.value = data;
         if (!current.value.length) {
-          current.value = [data[0]["objectId"]];
+          current.value = data.length ? [data[0]["objectId"]] : [];
         }
-
-        handleClick(
-          data.filter((item) => {
-            return item.objectId == current.value[0];
-          })[0]
-        );
+        if (data.length) {
+          handleClick(
+            data.filter((item) => {
+              return item.objectId == current.value[0];
+            })[0]
+          );
+        }
       }
     };
     const schemaSubmit = async () => {
@@ -346,6 +380,9 @@ export default defineComponent({
     };
     const fields = ref([]);
     const handleClick = async (record) => {
+      if (!record || !record.fields) {
+        return;
+      }
       fields.value = Object.keys(record.fields).map((key) => {
         let field = {
           name: key,
@@ -465,6 +502,7 @@ export default defineComponent({
       schemaOptions,
       dataOrigin,
       antdComponents,
+      simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       schemaSubmit,
       fieldSubmit,
       handleClick,

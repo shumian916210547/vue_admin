@@ -228,11 +228,11 @@ const columns = [
     dataIndex: "pagePath",
     key: "pagePath",
   },
-  {
+  /*   {
     title: "是否删除",
     dataIndex: "isDelete",
     key: "isDelete",
-  },
+  }, */
   {
     title: "创建时间",
     dataIndex: "createdAt",

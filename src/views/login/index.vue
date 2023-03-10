@@ -38,7 +38,7 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive } from "vue";
+import { defineComponent, onMounted, reactive } from "vue";
 import { loggingIn } from "@/apis/user";
 import { notification } from "ant-design-vue";
 import { useRouter } from "vue-router";
@@ -50,7 +50,7 @@ export default defineComponent({
     const formState = reactive({
       username: "",
       password: "",
-      remember: true,
+      remember: false,
     });
 
     const onFinish = async (values) => {
@@ -69,13 +69,15 @@ export default defineComponent({
           message: "提醒",
           description: "登录成功",
         });
-        sessionStorage.setItem(
-          "To",
-          JSON.stringify({
-            username: formState.username,
-            password: formState.password,
-          })
-        );
+        if (formState.remember) {
+          localStorage.setItem(
+            "To",
+            JSON.stringify({
+              username: values.username,
+              password: values.password,
+            })
+          );
+        }
         router.push("/home");
       } else {
         notification["error"]({
@@ -86,6 +88,13 @@ export default defineComponent({
     };
 
     const onFinishFailed = (errorInfo) => {};
+
+    onMounted(() => {
+      if (localStorage.getItem("To")) {
+        formState.remember = true;
+        onFinish(JSON.parse(localStorage.getItem("To")));
+      }
+    });
 
     return {
       formState,
