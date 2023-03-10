@@ -3,22 +3,22 @@ import {
   createWebHistory,
   createWebHashHistory,
 } from "vue-router";
+import Home from "@/views/home/index.vue"
+import Login from "@/views/login/index.vue"
 import store from "@/store/index";
-const routes = [
-  {
+const routes = [{
     path: "/login",
     name: "login",
-    component: () => import("@/views/login/index.vue"),
+    component: Login,
   },
   {
     path: "/",
     name: "index",
     component: () => import("@/views/index.vue"),
-    children: [
-      {
+    children: [{
         path: "/home",
         name: "home",
-        component: () => import("@/views/home/index.vue"),
+        component: Home,
       },
       {
         path: "/",
@@ -41,12 +41,17 @@ router.beforeEach(async (to, from, next) => {
     if (to.path === "/login") {
       next();
     } else {
-      next({ path: "/login" });
+      next({
+        path: "/login"
+      });
     }
   } else {
     if (oneEnter) {
       oneEnter = false;
-      next({ ...to, replace: true });
+      next({
+        ...to,
+        replace: true
+      });
     }
     if (to.path != "/home" && to.path != "/") {
       store.commit("SETCURRENTCOMPANY", to?.meta?.companyId);
