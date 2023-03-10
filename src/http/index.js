@@ -48,7 +48,7 @@ export function get(url, params = {}) {
       .get(url, {
         params: Object.assign(params, {
           companyId: companyId.value,
-          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
+          userid: JSON.parse(sessionStorage.getItem("userInfo"))?.userid
         }),
       })
       .then((response) => {
@@ -74,7 +74,7 @@ export function post(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
+          userid: JSON.parse(sessionStorage.getItem("userInfo"))?.userid
         })
       )
       .then(
@@ -102,7 +102,7 @@ export function patch(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
+          userid: JSON.parse(sessionStorage.getItem("userInfo"))?.userid
         })
       )
       .then(
@@ -130,7 +130,7 @@ export function put(url, data = {}) {
         url,
         Object.assign(data, {
           companyId: companyId.value,
-          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
+          userid: JSON.parse(sessionStorage.getItem("userInfo"))?.userid
         })
       )
       .then(
@@ -157,7 +157,7 @@ export function remove(url, data) {
       .delete(url, {
         data: Object.assign(data, {
           companyId: companyId.value,
-          userid: JSON.parse(sessionStorage.getItem("userInfo")).userid
+          userid: JSON.parse(sessionStorage.getItem("userInfo"))?.userid
         }),
       })
       .then(
