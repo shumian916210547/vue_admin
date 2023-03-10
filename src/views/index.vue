@@ -224,7 +224,7 @@ export default defineComponent({
 
 .logo {
   height: 64px;
-  background: rgba(255, 255, 255, 0.3);
+  /*  background: rgba(255, 255, 255, 0.3); */
   margin: 16px;
 }
 

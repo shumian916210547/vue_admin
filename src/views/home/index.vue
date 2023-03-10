@@ -23,23 +23,44 @@ export default defineComponent({
         mapStyle: "amap://styles/normal", //设置地图的显示样式
       });
 
-      AMap.plugin("AMap.Geolocation", () => {
-        let geolocation = new AMap.Geolocation({
-          // 是否使用高精度定位，默认：true
-          enableHighAccuracy: true,
-          // 设置定位超时时间，默认：无穷大
-          timeout: 10000,
-          zoomToAccuracy: true,
-        });
-        map.addControl(geolocation);
-        geolocation.getCurrentPosition((status, result) => {
-          console.log(result);
-          //获取用户当前的精确位置
-          if (status == "complete") {
-            console.log("result", result);
-          }
-        });
-      });
+      AMap.plugin(
+        [
+          "AMap.ToolBar",
+          "AMap.Scale",
+          "AMap.HawkEye",
+          "AMap.MapType",
+          "AMap.Geolocation",
+        ],
+        () => {
+          // 在图面添加工具条控件，工具条控件集成了缩放、平移、定位等功能按钮在内的组合控件
+          map.addControl(new AMap.ToolBar());
+
+          // 在图面添加比例尺控件，展示地图在当前层级和纬度下的比例尺
+          map.addControl(new AMap.Scale());
+
+          // 在图面添加鹰眼控件，在地图右下角显示地图的缩略图
+          map.addControl(new AMap.HawkEye({ isOpen: true }));
+
+          // 在图面添加类别切换控件，实现默认图层与卫星图、实施交通图层之间切换的控制
+          map.addControl(new AMap.MapType());
+
+          let geolocation = new AMap.Geolocation({
+            // 是否使用高精度定位，默认：true
+            enableHighAccuracy: true,
+            // 设置定位超时时间，默认：无穷大
+            timeout: 10000,
+            zoomToAccuracy: true,
+          });
+          map.addControl(geolocation);
+          geolocation.getCurrentPosition((status, result) => {
+            console.log(result);
+            //获取用户当前的精确位置
+            if (status == "complete") {
+              console.log("result", result);
+            }
+          });
+        }
+      );
     };
 
     onMounted(() => {
