@@ -86,7 +86,11 @@
               <template #default>
                 <component :is="Component" :key="route.path" />
               </template>
-              <template #fallback> Loading... </template>
+              <template #fallback>
+                <div class="example">
+                  <a-spin tip="loading..." size="large" />
+                </div>
+              </template>
             </suspense>
           </router-view>
         </a-layout-content>
@@ -190,7 +194,6 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      console.log("index mounted");
       store.dispatch("SETSCHEMA");
     });
 
@@ -240,5 +243,14 @@ export default defineComponent({
 :deep(.ant-menu-inline::-webkit-scrollbar),
 :deep(.ant-menu-inline-collapsed::-webkit-scrollbar) {
   width: 0;
+}
+
+.example {
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 </style>

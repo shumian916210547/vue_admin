@@ -11,9 +11,7 @@ import { defineComponent, onMounted, ref } from "vue";
 export default defineComponent({
   setup() {
     let baseUrl = ref("");
-    onMounted(() => {
-      baseUrl.value = process.env.VUE_APP_BASE_API;
-    });
+    baseUrl.value = process.env.VUE_APP_BASE_API;
     return {
       baseUrl,
     };

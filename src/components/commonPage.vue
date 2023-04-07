@@ -264,7 +264,7 @@ export default defineComponent({
   },
   props: {},
 
-  setup(props, ctx) {
+  async setup(props, ctx) {
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
@@ -560,15 +560,15 @@ export default defineComponent({
       xlsx.writeFile(workbook, "导出数据.xlsx");
     }, 500);
 
-    onMounted(() => {
-      baseUrl.value = process.env.VUE_APP_BASE_API;
-      Object.keys(fields).forEach((k) => {
-        if (fields[k].editComponent === "Upload") {
-          fileField.push(k);
-        }
-      });
-      loadData(pagination);
+    baseUrl.value = process.env.VUE_APP_BASE_API;
+    Object.keys(fields).forEach((k) => {
+      if (fields[k].editComponent === "Upload") {
+        fileField.push(k);
+      }
     });
+    
+    await loadData(pagination);
+
     return {
       tableData,
       tableColums,

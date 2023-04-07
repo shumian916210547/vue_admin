@@ -317,9 +317,8 @@ import { notification, Empty } from "ant-design-vue";
 import { insertSchema, updateById, removeFields } from "@/apis/schema";
 import { updateOption } from "@/apis/devRoute";
 import { useStore } from "vuex";
-import { string } from "vue-types";
 export default defineComponent({
-  setup() {
+  async setup() {
     const store = useStore();
     const current = ref([]);
     const schemaForm = ref();
@@ -367,6 +366,7 @@ export default defineComponent({
             message: "提醒",
             description: msg,
           });
+          current.value = [data.objectId];
         }
         loadSchema(meta);
         schemaState["name"] = undefined;
@@ -481,13 +481,13 @@ export default defineComponent({
         loadSchema(meta);
       }
     };
-    onMounted(() => {
-      loadSchema(meta);
-    });
 
     onUpdated(() => {
       store.dispatch("UpdateStore");
     });
+
+    await loadSchema(meta);
+
     return {
       current,
       schemas,

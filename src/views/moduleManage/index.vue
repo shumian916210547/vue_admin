@@ -221,7 +221,7 @@ const rules = {
 
 export default defineComponent({
   components: {},
-  setup() {
+  async setup() {
     const visible = ref(false);
 
     const formRef = ref();
@@ -389,8 +389,6 @@ export default defineComponent({
 
     /* 生命周期， 页面挂在后 */
     onMounted(() => {
-      loadModule(pagination);
-      loadSelectOption();
       store.getters["GETUSERS"].length
         ? store.getters["GETUSERS"]
         : store.dispatch("SETUSERS");
@@ -399,6 +397,9 @@ export default defineComponent({
     onUpdated(() => {
       store.dispatch("UpdateStore");
     });
+
+    await loadModule(pagination);
+    await loadSelectOption();
 
     return {
       formValue,

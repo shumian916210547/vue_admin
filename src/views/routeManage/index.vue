@@ -276,7 +276,7 @@ export default defineComponent({
     SmileOutlined,
     DownOutlined,
   },
-  setup() {
+  async setup() {
     const visible = ref(false);
 
     const store = useStore();
@@ -464,15 +464,12 @@ export default defineComponent({
       return store.getters["GETTABLES"];
     });
 
-    /* 生命周期， 页面挂在后 */
-    onMounted(() => {
-      loadRoute(pagination);
-      getSwitchs();
-    });
-
     onUpdated(() => {
       store.dispatch("UpdateStore");
     });
+
+    await loadRoute(pagination);
+    await getSwitchs();
 
     return {
       formValue,
