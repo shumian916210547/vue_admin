@@ -63,7 +63,12 @@
             <span>{{ userInfo?.username }}</span>
             <a-popover placement="bottomRight">
               <template #content>
-                <a-button @click="loginOut()">退出登录</a-button>
+                <div style="display: flex; flex-direction: column">
+                  <a-button @click="reLogin()">重新登录</a-button>
+                  <a-button @click="loginOut()" style="margin-top: 10px"
+                    >退出登录</a-button
+                  >
+                </div>
               </template>
               <user-outlined style="font-size: 24px; margin: 0 24px" />
             </a-popover>
@@ -181,6 +186,12 @@ export default defineComponent({
       return store.getters["GETMODULES"];
     });
 
+    const reLogin = () => {
+      sessionStorage.removeItem("MODULES");
+      sessionStorage.removeItem("token");
+      toPage("/login");
+    };
+
     const loginOut = () => {
       sessionStorage.removeItem("MODULES");
       sessionStorage.removeItem("token");
@@ -208,6 +219,7 @@ export default defineComponent({
       toPage,
       getPopupContainer,
       loginOut,
+      reLogin,
     };
   },
 });
