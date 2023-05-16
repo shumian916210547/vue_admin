@@ -168,10 +168,6 @@
             }"
             accept="video/*,image/*"
           >
-            <!-- <div>
-              <plus-outlined />
-              <div style="margin-top: 8px">Upload</div>
-            </div> -->
             <a-button>
               <upload-outlined></upload-outlined>
               Upload
@@ -367,20 +363,19 @@ export default defineComponent({
               }
             }
           })
-        : (() => {
-            Object.keys(fields).forEach((key) => {
-              formValue[key] = fields[key].default || "";
-              if (fields[key].targetClass == "_User" && fields[key].isOneself) {
-                formValue[key] = JSON.parse(
-                  sessionStorage.getItem("userInfo")
-                ).userid;
-              }
-              if (fields[key].editComponent === "Upload") {
-                formValue[key] = [];
-              }
-            });
-            formValue["objectId"] = undefined;
-          })();
+        : Object.keys(fields).forEach((key) => {
+            formValue[key] = fields[key].default || "";
+            if (fields[key].targetClass == "_User" && fields[key].isOneself) {
+              formValue[key] = JSON.parse(
+                sessionStorage.getItem("userInfo")
+              ).userid;
+            }
+            if (fields[key].editComponent === "Upload") {
+              formValue[key] = [];
+            }
+          }),
+        (formValue["objectId"] = undefined);
+
       visible.value = true;
     };
 
@@ -566,7 +561,7 @@ export default defineComponent({
         fileField.push(k);
       }
     });
-    
+
     await loadData(pagination);
 
     return {
