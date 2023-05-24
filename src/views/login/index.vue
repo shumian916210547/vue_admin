@@ -69,6 +69,8 @@ export default defineComponent({
           message: "提醒",
           description: "登录成功",
         });
+
+        document.title = data.company.name;
         if (formState.remember) {
           localStorage.setItem(
             "To",
