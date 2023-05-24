@@ -275,7 +275,6 @@ export default defineComponent({
     };
 
     const Users = computed(() => {
-      console.log(store.getters["GETUSERS"]);
       return store.getters["GETUSERS"];
     });
 
