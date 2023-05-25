@@ -266,7 +266,7 @@ export default defineComponent({
     let { meta } = route;
     let { companyId, className, columns, fields, modalWidth, switchs } = meta;
     list = switchs;
-    const formValue = reactive({});
+    const formValue = reactive(new Object());
     const visible = ref(false);
     let antd = antdComponent;
     antd["richText"] = richText;
@@ -274,10 +274,10 @@ export default defineComponent({
     const tables = computed(() => {
       return store.getters["GETTABLES"];
     });
-    let tableColums = ref([]);
-    const incHeader = ref([]);
+    let tableColums = ref(new Array());
+    const incHeader = ref(new Array());
     let baseUrl = ref();
-    let fileField = [];
+    let fileField = new Array();
     watch(
       tables,
       (n, o) => {
@@ -309,7 +309,7 @@ export default defineComponent({
     );
     /* 分页器配置 */
     const pagination = reactive({
-      position: ["bottomRight"],
+      position: new Array("bottomRight"),
       pageSize: 10,
       pageNum: 1,
       showSizeChanger: true,
@@ -317,7 +317,7 @@ export default defineComponent({
       companyId,
       className,
       showTotal: (total) => `Total ${total} items`,
-      pageSizeOptions: ["10", "20", "50", "100"],
+      pageSizeOptions: new Array("10", "20", "50", "100"),
       onChange: (num, size) => {
         pagination.pageNum = num;
         pagination.pageSize = size;
@@ -326,11 +326,11 @@ export default defineComponent({
       name: "",
     });
     /* 加载数据 */
-    const tableData = ref([]);
+    const tableData = ref(new Array());
     const loadData = async (params) => {
       const result = await base.findAll(params);
       if (result?.code == 200) {
-        tableData.value = result?.data.list || [];
+        tableData.value = result?.data.list || new Array();
         pagination.total = result?.data.count || 0;
       }
     };
@@ -386,7 +386,7 @@ export default defineComponent({
       visible.value = false;
     };
     let once = ref(true);
-    let onceKey = ref([]);
+    let onceKey = ref(new Array());
     const getSelectOptions = (key) => {
       if (once.value) {
         if (!onceKey.value.includes(key)) {
@@ -417,11 +417,11 @@ export default defineComponent({
     };
     /* 导入数据 */
     let incVisible = ref(false);
-    const fileList = ref([]);
+    const fileList = ref(new Array());
     const showIncModal = () => {
       incVisible.value = true;
     };
-    const incData = ref([]);
+    const incData = ref(new Array());
     const upload = (e) => {
       const reader = new FileReader();
       reader.onload = function (e) {
@@ -484,7 +484,7 @@ export default defineComponent({
 
     /* 文件移除 */
     const fileRemove = (e) => {
-      incData.value = [];
+      incData.value = new Array();
     };
     /* 表单提交 */
     const handleSubmit = debounce(async (e) => {

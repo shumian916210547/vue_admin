@@ -254,7 +254,7 @@ export default defineComponent({
 
     const showModal = (
       params = {
-        router: [],
+        router: new Array(),
         name: "",
         objectId: undefined,
         companyId: undefined,

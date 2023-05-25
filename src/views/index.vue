@@ -177,9 +177,9 @@ export default defineComponent({
     };
 
     let state = reactive({
-      selectedKeys: [route.path],
-      openKeys: [],
-      rootSubmenuKeys: [],
+      selectedKeys: new Array(route.path),
+      openKeys: new Array(),
+      rootSubmenuKeys: new Array(),
     });
 
     const modules = computed(() => {

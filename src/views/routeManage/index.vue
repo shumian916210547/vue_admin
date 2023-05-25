@@ -58,11 +58,11 @@
               objectId: record.objectId,
               pagePath: record.pagePath,
               isDelete: record.isDelete,
-              className: record?.option?.className || [],
-              column: record?.option?.columns || [],
-              fields: record?.option?.fields || [],
-              modalWidth: record?.option?.modalWidth || [],
-              switchs: record?.switchs || [],
+              className: record?.option?.className || new Array(),
+              column: record?.option?.columns || new Array(),
+              fields: record?.option?.fields || new Array(),
+              modalWidth: record?.option?.modalWidth || new Array(),
+              switchs: record?.switchs || new Array(),
             })
           "
           >编辑</a-button

@@ -320,7 +320,7 @@ import { useStore } from "vuex";
 export default defineComponent({
   async setup() {
     const store = useStore();
-    const current = ref([]);
+    const current = ref(new Array());
     const schemaForm = ref();
     const fieldForm = ref();
     const route = useRoute();
@@ -334,7 +334,7 @@ export default defineComponent({
       type: "",
     });
     const { meta } = route;
-    const schemas = ref([]);
+    const schemas = ref(new Array());
     const schemaVisible = ref(false);
     const fieldVisible = ref(false);
     const schemaState = reactive({
