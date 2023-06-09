@@ -123,15 +123,7 @@
   </a-modal>
 </template>
 <script>
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-  watchEffect,
-} from "vue";
+import { computed, defineComponent, reactive, ref, watch } from "vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import { notification, message } from "ant-design-vue";
 import * as antdComponent from "ant-design-vue";
@@ -143,11 +135,8 @@ import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { Mixins } from "@/mixins";
 export default defineComponent({
-  components: {
-    ...antdIcon,
-  },
+  components: { ...antdIcon },
   props: {},
-
   async setup(props, ctx) {
     const route = useRoute();
     const store = useStore();

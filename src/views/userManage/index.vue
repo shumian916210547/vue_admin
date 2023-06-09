@@ -98,7 +98,6 @@ import * as base from "@/apis/base";
 import * as user from "@/apis/user";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
-let list = [];
 import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {
@@ -111,10 +110,9 @@ export default defineComponent({
     const store = useStore();
     let { meta } = route;
     const { pagination } = Mixins()
-    let { companyId, className, columns, fields, modalWidth, switchs } = meta;
+    let { companyId, className, columns, fields, modalWidth } = meta;
     pagination.companyId = companyId
     pagination.className = className
-    list = switchs;
     const formValue = reactive({});
     const visible = ref(false);
     let antd = antdComponent;

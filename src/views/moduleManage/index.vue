@@ -93,24 +93,11 @@
 </template>
 
 <script>
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  onUpdated,
-  reactive,
-  ref,
-} from "vue";
+import { computed, defineComponent, onMounted, onUpdated, reactive, ref } from "vue";
 import { debounce } from "lodash";
 import * as antdIcons from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
-import {
-  findAll,
-  removeById,
-  insertDevModule,
-  updateById,
-} from "@/apis/devModule";
-import * as commonAPI from "@/apis/base";
+import { findAll, removeById, insertDevModule, updateById } from "@/apis/devModule";
 import { findList } from "@/apis/devRoute";
 import { useStore } from "vuex";
 const columns = [
@@ -162,6 +149,16 @@ const rules = {
   ],
 };
 
+/* 静态表单 */
+const staticform = {
+  router: new Array(),
+  name: "",
+  companyId: undefined,
+  objectId: undefined,
+  icon: undefined,
+  user: undefined,
+}
+
 import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {},
@@ -175,10 +172,7 @@ export default defineComponent({
 
     const store = useStore();
     let antdIconOptions = Object.keys(antdIcons).map((key) => {
-      return {
-        label: key,
-        value: key,
-      };
+      return { label: key, value: key, };
     });
     antdIconOptions = antdIconOptions.filter((item) => {
       return (
@@ -190,25 +184,9 @@ export default defineComponent({
     });
 
     /* 添加/修改数据表单 */
-    let formValue = reactive({
-      router: [],
-      name: "",
-      companyId: undefined,
-      objectId: undefined,
-      icon: undefined,
-      user: undefined,
-    });
+    let formValue = reactive(JSON.parse(JSON.stringify(staticform)));
 
-    const showModal = (
-      params = {
-        router: new Array(),
-        name: "",
-        objectId: undefined,
-        companyId: undefined,
-        icon: undefined,
-        user: undefined,
-      }
-    ) => {
+    const showModal = (params = JSON.parse(JSON.stringify(staticform))) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
         if (key == "router") {
@@ -232,45 +210,30 @@ export default defineComponent({
         visible.value = false;
         const { router, name, objectId, companyId, icon, user } = formValue;
         const { code, msg, data } = await submitForm({
-          router,
-          name,
-          objectId,
-          user,
-          meta: { companyId, icon },
+          router, name, objectId, user, meta: { companyId, icon },
         });
         if (code == 200) {
-          notification["success"]({
-            message: "提醒",
-            description: msg,
-          });
+          notification["success"]({ message: "提醒", description: msg });
         } else {
-          throw {
-            msg,
-          };
+          throw { msg };
         }
         loadData(pagination);
       } catch (errorInfo) {
-        notification["error"]({
-          message: "提醒",
-          description: errorInfo.msg || "缺少必填项",
-        });
+        notification["error"]({ message: "提醒", description: errorInfo.msg || "缺少必填项" });
       }
     }, 100);
 
     /* 修改/新增 */
     const submitForm = (params) => {
       return new Promise((resolve, reject) => {
-        switch (params.objectId != undefined) {
-          case true:
-            updateById(params).then((result) => {
-              resolve(result);
-            });
-            break;
-          case false:
-            insertDevModule(params).then((result) => {
-              resolve(result);
-            });
-            break;
+        if (params.objectId != undefined) {
+          updateById(params).then((result) => {
+            resolve(result);
+          });
+        } else {
+          insertDevModule(params).then((result) => {
+            resolve(result);
+          });
         }
       });
     };

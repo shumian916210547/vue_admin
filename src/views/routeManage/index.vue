@@ -116,23 +116,11 @@
 </template>
 
 <script>
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  onUpdated,
-  reactive,
-  ref,
-} from "vue";
+import { computed, defineComponent, onUpdated, reactive, ref } from "vue";
 import { debounce } from "lodash";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
-import {
-  findAll,
-  removeById,
-  insertDevRoute,
-  updateById,
-} from "@/apis/devRoute";
+import { findAll, removeById, insertDevRoute, updateById } from "@/apis/devRoute";
 import * as commonAPI from "@/apis/base";
 import { useStore } from "vuex";
 
@@ -196,6 +184,19 @@ const rules = {
   ],
 };
 
+/* 静态表单字段 */
+const staticform = {
+  path: "",
+  name: "",
+  objectId: undefined,
+  pagePath: "",
+  className: undefined,
+  column: [],
+  fields: [],
+  modalWidth: 520,
+  switchs: [],
+  isDelete: undefined,
+}
 
 import { Mixins } from "@/mixins";
 export default defineComponent({
@@ -211,32 +212,9 @@ export default defineComponent({
     let formRef = ref();
 
     /* 添加/修改数据表单 */
-    let formValue = reactive({
-      path: "",
-      name: "",
-      objectId: undefined,
-      pagePath: "",
-      className: undefined,
-      column: [],
-      fields: [],
-      modalWidth: 520,
-      switchs: [],
-    });
+    let formValue = reactive(JSON.parse(JSON.stringify(staticform)));
 
-    const showModal = (
-      params = {
-        path: "",
-        name: "",
-        objectId: undefined,
-        pagePath: "",
-        className: undefined,
-        column: [],
-        fields: [],
-        modalWidth: 520,
-        switchs: [],
-        isDelete: undefined,
-      }
-    ) => {
+    const showModal = (params = JSON.parse(JSON.stringify(staticform))) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
         if (key == "switchs") {
@@ -256,66 +234,37 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        let {
-          path,
-          name,
-          objectId,
-          pagePath,
-          className,
-          column,
-          fields,
-          modalWidth,
-          switchs,
-          isDelete,
-        } = formValue;
-
+        let { className, column, modalWidth, } = formValue;
         let fls = {};
-        fields.forEach((field) => {
-          fls[field] = tables.value[className][field];
+        formValue.fields.forEach((field) => {
+          fls[field] = tables.value[formValue.className][field];
         });
-
         const { code, msg, data } = await submitForm({
-          path,
-          name,
-          objectId,
-          pagePath,
           option: { className, columns: column, fields: fls, modalWidth },
-          switchs,
-          isDelete,
+          ...formValue
         });
         if (code == 200) {
-          notification["success"]({
-            message: "提醒",
-            description: msg,
-          });
+          notification["success"]({ message: "提醒", description: msg });
         } else {
-          throw {
-            msg,
-          };
+          throw { msg };
         }
         loadData(pagination);
       } catch (errorInfo) {
-        notification["error"]({
-          message: "提醒",
-          description: errorInfo.msg || "缺少必填项",
-        });
+        notification["error"]({ message: "提醒", description: errorInfo.msg || "缺少必填项" });
       }
     }, 100);
 
     /* 修改/新增 */
     const submitForm = (params) => {
       return new Promise((resolve, reject) => {
-        switch (params.objectId != undefined) {
-          case true:
-            updateById(params).then((result) => {
-              resolve(result);
-            });
-            break;
-          case false:
-            insertDevRoute(params).then((result) => {
-              resolve(result);
-            });
-            break;
+        if (params.objectId != undefined) {
+          updateById(params).then((result) => {
+            resolve(result);
+          });
+        } else {
+          insertDevRoute(params).then((result) => {
+            resolve(result);
+          });
         }
       });
     };
@@ -341,7 +290,7 @@ export default defineComponent({
         const { code, data } = await findAll(params);
         if (code == 200) {
           tableData.value = data?.list;
-          pagination.total = data.count;
+          pagination.total = data.count || 0;
         }
       } catch (error) {
         console.log(error);
