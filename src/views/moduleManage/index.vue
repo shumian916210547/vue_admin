@@ -153,10 +153,10 @@ const rules = {
 const staticform = {
   router: new Array(),
   name: "",
-  companyId: undefined,
-  objectId: undefined,
-  icon: undefined,
-  user: undefined,
+  companyId: '',
+  objectId: '',
+  icon: '',
+  user: '',
 }
 
 import { Mixins } from "@/mixins";
@@ -184,9 +184,9 @@ export default defineComponent({
     });
 
     /* 添加/修改数据表单 */
-    let formValue = reactive(JSON.parse(JSON.stringify(staticform)));
+    let formValue = reactive({ ...JSON.parse(JSON.stringify(staticform))});
 
-    const showModal = (params = JSON.parse(JSON.stringify(staticform))) => {
+    const showModal = (params = { ...JSON.parse(JSON.stringify(staticform)) }) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
         if (key == "router") {
@@ -205,10 +205,12 @@ export default defineComponent({
 
     /* 表单提交 */
     const handleSubmit = debounce(async (e) => {
+      console.log(formValue);
       try {
         await formRef.value.validateFields();
         visible.value = false;
         const { router, name, objectId, companyId, icon, user } = formValue;
+  
         const { code, msg, data } = await submitForm({
           router, name, objectId, user, meta: { companyId, icon },
         });
@@ -226,7 +228,7 @@ export default defineComponent({
     /* 修改/新增 */
     const submitForm = (params) => {
       return new Promise((resolve, reject) => {
-        if (params.objectId != undefined) {
+        if (params.objectId) {
           updateById(params).then((result) => {
             resolve(result);
           });

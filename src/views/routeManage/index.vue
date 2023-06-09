@@ -188,14 +188,14 @@ const rules = {
 const staticform = {
   path: "",
   name: "",
-  objectId: undefined,
+  objectId: '',
   pagePath: "",
-  className: undefined,
+  className: '',
   column: [],
   fields: [],
   modalWidth: 520,
   switchs: [],
-  isDelete: undefined,
+  isDelete: '',
 }
 
 import { Mixins } from "@/mixins";
@@ -212,9 +212,9 @@ export default defineComponent({
     let formRef = ref();
 
     /* 添加/修改数据表单 */
-    let formValue = reactive(JSON.parse(JSON.stringify(staticform)));
+    let formValue = reactive({ ...JSON.parse(JSON.stringify(staticform)) });
 
-    const showModal = (params = JSON.parse(JSON.stringify(staticform))) => {
+    const showModal = (params = { ...JSON.parse(JSON.stringify(staticform)) }) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
         if (key == "switchs") {
@@ -257,7 +257,7 @@ export default defineComponent({
     /* 修改/新增 */
     const submitForm = (params) => {
       return new Promise((resolve, reject) => {
-        if (params.objectId != undefined) {
+        if (params.objectId) {
           updateById(params).then((result) => {
             resolve(result);
           });
