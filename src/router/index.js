@@ -7,25 +7,25 @@ import Home from "@/views/home/index.vue"
 import Login from "@/views/login/index.vue"
 import store from "@/store/index";
 const routes = [{
-    path: "/login",
-    name: "login",
-    component: Login,
+  path: "/login",
+  name: "login",
+  component: Login,
+},
+{
+  path: "/",
+  name: "index",
+  component: () => import("@/views/index.vue"),
+  children: [{
+    path: "/home",
+    name: "home",
+    component: Home,
   },
   {
     path: "/",
-    name: "index",
-    component: () => import("@/views/index.vue"),
-    children: [{
-        path: "/home",
-        name: "home",
-        component: Home,
-      },
-      {
-        path: "/",
-        redirect: "/home",
-      },
-    ],
+    redirect: "/home",
   },
+  ],
+},
 ];
 
 const router = createRouter({
@@ -53,6 +53,7 @@ router.beforeEach(async (to, from, next) => {
         replace: true
       });
     }
+    store.commit("SETCURRENTSWITCHS", to.meta.switchs || []);
     if (to.path != "/home" && to.path != "/") {
       store.commit("SETCURRENTCOMPANY", to?.meta?.companyId);
     }

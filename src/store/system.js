@@ -15,7 +15,8 @@ export default {
     currentCompany: "",
     antdComponents: [],
     identity: [],
-    users: []
+    users: [],
+    switchs: []
   },
   getters: {
     GETUSERS: state => {
@@ -53,9 +54,17 @@ export default {
     GETIDENTITY: (state) => {
       return state.identity;
     },
+
+    GETCURRENTSWITCHS(state) {
+      return state.switchs;
+    },
   },
 
   mutations: {
+
+    SETCURRENTSWITCHS(state, value) {
+      state.switchs = value
+    },
 
     SETUSERS(state, value) {
       state.users = value;
@@ -76,11 +85,11 @@ export default {
             route["component"] = () => import("@/components" + route.pagePath);
           }
           route["meta"] = Object.assign({}, {
-              companyId: module?.meta?.companyId
-            },
+            companyId: module?.meta?.companyId
+          },
             route.option, {
-              switchs: route.switchs
-            }
+            switchs: route.switchs
+          }
           );
           router.addRoute("index", route);
           return route;

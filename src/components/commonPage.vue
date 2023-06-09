@@ -3,68 +3,35 @@
     <a-row>
       <a-col :span="8">
         <a-form-item label="名称" v-openSwitch="'Search'">
-          <a-input
-            :disabled="false"
-            v-model:value="pagination.name"
-            placeholder="请输入名称"
-          />
+          <a-input :disabled="false" v-model:value="pagination.name" placeholder="请输入名称" />
         </a-form-item>
       </a-col>
 
       <a-col :span="5" :offset="1"> </a-col>
-      <a-col
-        :span="2"
-        :offset="1"
-        style="justify-content: space-evenly; display: flex"
-      >
+      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
         <a-form-item v-openSwitch="'Search'">
-          <a-button
-            v-openSwitch="'Search'"
-            type="primary"
-            @click="loadData(pagination)"
-            >查询</a-button
-          >
+          <a-button v-openSwitch="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
         </a-form-item>
 
         <a-form-item v-openSwitch="'Search'">
-          <a-button
-            v-openSwitch="'Search'"
-            @click="
-              () => {
-                pagination.name = '';
-              }
-            "
-            >重置</a-button
-          >
+          <a-button v-openSwitch="'Search'" @click="
+            () => {
+              pagination.name = '';
+            }
+          ">重置</a-button>
         </a-form-item>
       </a-col>
-      <a-col
-        :span="5"
-        :offset="2"
-        style="justify-content: space-evenly; display: flex"
-      >
+      <a-col :span="5" :offset="2" style="justify-content: space-evenly; display: flex">
         <a-form-item>
-          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()"
-            >新建</a-button
-          >
-          <a-button v-openSwitch="'Export_Template'" @click="exportTemplate()"
-            >导出模板</a-button
-          >
-          <a-button v-openSwitch="'Import'" @click="showIncModal()"
-            >导入</a-button
-          >
-          <a-button v-openSwitch="'Export'" @click="exportData()"
-            >导出</a-button
-          >
+          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()">新建</a-button>
+          <a-button v-openSwitch="'Export_Template'" @click="exportTemplate()">导出模板</a-button>
+          <a-button v-openSwitch="'Import'" @click="showIncModal()">导入</a-button>
+          <a-button v-openSwitch="'Export'" @click="exportData()">导出</a-button>
         </a-form-item>
       </a-col>
     </a-row>
   </a-form>
-  <a-table
-    :pagination="pagination"
-    :columns="tableColums"
-    :data-source="tableData"
-  >
+  <a-table :pagination="pagination" :columns="tableColums" :data-source="tableData">
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
@@ -75,25 +42,10 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button
-          v-openSwitch="'Edit'"
-          type="primary"
-          @click="showModal(record)"
-          >编辑</a-button
-        >
+        <a-button v-openSwitch="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
 
-        <a-popconfirm
-          title="确定删除此行"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="handleDelete(record)"
-        >
-          <a-button
-            v-openSwitch="'Delete'"
-            type="primary"
-            danger
-            style="margin: 0 0 0 10px"
-          >
+        <a-popconfirm title="确定删除此行" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
+          <a-button v-openSwitch="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
             删除
           </a-button>
         </a-popconfirm>
@@ -106,82 +58,42 @@
     </template>
   </a-table>
   <!-- 表单 -->
-  <a-modal
-    v-model:visible="visible"
-    :width="modalWidth"
-    @cancel="onCancel()"
-    @ok="handleSubmit()"
-  >
+  <a-modal v-model:visible="visible" :width="modalWidth" @cancel="onCancel()" @ok="handleSubmit()">
     <slot name="form">
       <a-form :model="formValue" ref="formRef" autocomplete="off">
-        <a-form-item
-          v-for="(item, index) in Object.keys(fields)"
-          :key="index"
-          :label="fields[item].chineseName"
-          :name="item"
-          :rules="[
+        <a-form-item v-for="(item, index) in Object.keys(fields)" :key="index" :label="fields[item].chineseName"
+          :name="item" :rules="[
             {
               required: fields[item].required,
               message: 'Please input your' + fields[item].chineseName,
             },
-          ]"
-        >
-          <component
-            v-if="fields[item].editComponent == 'Switch'"
-            v-model:checked="formValue[item]"
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-          />
-          <component
-            v-else-if="fields[item].editComponent == 'TimePicker'"
-            v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="HH:mm:ss"
-            style="width: 100%"
-          />
-          <component
-            :is="antd[fields[item].editComponent]"
-            v-else-if="fields[item].editComponent == 'DatePicker'"
-            v-model:value="formValue[item]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="YYYY/MM/DD"
-            style="width: 100%"
-          />
-          <component
-            v-else-if="fields[item].editComponent == 'Select'"
-            :disabled="String(fields[item]) ? true : false"
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            v-model:value="formValue[item]"
-            :options="getSelectOptions(fields[item].dataSource)"
-            :field-names="{ label: 'name', value: 'objectId' }"
-            style="width: 100%"
-          />
+          ]">
+          <component v-if="fields[item].editComponent == 'Switch'" v-model:checked="formValue[item]"
+            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName" />
+          <component v-else-if="fields[item].editComponent == 'TimePicker'" v-model:value="formValue[item]"
+            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="HH:mm:ss" style="width: 100%" />
+          <component :is="antd[fields[item].editComponent]" v-else-if="fields[item].editComponent == 'DatePicker'"
+            v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="YYYY/MM/DD" style="width: 100%" />
+          <component v-else-if="fields[item].editComponent == 'Select'" :disabled="String(fields[item]) ? true : false"
+            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
+            v-model:value="formValue[item]" :options="getSelectOptions(fields[item].dataSource)"
+            :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
 
-          <a-upload
-            v-else-if="fields[item].editComponent == 'Upload'"
-            v-model:file-list="formValue[item]"
-            :action="baseUrl + '/cmn/uploadFile'"
-            :data="{
+          <a-upload v-else-if="fields[item].editComponent == 'Upload'" v-model:file-list="formValue[item]"
+            :action="baseUrl + '/cmn/uploadFile'" :data="{
               userid: userInfo.userid,
-            }"
-            accept="video/*,image/*"
-          >
+            }" accept="video/*,image/*">
             <a-button>
               <upload-outlined></upload-outlined>
               Upload
             </a-button>
           </a-upload>
 
-          <component
-            v-else
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            :disabled="false"
-            v-model:value="formValue[item]"
-            style="width: 100%"
-          />
+          <component v-else :is="antd[fields[item].editComponent]"
+            :placeholder="'Please input your' + fields[item].chineseName" :disabled="false"
+            v-model:value="formValue[item]" style="width: 100%" />
         </a-form-item>
       </a-form>
     </slot>
@@ -191,20 +103,9 @@
   </a-modal>
 
   <!-- 导入 -->
-  <a-modal
-    v-model:visible="incVisible"
-    width="1200px"
-    title="导入"
-    @ok="handleConfirmUpload"
-  >
-    <a-upload-dragger
-      v-model:fileList="fileList"
-      :customRequest="upload"
-      @remove="fileRemove"
-      name="file"
-      :multiple="false"
-      :max-count="1"
-    >
+  <a-modal v-model:visible="incVisible" width="1200px" title="导入" @ok="handleConfirmUpload">
+    <a-upload-dragger v-model:fileList="fileList" :customRequest="upload" @remove="fileRemove" name="file"
+      :multiple="false" :max-count="1">
       <p class="ant-upload-drag-icon">
         <inbox-outlined></inbox-outlined>
       </p>
@@ -240,21 +141,8 @@ import richText from "./richText.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
-let list = [];
+import { Mixins } from "@/mixins";
 export default defineComponent({
-  directives: {
-    openSwitch: {
-      mounted(el, binding, vnode) {
-        const { value } = binding;
-        let f = list?.some((p) => {
-          return p.key == value;
-        });
-        if (!f) {
-          el.parentNode && el.parentNode.removeChild(el);
-        }
-      },
-    },
-  },
   components: {
     ...antdIcon,
   },
@@ -264,8 +152,10 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
-    let { companyId, className, columns, fields, modalWidth, switchs } = meta;
-    list = switchs;
+    const { pagination } = Mixins()
+    let { companyId, className, columns, fields, modalWidth } = meta;
+    pagination.companyId = companyId
+    pagination.className = className
     const formValue = reactive(new Object());
     const visible = ref(false);
     let antd = antdComponent;
@@ -307,24 +197,7 @@ export default defineComponent({
       },
       { deep: true, immediate: true }
     );
-    /* 分页器配置 */
-    const pagination = reactive({
-      position: new Array("bottomRight"),
-      pageSize: 10,
-      pageNum: 1,
-      showSizeChanger: true,
-      total: 0,
-      companyId,
-      className,
-      showTotal: (total) => `Total ${total} items`,
-      pageSizeOptions: new Array("10", "20", "50", "100"),
-      onChange: (num, size) => {
-        pagination.pageNum = num;
-        pagination.pageSize = size;
-        loadData({ pageNum: num, pageSize: size, companyId, className });
-      },
-      name: "",
-    });
+
     /* 加载数据 */
     const tableData = ref(new Array());
     const loadData = async (params) => {
@@ -334,6 +207,7 @@ export default defineComponent({
         pagination.total = result?.data.count || 0;
       }
     };
+
     /* 删除 */
     const handleDelete = async ({ objectId }) => {
       const { msg, code, data } = await base.removeById({
@@ -349,35 +223,43 @@ export default defineComponent({
         loadData(pagination);
       }
     };
-    const showModal = (row) => {
-      row
-        ? Object.keys(row).map((key) => {
-            if (key == "objectId") {
-              formValue[key] = row[key];
-            } else {
-              if (fields[key]) {
-                formValue[key] = row[key];
-              }
-              if (row[key].className && row[key].className !== "Company") {
-                formValue[key] = row[key].objectId;
-              }
-            }
-          })
-        : Object.keys(fields).forEach((key) => {
-            formValue[key] = fields[key].default || "";
-            if (fields[key].targetClass == "_User" && fields[key].isOneself) {
-              formValue[key] = JSON.parse(
-                sessionStorage.getItem("userInfo")
-              ).userid;
-            }
-            if (fields[key].editComponent === "Upload") {
-              formValue[key] = [];
-            }
-          }),
-        (formValue["objectId"] = undefined);
 
+    const showModal = (row) => {
+      row ? updateData(row) : insetData(row)
       visible.value = true;
     };
+
+    /* 处理数据修改 */
+    const updateData = (row) => {
+      Object.keys(row).map((key) => {
+        if (key == "objectId") {
+          formValue[key] = row[key];
+        } else {
+          if (fields[key]) {
+            formValue[key] = row[key];
+          }
+          if (row[key].className && row[key].className !== "Company") {
+            formValue[key] = row[key].objectId;
+          }
+        }
+      })
+    }
+
+    /* 处理新建数据 */
+    const insetData = (row) => {
+      Object.keys(fields).forEach((key) => {
+        formValue[key] = fields[key].default || "";
+        if (fields[key].targetClass == "_User" && fields[key].isOneself) {
+          formValue[key] = JSON.parse(
+            sessionStorage.getItem("userInfo")
+          ).userid;
+        }
+        if (fields[key].editComponent === "Upload") {
+          formValue[key] = [];
+        }
+      });
+      formValue["objectId"] = undefined;
+    }
 
     const onCancel = () => {
       for (const k of Object.keys(formValue)) {
@@ -385,6 +267,7 @@ export default defineComponent({
       }
       visible.value = false;
     };
+
     let once = ref(true);
     let onceKey = ref(new Array());
     const getSelectOptions = (key) => {

@@ -8,50 +8,27 @@
       </a-col>
 
       <a-col :span="5" :offset="1"> </a-col>
-      <a-col
-        :span="2"
-        :offset="1"
-        style="justify-content: space-evenly; display: flex"
-      >
+      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
         <a-form-item v-openSwitch="'Search'">
-          <a-button
-            v-openSwitch="'Search'"
-            type="primary"
-            @click="loadData(pagination)"
-            >查询</a-button
-          >
+          <a-button v-openSwitch="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
         </a-form-item>
 
         <a-form-item v-openSwitch="'Search'">
-          <a-button
-            v-openSwitch="'Search'"
-            @click="
-              () => {
-                pagination.name = '';
-              }
-            "
-            >重置</a-button
-          >
+          <a-button v-openSwitch="'Search'" @click="
+            () => {
+              pagination.name = '';
+            }
+          ">重置</a-button>
         </a-form-item>
       </a-col>
-      <a-col
-        :span="5"
-        :offset="2"
-        style="justify-content: space-evenly; display: flex"
-      >
+      <a-col :span="5" :offset="2" style="justify-content: space-evenly; display: flex">
         <a-form-item>
-          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()"
-            >新建</a-button
-          >
+          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()">新建</a-button>
         </a-form-item>
       </a-col>
     </a-row>
   </a-form>
-  <a-table
-    :pagination="pagination"
-    :columns="tableColums"
-    :data-source="tableData"
-  >
+  <a-table :pagination="pagination" :columns="tableColums" :data-source="tableData">
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
@@ -62,25 +39,10 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button
-          v-openSwitch="'Edit'"
-          type="primary"
-          @click="showModal(record)"
-          >编辑</a-button
-        >
+        <a-button v-openSwitch="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
 
-        <a-popconfirm
-          title="确定删除此行"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="handleDelete(record)"
-        >
-          <a-button
-            v-openSwitch="'Delete'"
-            type="primary"
-            danger
-            style="margin: 0 0 0 10px"
-          >
+        <a-popconfirm title="确定删除此行" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
+          <a-button v-openSwitch="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
             删除
           </a-button>
         </a-popconfirm>
@@ -89,57 +51,28 @@
     </template>
   </a-table>
   <!-- 表单 -->
-  <a-modal
-    v-model:visible="visible"
-    :width="modalWidth"
-    @cancel="onCancel()"
-    @ok="handleSubmit()"
-  >
+  <a-modal v-model:visible="visible" :width="modalWidth" @cancel="onCancel()" @ok="handleSubmit()">
     <slot name="form">
       <a-form :model="formValue" ref="formRef" autocomplete="off">
-        <a-form-item
-          v-for="(item, index) in Object.keys(fields)"
-          :key="index"
-          :label="fields[item].chineseName"
-          :name="item"
-          :rules="[
+        <a-form-item v-for="(item, index) in Object.keys(fields)" :key="index" :label="fields[item].chineseName"
+          :name="item" :rules="[
             {
               required: fields[item].required,
               message: 'Please input your' + fields[item].chineseName,
             },
-          ]"
-        >
-          <component
-            v-if="fields[item].editComponent == 'Switch'"
-            v-model:checked="formValue[item]"
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-          />
-          <component
-            v-else-if="fields[item].editComponent == 'TimePicker'"
-            v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="HH:mm:ss"
-            style="width: 100%"
-          />
-          <component
-            :is="antd[fields[item].editComponent]"
-            v-else-if="fields[item].editComponent == 'DatePicker'"
-            v-model:value="formValue[item]"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="YYYY/MM/DD"
-            style="width: 100%"
-          />
-          <component
-            :is="antd[fields[item].editComponent]"
-            v-else
-            v-model:value="formValue[item]"
+          ]">
+          <component v-if="fields[item].editComponent == 'Switch'" v-model:checked="formValue[item]"
+            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName" />
+          <component v-else-if="fields[item].editComponent == 'TimePicker'" v-model:value="formValue[item]"
+            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="HH:mm:ss" style="width: 100%" />
+          <component :is="antd[fields[item].editComponent]" v-else-if="fields[item].editComponent == 'DatePicker'"
+            v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
+            value-format="YYYY/MM/DD" style="width: 100%" />
+          <component :is="antd[fields[item].editComponent]" v-else v-model:value="formValue[item]"
             :options="getSelectOptions(fields[item].dataSource)"
             :placeholder="'Please input your' + fields[item].chineseName"
-            :field-names="{ label: 'name', value: 'objectId' }"
-            style="width: 100%"
-          />
+            :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
         </a-form-item>
       </a-form>
     </slot>
@@ -166,20 +99,8 @@ import * as user from "@/apis/user";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 let list = [];
+import { Mixins } from "@/mixins";
 export default defineComponent({
-  directives: {
-    openSwitch: {
-      mounted(el, binding, vnode) {
-        const { value } = binding;
-        let f = list?.some((p) => {
-          return p.key == value;
-        });
-        if (!f) {
-          el.parentNode && el.parentNode.removeChild(el);
-        }
-      },
-    },
-  },
   components: {
     InboxOutlined,
   },
@@ -189,7 +110,10 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
+    const { pagination } = Mixins()
     let { companyId, className, columns, fields, modalWidth, switchs } = meta;
+    pagination.companyId = companyId
+    pagination.className = className
     list = switchs;
     const formValue = reactive({});
     const visible = ref(false);
@@ -229,24 +153,7 @@ export default defineComponent({
       },
       { deep: true, immediate: true }
     );
-    /* 分页器配置 */
-    const pagination = reactive({
-      position: ["bottomRight"],
-      pageSize: 10,
-      pageNum: 1,
-      showSizeChanger: true,
-      total: 0,
-      companyId,
-      className,
-      showTotal: (total) => `Total ${total} items`,
-      pageSizeOptions: ["10", "20", "50", "100"],
-      onChange: (num, size) => {
-        pagination.pageNum = num;
-        pagination.pageSize = size;
-        loadData({ pageNum: num, pageSize: size, companyId, className });
-      },
-      name: "",
-    });
+
     /* 加载数据 */
     const tableData = ref([]);
     const loadData = async (params) => {
@@ -273,23 +180,23 @@ export default defineComponent({
     const showModal = (row) => {
       row
         ? Object.keys(row).map((key) => {
-            if (key == "objectId") {
+          if (key == "objectId") {
+            formValue[key] = row[key];
+          } else {
+            if (fields[key]) {
               formValue[key] = row[key];
-            } else {
-              if (fields[key]) {
-                formValue[key] = row[key];
-              }
-              if (row[key].className && row[key].className !== "Company") {
-                formValue[key] = row[key].objectId;
-              }
             }
-          })
+            if (row[key].className && row[key].className !== "Company") {
+              formValue[key] = row[key].objectId;
+            }
+          }
+        })
         : (() => {
-            Object.keys(fields).map((key) => {
-              formValue[key] = fields[key].default || "";
-            });
-            formValue["objectId"] = undefined;
-          })();
+          Object.keys(fields).map((key) => {
+            formValue[key] = fields[key].default || "";
+          });
+          formValue["objectId"] = undefined;
+        })();
       visible.value = true;
     };
 

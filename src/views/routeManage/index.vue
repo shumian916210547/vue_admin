@@ -3,28 +3,18 @@
     <a-row>
       <a-col :span="8">
         <a-form-item label="路由名称">
-          <a-input
-            v-model:value="pagination.name"
-            placeholder="请输入路由名称"
-          />
+          <a-input v-model:value="pagination.name" placeholder="请输入路由名称" />
         </a-form-item>
       </a-col>
 
       <a-col :span="8" :offset="1"> </a-col>
-      <a-col
-        :span="2"
-        :offset="1"
-        style="justify-content: space-evenly; display: flex"
-      >
-        <a-button type="primary" @click="loadRoute(pagination)">查询</a-button>
-        <a-button
-          @click="
-            () => {
-              pagination.name = '';
-            }
-          "
-          >重置</a-button
-        >
+      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
+        <a-button type="primary" @click="loadData(pagination)">查询</a-button>
+        <a-button @click="
+          () => {
+            pagination.name = '';
+          }
+        ">重置</a-button>
       </a-col>
       <a-col :span="2" :offset="2">
         <a-button type="primary" @click="showModal()">新建</a-button>
@@ -32,12 +22,7 @@
     </a-row>
   </a-form>
 
-  <a-table
-    :pagination="pagination"
-    :columns="columns"
-    :data-source="tableData"
-    style="flex: 1"
-  >
+  <a-table :pagination="pagination" :columns="columns" :data-source="tableData" style="flex: 1">
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'name'">
         <span>{{ record.name }}</span>
@@ -49,36 +34,22 @@
       </template>
 
       <template v-else-if="column.key === 'operation'">
-        <a-button
-          type="primary"
-          @click="
-            showModal({
-              path: record.path,
-              name: record.name,
-              objectId: record.objectId,
-              pagePath: record.pagePath,
-              isDelete: record.isDelete,
-              className: record?.option?.className || new Array(),
-              column: record?.option?.columns || new Array(),
-              fields: record?.option?.fields || new Array(),
-              modalWidth: record?.option?.modalWidth || new Array(),
-              switchs: record?.switchs || new Array(),
-            })
-          "
-          >编辑</a-button
-        >
-        <a-popconfirm
-          title="确定删除此路由"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="confirmDelete(record)"
-        >
-          <a-button
-            type="primary"
-            danger
-            style="margin: 0 0 0 10px"
-            :hidden="record.isDelete"
-          >
+        <a-button type="primary" @click="
+          showModal({
+            path: record.path,
+            name: record.name,
+            objectId: record.objectId,
+            pagePath: record.pagePath,
+            isDelete: record.isDelete,
+            className: record?.option?.className || new Array(),
+            column: record?.option?.columns || new Array(),
+            fields: record?.option?.fields || new Array(),
+            modalWidth: record?.option?.modalWidth || new Array(),
+            switchs: record?.switchs || new Array(),
+          })
+        ">编辑</a-button>
+        <a-popconfirm title="确定删除此路由" ok-text="Yes" cancel-text="No" @confirm="confirmDelete(record)">
+          <a-button type="primary" danger style="margin: 0 0 0 10px" :hidden="record.isDelete">
             删除
           </a-button>
         </a-popconfirm>
@@ -88,12 +59,7 @@
 
   <!-- 表单 -->
   <a-modal v-model:visible="visible" @ok="handleSubmit">
-    <a-form
-      ref="formRef"
-      :rules="rules"
-      :model="formValue"
-      :key="formValue.objectId"
-    >
+    <a-form ref="formRef" :rules="rules" :model="formValue" :key="formValue.objectId">
       <a-form-item label="路由名称" name="name">
         <a-input v-model:value="formValue.name" placeholder="请输入路由名称" />
       </a-form-item>
@@ -103,75 +69,34 @@
       </a-form-item>
 
       <a-form-item label="页面路径" name="pagePath">
-        <a-input
-          v-model:value="formValue.pagePath"
-          placeholder="请输入页面路径"
-        />
+        <a-input v-model:value="formValue.pagePath" placeholder="请输入页面路径" />
       </a-form-item>
 
       <a-form-item label="路由Schema" name="className">
-        <a-select
-          v-model:value="formValue.className"
-          style="width: 100%"
-          :options="schema"
-          placeholder="请选择路由Schema"
-          show-search
-          allowClear
-        ></a-select>
+        <a-select v-model:value="formValue.className" style="width: 100%" :options="schema" placeholder="请选择路由Schema"
+          show-search allowClear></a-select>
       </a-form-item>
 
       <a-form-item label="弹窗宽度" name="modalWidth">
-        <a-input-number
-          id="inputNumber"
-          placeholder="请输入弹窗宽度"
-          v-model:value="formValue.modalWidth"
-          style="width: 100%"
-          :min="520"
-          :max="1920"
-        />
+        <a-input-number id="inputNumber" placeholder="请输入弹窗宽度" v-model:value="formValue.modalWidth" style="width: 100%"
+          :min="520" :max="1920" />
       </a-form-item>
 
       <a-form-item label="表头信息" name="column" v-show="formValue.className">
-        <a-select
-          v-model:value="formValue.column"
-          mode="multiple"
-          style="width: 100%"
-          placeholder="请选择表头信息"
-          :options="fields[formValue.className]"
-          show-search
-          allowClear
-        >
+        <a-select v-model:value="formValue.column" mode="multiple" style="width: 100%" placeholder="请选择表头信息"
+          :options="fields[formValue.className]" show-search allowClear>
         </a-select>
       </a-form-item>
 
-      <a-form-item
-        label="可编辑字段"
-        name="fields"
-        v-show="formValue.className"
-      >
-        <a-select
-          v-model:value="formValue.fields"
-          mode="multiple"
-          style="width: 100%"
-          placeholder="请选择可编辑字段"
-          :options="fields[formValue.className]"
-          show-search
-          allowClear
-        >
+      <a-form-item label="可编辑字段" name="fields" v-show="formValue.className">
+        <a-select v-model:value="formValue.fields" mode="multiple" style="width: 100%" placeholder="请选择可编辑字段"
+          :options="fields[formValue.className]" show-search allowClear>
         </a-select>
       </a-form-item>
 
       <a-form-item label="可使用功能" name="switchs">
-        <a-select
-          :field-names="{ label: 'name', value: 'objectId' }"
-          v-model:value="formValue.switchs"
-          mode="multiple"
-          style="width: 100%"
-          placeholder="请选择可使用功能"
-          :options="switchs"
-          show-search
-          allowClear
-        >
+        <a-select :field-names="{ label: 'name', value: 'objectId' }" v-model:value="formValue.switchs" mode="multiple"
+          style="width: 100%" placeholder="请选择可使用功能" :options="switchs" show-search allowClear>
         </a-select>
       </a-form-item>
 
@@ -271,6 +196,8 @@ const rules = {
   ],
 };
 
+
+import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {
     SmileOutlined,
@@ -278,7 +205,7 @@ export default defineComponent({
   },
   async setup() {
     const visible = ref(false);
-
+    const { pagination } = Mixins()
     const store = useStore();
     /* 表单 */
     let formRef = ref();
@@ -366,7 +293,7 @@ export default defineComponent({
             msg,
           };
         }
-        loadRoute(pagination);
+        loadData(pagination);
       } catch (errorInfo) {
         notification["error"]({
           message: "提醒",
@@ -401,32 +328,15 @@ export default defineComponent({
           message: "删除提醒",
           description: "路由" + data.name + "删除成功",
         });
-        loadRoute(pagination);
+        loadData(pagination);
       }
     };
-
-    /* 分页器配置 */
-    let pagination = reactive({
-      position: ["bottomRight"],
-      pageSize: 10,
-      pageNum: 1,
-      showSizeChanger: true,
-      total: 0,
-      showTotal: (total) => `Total ${total} items`,
-      pageSizeOptions: ["10", "20", "50", "100"],
-      onChange: (num, size) => {
-        pagination.pageNum = num;
-        pagination.pageSize = size;
-        loadRoute({ pageNum: num, pageSize: size });
-      },
-      name: "",
-    });
 
     /* 表格数据 */
     let tableData = ref([]);
 
     /* 加载数据 */
-    const loadRoute = async (params) => {
+    const loadData = async (params) => {
       try {
         const { code, data } = await findAll(params);
         if (code == 200) {
@@ -468,7 +378,7 @@ export default defineComponent({
       store.dispatch("UpdateStore");
     });
 
-    await loadRoute(pagination);
+    await loadData(pagination);
     await getSwitchs();
 
     return {
@@ -484,7 +394,7 @@ export default defineComponent({
       switchs,
       showModal,
       handleSubmit,
-      loadRoute,
+      loadData,
       confirmDelete,
     };
   },
