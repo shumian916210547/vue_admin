@@ -10,7 +10,6 @@ module.exports = defineConfig({
   devServer: {
     hot: true,
     liveReload: true,
-    host: "localhost",
     port: 4200,
     open: false,
     proxy: {
