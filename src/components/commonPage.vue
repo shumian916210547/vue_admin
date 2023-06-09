@@ -76,7 +76,7 @@
           <component :is="antd[fields[item].editComponent]" v-else-if="fields[item].editComponent == 'DatePicker'"
             v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
             value-format="YYYY/MM/DD" style="width: 100%" />
-          <component v-else-if="fields[item].editComponent == 'Select'" :disabled="String(fields[item]) ? true : false"
+          <component v-else-if="fields[item].editComponent == 'Select'" :disabled="String(fields[item]) ? false : true"
             :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
             v-model:value="formValue[item]" :options="getSelectOptions(fields[item].dataSource)"
             :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
