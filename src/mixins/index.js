@@ -1,6 +1,8 @@
 
 import { reactive } from "vue";
+import { useRouter } from "vue-router";
 export function Mixins() {
+    const router = useRouter();
 
     /* 分页器配置 */
     let pagination = reactive({
@@ -14,13 +16,18 @@ export function Mixins() {
         total: 0,
         showTotal: (total) => `Total ${total} items`,
         pageSizeOptions: ["10", "20", "50", "100"],
-        onChange: (num, size) => {
+        onChange: (num, size, loadData) => {
             pagination.pageNum = num;
             pagination.pageSize = size;
             loadData({ pageNum: num, pageSize: size });
         },
     });
 
-    return { pagination }
+    // 页面跳转
+    const toPage = (path, params) => {
+        router.push({ path, query: params });
+    };
+
+    return { pagination, toPage }
 
 }

@@ -1,34 +1,17 @@
 <template>
   <div class="login">
-    <a-form
-      :model="formState"
-      name="basic"
-      :label-col="{ span: 8 }"
-      :wrapper-col="{ span: 16 }"
-      autocomplete="off"
-      @finish="onFinish"
-      @finishFailed="onFinishFailed"
-    >
-      <a-form-item
-        label="Username"
-        name="username"
-        :rules="[{ required: true, message: 'Please input your username!' }]"
-      >
+    <a-form :model="formState" name="basic" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }" autocomplete="off"
+      @finish="onFinish" @finishFailed="onFinishFailed">
+      <a-form-item label="Username" name="username" :rules="[{ required: true, message: 'Please input your username!' }]">
         <a-input v-model:value="formState.username" />
       </a-form-item>
 
-      <a-form-item
-        label="Password"
-        name="password"
-        :rules="[{ required: true, message: 'Please input your password!' }]"
-      >
+      <a-form-item label="Password" name="password" :rules="[{ required: true, message: 'Please input your password!' }]">
         <a-input-password v-model:value="formState.password" />
       </a-form-item>
 
       <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
-        <a-checkbox v-model:checked="formState.remember"
-          >Remember me</a-checkbox
-        >
+        <a-checkbox v-model:checked="formState.remember">Remember me</a-checkbox>
       </a-form-item>
 
       <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
@@ -43,10 +26,12 @@ import { loggingIn } from "@/apis/user";
 import { notification } from "ant-design-vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { Mixins } from "@/mixins";
 export default defineComponent({
   setup() {
     const router = useRouter();
     const store = useStore();
+    const { toPage } = Mixins()
     const formState = reactive({
       username: "",
       password: "",
@@ -80,7 +65,7 @@ export default defineComponent({
             })
           );
         }
-        router.push("/home");
+      toPage('/home')
       } else {
         notification["error"]({
           message: "提醒",
@@ -89,7 +74,7 @@ export default defineComponent({
       }
     };
 
-    const onFinishFailed = (errorInfo) => {};
+    const onFinishFailed = (errorInfo) => { };
 
     onMounted(() => {
       if (localStorage.getItem("To")) {
@@ -116,6 +101,7 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
+
   form {
     width: 550px;
     height: 500px;
