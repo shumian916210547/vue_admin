@@ -2,19 +2,19 @@
   <a-form :model="pagination">
     <a-row>
       <a-col :span="8">
-        <a-form-item label="名称" v-openSwitch="'Search'">
+        <a-form-item label="名称" v-permission="'Search'">
           <a-input :disabled="false" v-model:value="pagination.name" placeholder="请输入名称" />
         </a-form-item>
       </a-col>
 
       <a-col :span="5" :offset="1"> </a-col>
       <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
-        <a-form-item v-openSwitch="'Search'">
-          <a-button v-openSwitch="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
+        <a-form-item v-permission="'Search'">
+          <a-button v-permission="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
         </a-form-item>
 
-        <a-form-item v-openSwitch="'Search'">
-          <a-button v-openSwitch="'Search'" @click="
+        <a-form-item v-permission="'Search'">
+          <a-button v-permission="'Search'" @click="
             () => {
               pagination.name = '';
             }
@@ -23,10 +23,10 @@
       </a-col>
       <a-col :span="5" :offset="2" style="justify-content: space-evenly; display: flex">
         <a-form-item>
-          <a-button v-openSwitch="'Insert'" type="primary" @click="showModal()">新建</a-button>
-          <a-button v-openSwitch="'Export_Template'" @click="exportTemplate()">导出模板</a-button>
-          <a-button v-openSwitch="'Import'" @click="showIncModal()">导入</a-button>
-          <a-button v-openSwitch="'Export'" @click="exportData()">导出</a-button>
+          <a-button v-permission="'Insert'" type="primary" @click="showModal()">新建</a-button>
+          <a-button v-permission="'Export_Template'" @click="exportTemplate()">导出模板</a-button>
+          <a-button v-permission="'Import'" @click="showIncModal()">导入</a-button>
+          <a-button v-permission="'Export'" @click="exportData()">导出</a-button>
         </a-form-item>
       </a-col>
     </a-row>
@@ -42,10 +42,10 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button v-openSwitch="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
+        <a-button v-permission="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
 
         <a-popconfirm title="确定删除此行" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
-          <a-button v-openSwitch="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
+          <a-button v-permission="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
             删除
           </a-button>
         </a-popconfirm>

@@ -7,4 +7,4 @@ import "ant-design-vue/dist/antd.css";
 
 import { permission } from "./directives";
 
-createApp(App).use(store).use(router).directive('openSwitch', permission).use(Antd).mount("#app");
+createApp(App).use(store).use(router).directive('permission', permission).use(Antd).mount("#app");
