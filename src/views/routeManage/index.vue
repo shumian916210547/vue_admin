@@ -22,7 +22,7 @@
     </a-row>
   </a-form>
 
-  <a-table :pagination="pagination" :columns="columns" :data-source="tableData" style="flex: 1">
+  <a-table :pagination="pagination" @change="loadData(pagination)" :columns="columns" :data-source="tableData" style="flex: 1">
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'name'">
         <span>{{ record.name }}</span>

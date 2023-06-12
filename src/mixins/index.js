@@ -16,10 +16,9 @@ export function Mixins() {
         total: 0,
         showTotal: (total) => `Total ${total} items`,
         pageSizeOptions: ["10", "20", "50", "100"],
-        onChange: (num, size, loadData) => {
+        onChange: (num, size) => {
             pagination.pageNum = num;
             pagination.pageSize = size;
-            loadData({ pageNum: num, pageSize: size });
         },
     });
 

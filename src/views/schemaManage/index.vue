@@ -340,9 +340,7 @@ export default defineComponent({
               return item.objectId == current.value[0];
             })?.[0].name,
             fieldState,
-          }).then((res) => {
-            console.log(res);
-          });
+          })
         }
         loadSchema(meta);
         fieldVisible.value = false;

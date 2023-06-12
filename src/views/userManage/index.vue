@@ -28,7 +28,7 @@
       </a-col>
     </a-row>
   </a-form>
-  <a-table :pagination="pagination" :columns="tableColums" :data-source="tableData">
+  <a-table :pagination="pagination" @change="loadData(pagination)" :columns="tableColums" :data-source="tableData">
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
