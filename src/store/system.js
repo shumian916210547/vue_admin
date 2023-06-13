@@ -16,9 +16,14 @@ export default {
     antdComponents: [],
     identity: [],
     users: [],
-    switchs: []
+    switchs: [],
+    tableLoading: false
   },
   getters: {
+    GETLOADING: state => {
+      return state.tableLoading
+    },
+
     GETUSERS: state => {
       return state.users;
     },
@@ -61,6 +66,9 @@ export default {
   },
 
   mutations: {
+    SETLOADING(state, value) {
+      state.tableLoading = value
+    },
 
     SETCURRENTSWITCHS(state, value) {
       state.switchs = value

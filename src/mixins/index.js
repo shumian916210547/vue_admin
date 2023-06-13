@@ -1,8 +1,9 @@
-
-import { reactive } from "vue";
+import { computed, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 export function Mixins() {
     const router = useRouter();
+    const store = useStore()
 
     /* 分页器配置 */
     let pagination = reactive({
@@ -27,6 +28,10 @@ export function Mixins() {
         router.push({ path, query: params });
     };
 
-    return { pagination, toPage }
+    const loading = computed(() => {
+        return store.getters['GETLOADING']
+    })
+
+    return { pagination, toPage, loading }
 
 }

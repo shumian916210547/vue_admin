@@ -17,22 +17,28 @@ let companyId = computed(() => {
 //http request 拦截器
 axios.interceptors.request.use(
   (config) => {
+    if (config.url.includes('/findAll')) {
+      store.commit('SETLOADING', true)
+    }
     return config;
   },
-  (error) => {}
+  (error) => { }
 );
 
 //http response 拦截器
 axios.interceptors.response.use(
   (response) => {
+    store.commit('SETLOADING', false)
     if (response) {
       if (response.data.code == 200) {
         return response;
-      } else {}
-    } else {}
+      } else { }
+    } else { }
     return response;
   },
-  (error) => {}
+  (error) => {
+    store.commit('SETLOADING', false)
+  }
 );
 
 /**

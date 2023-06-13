@@ -31,7 +31,8 @@
       </a-col>
     </a-row>
   </a-form>
-  <a-table :pagination="pagination" @change="loadData(pagination)" :columns="tableColums" :data-source="tableData">
+  <a-table :pagination="pagination" :loading="loading" @change="loadData(pagination)" :columns="tableColums"
+    :data-source="tableData">
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
@@ -73,14 +74,13 @@
           <component v-else-if="fields[item].editComponent == 'TimePicker'" v-model:value="formValue[item]"
             :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
             value-format="HH:mm:ss" style="width: 100%" />
-          <component :is="antd[fields[item].editComponent]" v-else-if="fields[item].editComponent == 'DatePicker'"
+          <component v-else-if="fields[item].editComponent == 'DatePicker'" :is="antd[fields[item].editComponent]"
             v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
             value-format="YYYY/MM/DD" style="width: 100%" />
           <component v-else-if="fields[item].editComponent == 'Select'" :disabled="String(fields[item]) ? false : true"
             :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
             v-model:value="formValue[item]" :options="getSelectOptions(fields[item].dataSource)"
             :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
-
           <a-upload v-else-if="fields[item].editComponent == 'Upload'" v-model:file-list="formValue[item]"
             :action="baseUrl + '/cmn/uploadFile'" :data="{
               userid: userInfo.userid,
@@ -90,7 +90,6 @@
               Upload
             </a-button>
           </a-upload>
-
           <component v-else :is="antd[fields[item].editComponent]"
             :placeholder="'Please input your' + fields[item].chineseName" :disabled="false"
             v-model:value="formValue[item]" style="width: 100%" />
@@ -141,7 +140,7 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
-    const { pagination } = Mixins()
+    const { pagination, loading } = Mixins()
     let { companyId, className, columns, fields, modalWidth } = meta;
     pagination.companyId = companyId
     pagination.className = className
@@ -452,6 +451,7 @@ export default defineComponent({
       incData,
       incHeader,
       baseUrl,
+      loading,
       showModal,
       loadData,
       handleDelete,

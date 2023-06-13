@@ -22,7 +22,8 @@
     </a-row>
   </a-form>
 
-  <a-table :pagination="pagination" @change="loadData(pagination)" :columns="columns" :data-source="tableData" style="flex: 1">
+  <a-table :pagination="pagination" :loading="loading" @change="loadData(pagination)" :columns="columns" :data-source="tableData"
+    style="flex: 1">
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'name'">
         <span>{{ record.name }}</span>
@@ -164,7 +165,7 @@ export default defineComponent({
   components: {},
   async setup() {
 
-    const { pagination } = Mixins()
+    const { pagination, loading } = Mixins()
 
     const visible = ref(false);
 
@@ -184,7 +185,7 @@ export default defineComponent({
     });
 
     /* 添加/修改数据表单 */
-    let formValue = reactive({ ...JSON.parse(JSON.stringify(staticform))});
+    let formValue = reactive({ ...JSON.parse(JSON.stringify(staticform)) });
 
     const showModal = (params = { ...JSON.parse(JSON.stringify(staticform)) }) => {
       visible.value = true;
@@ -209,7 +210,7 @@ export default defineComponent({
         await formRef.value.validateFields();
         visible.value = false;
         const { router, name, objectId, companyId, icon, user } = formValue;
-  
+
         const { code, msg, data } = await submitForm({
           router, name, objectId, user, meta: { companyId, icon },
         });
@@ -312,6 +313,7 @@ export default defineComponent({
       loadData,
       confirmDelete,
       Users,
+      loading
     };
   },
 });
