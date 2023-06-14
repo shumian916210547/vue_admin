@@ -3,36 +3,70 @@
     <a-row>
       <a-col :span="8">
         <a-form-item label="名称" v-permission="'Search'">
-          <a-input :disabled="false" v-model:value="pagination.name" placeholder="请输入名称" />
+          <a-input
+            :disabled="false"
+            v-model:value="pagination.name"
+            placeholder="请输入名称"
+          />
         </a-form-item>
       </a-col>
 
       <a-col :span="5" :offset="1"> </a-col>
-      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
+      <a-col
+        :span="2"
+        :offset="1"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-form-item v-permission="'Search'">
-          <a-button v-permission="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
+          <a-button
+            v-permission="'Search'"
+            type="primary"
+            @click="loadData(pagination)"
+            >查询</a-button
+          >
         </a-form-item>
 
         <a-form-item v-permission="'Search'">
-          <a-button v-permission="'Search'" @click="
-            () => {
-              pagination.name = '';
-            }
-          ">重置</a-button>
+          <a-button
+            v-permission="'Search'"
+            @click="
+              () => {
+                pagination.name = '';
+              }
+            "
+            >重置</a-button
+          >
         </a-form-item>
       </a-col>
-      <a-col :span="5" :offset="2" style="justify-content: space-evenly; display: flex">
+      <a-col
+        :span="5"
+        :offset="2"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-form-item>
-          <a-button v-permission="'Insert'" type="primary" @click="showModal()">新建</a-button>
-          <a-button v-permission="'Export_Template'" @click="exportTemplate()">导出模板</a-button>
-          <a-button v-permission="'Import'" @click="showIncModal()">导入</a-button>
-          <a-button v-permission="'Export'" @click="exportData()">导出</a-button>
+          <a-button v-permission="'Insert'" type="primary" @click="showModal()"
+            >新建</a-button
+          >
+          <a-button v-permission="'Export_Template'" @click="exportTemplate()"
+            >导出模板</a-button
+          >
+          <a-button v-permission="'Import'" @click="showIncModal()"
+            >导入</a-button
+          >
+          <a-button v-permission="'Export'" @click="exportData()"
+            >导出</a-button
+          >
         </a-form-item>
       </a-col>
     </a-row>
   </a-form>
-  <a-table :pagination="pagination" :loading="loading" @change="loadData(pagination)" :columns="tableColums"
-    :data-source="tableData">
+  <a-table
+    :pagination="pagination"
+    :loading="loading"
+    @change="loadData(pagination)"
+    :columns="tableColums"
+    :data-source="tableData"
+  >
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
@@ -43,10 +77,25 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button v-permission="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
+        <a-button
+          v-permission="'Edit'"
+          type="primary"
+          @click="showModal(record)"
+          >编辑</a-button
+        >
 
-        <a-popconfirm title="确定删除此行" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
-          <a-button v-permission="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
+        <a-popconfirm
+          title="确定删除此行"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="handleDelete(record)"
+        >
+          <a-button
+            v-permission="'Delete'"
+            type="primary"
+            danger
+            style="margin: 0 0 0 10px"
+          >
             删除
           </a-button>
         </a-popconfirm>
@@ -59,52 +108,28 @@
     </template>
   </a-table>
   <!-- 表单 -->
-  <a-modal v-model:visible="visible" :width="modalWidth" @cancel="onCancel()" @ok="handleSubmit()">
-    <slot name="form">
-      <a-form :model="formValue" ref="formRef" autocomplete="off">
-        <a-form-item v-for="(item, index) in Object.keys(fields)" :key="index" :label="fields[item].chineseName"
-          :name="item" :rules="[
-            {
-              required: fields[item].required,
-              message: 'Please input your' + fields[item].chineseName,
-            },
-          ]">
-          <component v-if="fields[item].editComponent == 'Switch'" v-model:checked="formValue[item]"
-            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName" />
-          <component v-else-if="fields[item].editComponent == 'TimePicker'" v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="HH:mm:ss" style="width: 100%" />
-          <component v-else-if="fields[item].editComponent == 'DatePicker'" :is="antd[fields[item].editComponent]"
-            v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="YYYY/MM/DD" style="width: 100%" />
-          <component v-else-if="fields[item].editComponent == 'Select'" :disabled="String(fields[item]) ? false : true"
-            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
-            v-model:value="formValue[item]" :options="getSelectOptions(fields[item].dataSource)"
-            :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
-          <a-upload v-else-if="fields[item].editComponent == 'Upload'" v-model:file-list="formValue[item]"
-            :action="baseUrl + '/cmn/uploadFile'" :data="{
-              userid: userInfo.userid,
-            }" accept="video/*,image/*">
-            <a-button>
-              <upload-outlined></upload-outlined>
-              Upload
-            </a-button>
-          </a-upload>
-          <component v-else :is="antd[fields[item].editComponent]"
-            :placeholder="'Please input your' + fields[item].chineseName" :disabled="false"
-            v-model:value="formValue[item]" style="width: 100%" />
-        </a-form-item>
-      </a-form>
-    </slot>
-    <template #title>
-      <span>{{ formValue.objectId != undefined ? "修改" : "新增" }}</span>
-    </template>
-  </a-modal>
-
+  <CommonPageForm
+    v-model:visible="visible"
+    v-model:FormValue="formValue"
+    :modalWidth="modalWidth"
+    :fields="fields"
+    @submit="handleSubmit"
+  ></CommonPageForm>
   <!-- 导入 -->
-  <a-modal v-model:visible="incVisible" width="1200px" title="导入" @ok="handleConfirmUpload">
-    <a-upload-dragger v-model:fileList="fileList" :customRequest="upload" @remove="fileRemove" name="file"
-      :multiple="false" :max-count="1">
+  <a-modal
+    v-model:visible="incVisible"
+    width="1200px"
+    title="导入"
+    @ok="handleConfirmUpload"
+  >
+    <a-upload-dragger
+      v-model:fileList="fileList"
+      :customRequest="upload"
+      @remove="fileRemove"
+      name="file"
+      :multiple="false"
+      :max-count="1"
+    >
       <p class="ant-upload-drag-icon">
         <inbox-outlined></inbox-outlined>
       </p>
@@ -125,37 +150,32 @@
 import { computed, defineComponent, reactive, ref, watch } from "vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import { notification, message } from "ant-design-vue";
-import * as antdComponent from "ant-design-vue";
 import * as xlsx from "xlsx";
 import { debounce } from "lodash";
-import richText from "./richText.vue";
+import CommonPageForm from "./CommonPageForm.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { Mixins } from "@/mixins";
 export default defineComponent({
-  components: { ...antdIcon },
+  components: { ...antdIcon, CommonPageForm },
   props: {},
   async setup(props, ctx) {
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
-    const { pagination, loading } = Mixins()
+    const { pagination, loading } = Mixins();
     let { companyId, className, columns, fields, modalWidth } = meta;
-    pagination.companyId = companyId
-    pagination.className = className
+    pagination.companyId = companyId;
+    pagination.className = className;
     const formValue = reactive(new Object());
     const visible = ref(false);
-    let antd = antdComponent;
-    antd["richText"] = richText;
     /* 表头 */
     const tables = computed(() => {
       return store.getters["GETTABLES"];
     });
     let tableColums = ref(new Array());
     const incHeader = ref(new Array());
-    let baseUrl = ref();
-    let fileField = new Array();
     watch(
       tables,
       (n, o) => {
@@ -213,7 +233,7 @@ export default defineComponent({
     };
 
     const showModal = (row) => {
-      row ? updateData(row) : insetData(row)
+      row ? updateData(row) : insetData(row);
       visible.value = true;
     };
 
@@ -230,8 +250,8 @@ export default defineComponent({
             formValue[key] = row[key].objectId;
           }
         }
-      })
-    }
+      });
+    };
 
     /* 处理新建数据 */
     const insetData = (row) => {
@@ -247,29 +267,6 @@ export default defineComponent({
         }
       });
       formValue["objectId"] = undefined;
-    }
-
-    const onCancel = () => {
-      for (const k of Object.keys(formValue)) {
-        formValue[k] = undefined;
-      }
-      visible.value = false;
-    };
-
-    let once = ref(true);
-    let onceKey = ref(new Array());
-    const getSelectOptions = (key) => {
-      if (once.value) {
-        if (!onceKey.value.includes(key)) {
-          if (key) {
-            onceKey.value.push(key);
-            store.dispatch("S" + key.slice(1));
-          }
-        } else {
-          once.value = false;
-        }
-      }
-      return store.getters[key];
     };
 
     const formRef = ref();
@@ -357,18 +354,10 @@ export default defineComponent({
     const fileRemove = (e) => {
       incData.value = new Array();
     };
+
     /* 表单提交 */
-    const handleSubmit = debounce(async (e) => {
+    const handleSubmit = async (params) => {
       try {
-        const params = await formRef.value.validateFields();
-        fileField.forEach((k) => {
-          params[k] = params[k].map((item) => {
-            if (item.response) {
-              item = item.response?.data;
-            }
-            return item;
-          });
-        });
         let code, msg;
         if (formValue.objectId) {
           ({ code, msg } = await base.updateById({
@@ -398,7 +387,7 @@ export default defineComponent({
           description: errorInfo.msg || errorInfo || "缺少必填项",
         });
       }
-    }, 100);
+    };
 
     const exportData = debounce(async () => {
       const { total } = pagination;
@@ -426,13 +415,6 @@ export default defineComponent({
       xlsx.writeFile(workbook, "导出数据.xlsx");
     }, 500);
 
-    baseUrl.value = process.env.VUE_APP_BASE_API;
-    Object.keys(fields).forEach((k) => {
-      if (fields[k].editComponent === "Upload") {
-        fileField.push(k);
-      }
-    });
-
     await loadData(pagination);
 
     return {
@@ -445,25 +427,20 @@ export default defineComponent({
       formRef,
       fields,
       modalWidth,
-      antd,
       fileList,
       incVisible,
       incData,
       incHeader,
-      baseUrl,
       loading,
       showModal,
       loadData,
       handleDelete,
-      getSelectOptions,
       exportTemplate,
       showIncModal,
       upload,
       fileRemove,
-      onCancel,
       handleConfirmUpload,
       exportData,
-      userInfo: JSON.parse(sessionStorage.getItem("userInfo")),
     };
   },
 });
