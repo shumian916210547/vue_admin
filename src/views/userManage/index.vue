@@ -8,28 +8,52 @@
       </a-col>
 
       <a-col :span="5" :offset="1"> </a-col>
-      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
+      <a-col
+        :span="2"
+        :offset="1"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-form-item v-permission="'Search'">
-          <a-button v-permission="'Search'" type="primary" @click="loadData(pagination)">查询</a-button>
+          <a-button
+            v-permission="'Search'"
+            type="primary"
+            @click="loadData(pagination)"
+            >查询</a-button
+          >
         </a-form-item>
 
         <a-form-item v-permission="'Search'">
-          <a-button v-permission="'Search'" @click="
-            () => {
-              pagination.name = '';
-            }
-          ">重置</a-button>
+          <a-button
+            v-permission="'Search'"
+            @click="
+              () => {
+                pagination.name = '';
+              }
+            "
+            >重置</a-button
+          >
         </a-form-item>
       </a-col>
-      <a-col :span="5" :offset="2" style="justify-content: space-evenly; display: flex">
+      <a-col
+        :span="5"
+        :offset="2"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-form-item>
-          <a-button v-permission="'Insert'" type="primary" @click="showModal()">新建</a-button>
+          <a-button v-permission="'Insert'" type="primary" @click="showModal()"
+            >新建</a-button
+          >
         </a-form-item>
       </a-col>
     </a-row>
   </a-form>
-  <a-table :pagination="pagination" :loading="loading" @change="loadData(pagination)" :columns="tableColums"
-    :data-source="tableData">
+  <a-table
+    :pagination="pagination"
+    :loading="loading"
+    @change="loadData(pagination)"
+    :columns="tableColums"
+    :data-source="tableData"
+  >
     <template #bodyCell="{ column, record }">
       <template v-if="column?.key === 'isDelete'">
         <span v-if="record.isDelete">是</span>
@@ -40,10 +64,25 @@
         <span v-else>未完成</span>
       </template>
       <template v-else-if="column?.key === 'operation'">
-        <a-button v-permission="'Edit'" type="primary" @click="showModal(record)">编辑</a-button>
+        <a-button
+          v-permission="'Edit'"
+          type="primary"
+          @click="showModal(record)"
+          >编辑</a-button
+        >
 
-        <a-popconfirm title="确定删除此行" ok-text="Yes" cancel-text="No" @confirm="handleDelete(record)">
-          <a-button v-permission="'Delete'" type="primary" danger style="margin: 0 0 0 10px">
+        <a-popconfirm
+          title="确定删除此行"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="handleDelete(record)"
+        >
+          <a-button
+            v-permission="'Delete'"
+            type="primary"
+            danger
+            style="margin: 0 0 0 10px"
+          >
             删除
           </a-button>
         </a-popconfirm>
@@ -52,35 +91,13 @@
     </template>
   </a-table>
   <!-- 表单 -->
-  <a-modal v-model:visible="visible" :width="modalWidth" @cancel="onCancel()" @ok="handleSubmit()">
-    <slot name="form">
-      <a-form :model="formValue" ref="formRef" autocomplete="off">
-        <a-form-item v-for="(item, index) in Object.keys(fields)" :key="index" :label="fields[item].chineseName"
-          :name="item" :rules="[
-            {
-              required: fields[item].required,
-              message: 'Please input your' + fields[item].chineseName,
-            },
-          ]">
-          <component v-if="fields[item].editComponent == 'Switch'" v-model:checked="formValue[item]"
-            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName" />
-          <component v-else-if="fields[item].editComponent == 'TimePicker'" v-model:value="formValue[item]"
-            :is="antd[fields[item].editComponent]" :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="HH:mm:ss" style="width: 100%" />
-          <component :is="antd[fields[item].editComponent]" v-else-if="fields[item].editComponent == 'DatePicker'"
-            v-model:value="formValue[item]" :placeholder="'Please input your' + fields[item].chineseName"
-            value-format="YYYY/MM/DD" style="width: 100%" />
-          <component :is="antd[fields[item].editComponent]" v-else v-model:value="formValue[item]"
-            :options="getSelectOptions(fields[item].dataSource)"
-            :placeholder="'Please input your' + fields[item].chineseName"
-            :field-names="{ label: 'name', value: 'objectId' }" style="width: 100%" />
-        </a-form-item>
-      </a-form>
-    </slot>
-    <template #title>
-      <span>{{ formValue.objectId != undefined ? "修改" : "新增" }}</span>
-    </template>
-  </a-modal>
+  <CommonPageForm
+    v-model:visible="visible"
+    v-model:FormValue="formValue"
+    :modalWidth="modalWidth"
+    :fields="fields"
+    @submit="handleSubmit"
+  ></CommonPageForm>
 </template>
 <script>
 import {
@@ -93,7 +110,7 @@ import {
 } from "vue";
 import { InboxOutlined } from "@ant-design/icons-vue";
 import * as antdComponent from "ant-design-vue";
-import { debounce } from "lodash";
+import CommonPageForm from "@/components/CommonPageForm.vue";
 import { notification } from "ant-design-vue";
 import * as base from "@/apis/base";
 import * as user from "@/apis/user";
@@ -103,6 +120,7 @@ import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {
     InboxOutlined,
+    CommonPageForm,
   },
   props: {},
 
@@ -110,10 +128,10 @@ export default defineComponent({
     const route = useRoute();
     const store = useStore();
     let { meta } = route;
-    const { pagination, loading } = Mixins()
+    const { pagination, loading } = Mixins();
     let { companyId, className, columns, fields, modalWidth } = meta;
-    pagination.companyId = companyId
-    pagination.className = className
+    pagination.companyId = companyId;
+    pagination.className = className;
     const formValue = reactive({});
     const visible = ref(false);
     let antd = antdComponent;
@@ -179,54 +197,29 @@ export default defineComponent({
     const showModal = (row) => {
       row
         ? Object.keys(row).map((key) => {
-          if (key == "objectId") {
-            formValue[key] = row[key];
-          } else {
-            if (fields[key]) {
+            if (key == "objectId") {
               formValue[key] = row[key];
+            } else {
+              if (fields[key]) {
+                formValue[key] = row[key];
+              }
+              if (row[key].className && row[key].className !== "Company") {
+                formValue[key] = row[key].objectId;
+              }
             }
-            if (row[key].className && row[key].className !== "Company") {
-              formValue[key] = row[key].objectId;
-            }
-          }
-        })
+          })
         : (() => {
-          Object.keys(fields).map((key) => {
-            formValue[key] = fields[key].default || "";
-          });
-          formValue["objectId"] = undefined;
-        })();
+            Object.keys(fields).map((key) => {
+              formValue[key] = fields[key].default || "";
+            });
+            formValue["objectId"] = undefined;
+          })();
       visible.value = true;
     };
 
-    const onCancel = () => {
-      for (const k of Object.keys(formValue)) {
-        formValue[k] = undefined;
-      }
-      visible.value = false;
-    };
-    let once = ref(true);
-    let onceKey = ref([]);
-    const getSelectOptions = (key) => {
-      if (once.value) {
-        if (!onceKey.value.includes(key)) {
-          if (key) {
-            onceKey.value.push(key);
-            store.dispatch("S" + key.slice(1));
-          }
-        } else {
-          once.value = false;
-        }
-      }
-      return store.getters[key];
-    };
-
-    const formRef = ref();
-
     /* 表单提交 */
-    const handleSubmit = debounce(async (e) => {
+    const handleSubmit = async (params) => {
       try {
-        const params = await formRef.value.validateFields();
         let code, msg;
         if (formValue.objectId) {
           ({ code, msg } = await base.updateById({
@@ -236,9 +229,10 @@ export default defineComponent({
             params,
           }));
         } else {
-          ({ code, msg } = await user.signUp({
+          ({ code, msg } = await base.insert({
             companyId,
-            ...params,
+            className,
+            params,
           }));
         }
         if (code == 200) {
@@ -247,20 +241,16 @@ export default defineComponent({
             description: msg,
           });
           loadData(pagination);
-          visible.value = false;
-        } else {
-          notification["error"]({
-            message: "提醒",
-            description: msg,
-          });
         }
+        visible.value = false;
       } catch (errorInfo) {
         notification["error"]({
           message: "提醒",
-          description: errorInfo.msg || "缺少必填项",
+          description: errorInfo.msg || errorInfo || "缺少必填项",
         });
       }
-    }, 100);
+    };
+
     onMounted(() => {
       loadData(pagination);
     });
@@ -271,16 +261,13 @@ export default defineComponent({
       visible,
       formValue,
       handleSubmit,
-      formRef,
       fields,
       modalWidth,
       antd,
       showModal,
       loadData,
       handleDelete,
-      getSelectOptions,
-      onCancel,
-      loading
+      loading,
     };
   },
 });

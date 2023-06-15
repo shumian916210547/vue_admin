@@ -65,7 +65,7 @@ export default defineComponent({
   /* 名称 */
   name: "FormItemComponent",
 
-  components: { ...antdIcon },
+  components: { ...antdIcon, richText },
 
   props: {
     /* 组件名称 */
@@ -100,7 +100,7 @@ export default defineComponent({
   },
 
   setup(props, { emit }) {
-    antdComponent["richText"] = richText;
+    antdComponent = { ...antdComponent, richText };
     let componentValue = ref(props.value);
     watch(componentValue, (n) => {
       emit("update:value", n);

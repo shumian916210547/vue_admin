@@ -116,49 +116,28 @@
     @submit="handleSubmit"
   ></CommonPageForm>
   <!-- 导入 -->
-  <a-modal
+  <CommonPageImport
     v-model:visible="incVisible"
-    width="1200px"
-    title="导入"
-    @ok="handleConfirmUpload"
-  >
-    <a-upload-dragger
-      v-model:fileList="fileList"
-      :customRequest="upload"
-      @remove="fileRemove"
-      name="file"
-      :multiple="false"
-      :max-count="1"
-    >
-      <p class="ant-upload-drag-icon">
-        <inbox-outlined></inbox-outlined>
-      </p>
-      <p class="ant-upload-text">Click or drag file to this area to upload</p>
-      <p class="ant-upload-hint">
-        Support for a single or bulk upload. Strictly prohibit from uploading
-        company data or other band files
-      </p>
-    </a-upload-dragger>
-    <a-table :columns="incHeader" :data-source="incData" bordered>
-      <template #bodyCell="{ column, record }">
-        <div>{{ record[column.key] }}</div>
-      </template>
-    </a-table>
-  </a-modal>
+    v-model:fileList="fileList"
+    :columns="incHeader"
+    :dataSource="incData"
+    @confirmUpload="handleConfirmUpload"
+  ></CommonPageImport>
 </template>
 <script>
 import { computed, defineComponent, reactive, ref, watch } from "vue";
 import * as antdIcon from "@ant-design/icons-vue";
-import { notification, message } from "ant-design-vue";
+import { notification } from "ant-design-vue";
 import * as xlsx from "xlsx";
 import { debounce } from "lodash";
+import CommonPageImport from "./CommonPageImport.vue";
 import CommonPageForm from "./CommonPageForm.vue";
 import * as base from "@/apis/base";
 import { useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { Mixins } from "@/mixins";
 export default defineComponent({
-  components: { ...antdIcon, CommonPageForm },
+  components: { ...antdIcon, CommonPageForm, CommonPageImport },
   props: {},
   async setup(props, ctx) {
     const route = useRoute();
@@ -290,38 +269,6 @@ export default defineComponent({
       incVisible.value = true;
     };
     const incData = ref(new Array());
-    const upload = (e) => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const data = e.target.result;
-        const workbook = xlsx.read(data, { type: "binary" });
-        incData.value = xlsx.utils
-          .sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
-          .map((item) => {
-            Object.keys(item).forEach((k) => {
-              incHeader.value.forEach((l) => {
-                Object.keys(l).forEach((v) => {
-                  k == l[v] ? ((item[l.key] = item[k]), delete item[k]) : "";
-                });
-              });
-            });
-            return item;
-          });
-      };
-      reader.readAsArrayBuffer(e.file);
-      const timer = setTimeout(() => {
-        fileList.value = [
-          {
-            uid: e.file.uid,
-            name: e.file.name,
-            status: "done",
-            percent: 100,
-          },
-        ];
-        message.success("上传成功");
-        clearTimeout(timer);
-      }, 200);
-    };
     /* 确认上传数据 */
     const handleConfirmUpload = debounce(async () => {
       incVisible.value = false;
@@ -349,11 +296,6 @@ export default defineComponent({
         });
       }
     }, 500);
-
-    /* 文件移除 */
-    const fileRemove = (e) => {
-      incData.value = new Array();
-    };
 
     /* 表单提交 */
     const handleSubmit = async (params) => {
@@ -437,8 +379,6 @@ export default defineComponent({
       handleDelete,
       exportTemplate,
       showIncModal,
-      upload,
-      fileRemove,
       handleConfirmUpload,
       exportData,
     };
