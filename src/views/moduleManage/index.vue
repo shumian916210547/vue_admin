@@ -3,18 +3,28 @@
     <a-row>
       <a-col :span="8">
         <a-form-item label="模块名称">
-          <a-input v-model:value="pagination.name" placeholder="请输入模块名称" />
+          <a-input
+            v-model:value="pagination.name"
+            placeholder="请输入模块名称"
+          />
         </a-form-item>
       </a-col>
 
       <a-col :span="8" :offset="1"> </a-col>
-      <a-col :span="2" :offset="1" style="justify-content: space-evenly; display: flex">
+      <a-col
+        :span="2"
+        :offset="1"
+        style="justify-content: space-evenly; display: flex"
+      >
         <a-button type="primary" @click="loadData(pagination)">查询</a-button>
-        <a-button @click="
-          () => {
-            pagination.name = '';
-          }
-        ">重置</a-button>
+        <a-button
+          @click="
+            () => {
+              pagination.name = '';
+            }
+          "
+          >重置</a-button
+        >
       </a-col>
       <a-col :span="2" :offset="2">
         <a-button type="primary" @click="showModal()">新建</a-button>
@@ -22,8 +32,14 @@
     </a-row>
   </a-form>
 
-  <a-table :pagination="pagination" :loading="loading" @change="loadData(pagination)" :columns="columns" :data-source="tableData"
-    style="flex: 1">
+  <a-table
+    :pagination="pagination"
+    :loading="loading"
+    @change="loadData(pagination)"
+    :columns="columns"
+    :data-source="tableData"
+    style="flex: 1"
+  >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'name'">
         <span>{{ record.name }}</span>
@@ -35,17 +51,27 @@
       </template>
 
       <template v-else-if="column.key === 'operation'">
-        <a-button type="primary" @click="
-          showModal({
-            objectId: record.objectId,
-            name: record.name,
-            router: record.router,
-            companyId: record?.meta?.companyId || [],
-            icon: record?.meta?.icon || [],
-            user: record?.user?.objectId || [],
-          })
-        ">编辑</a-button>
-        <a-popconfirm title="确定删除此模块" ok-text="Yes" cancel-text="No" @confirm="confirmDelete(record)">
+        <a-button
+          type="primary"
+          @click="
+            showModal({
+              objectId: record.objectId,
+              name: record.name,
+              path: record.path,
+              router: record.router,
+              companyId: record?.meta?.companyId || [],
+              icon: record?.meta?.icon || [],
+              user: record?.user?.objectId || [],
+            })
+          "
+          >编辑</a-button
+        >
+        <a-popconfirm
+          title="确定删除此模块"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="confirmDelete(record)"
+        >
           <a-button type="primary" danger style="margin: 0 0 0 10px">
             删除
           </a-button>
@@ -56,29 +82,66 @@
 
   <!-- 表单 -->
   <a-modal v-model:visible="visible" @ok="handleSubmit">
-    <a-form ref="formRef" :rules="rules" :model="formValue" :key="formValue.objectId">
+    <a-form
+      ref="formRef"
+      :rules="rules"
+      :model="formValue"
+      :key="formValue.objectId"
+    >
       <a-form-item label="模块名称" name="name">
         <a-input v-model:value="formValue.name" placeholder="请输入模块名称" />
       </a-form-item>
 
+      <a-form-item label="模块路径" name="path">
+        <a-input v-model:value="formValue.path" placeholder="请输入模块路径" />
+      </a-form-item>
+
       <a-form-item label="模块路由" name="router">
-        <a-select v-model:value="formValue.router" mode="multiple" style="width: 100%" placeholder="请选择模块路由"
-          :field-names="{ label: 'name', value: 'objectId' }" :options="routes" show-search allowClear></a-select>
+        <a-select
+          v-model:value="formValue.router"
+          mode="multiple"
+          style="width: 100%"
+          placeholder="请选择模块路由"
+          :field-names="{ label: 'name', value: 'objectId' }"
+          :options="routes"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
 
       <a-form-item label="所属用户" name="user">
-        <a-select v-model:value="formValue.user" style="width: 100%" placeholder="请选择模块所属用户"
-          :field-names="{ label: 'name', value: 'objectId' }" :options="Users" show-search allowClear></a-select>
+        <a-select
+          v-model:value="formValue.user"
+          style="width: 100%"
+          placeholder="请选择模块所属用户"
+          :field-names="{ label: 'name', value: 'objectId' }"
+          :options="Users"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
 
       <a-form-item label="模块所属公司" name="companyId">
-        <a-select v-model:value="formValue.companyId" style="width: 100%" placeholder="请选择模块所属公司" :options="company"
-          show-search allowClear></a-select>
+        <a-select
+          v-model:value="formValue.companyId"
+          style="width: 100%"
+          placeholder="请选择模块所属公司"
+          :options="company"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
 
       <a-form-item label="模块图标" name="icon">
-        <a-select v-model:value="formValue.icon" style="width: 100%" :options="antdIconOptions" option-label-prop="label"
-          placeholder="请选择模块图标" show-search allowClear>
+        <a-select
+          v-model:value="formValue.icon"
+          style="width: 100%"
+          :options="antdIconOptions"
+          option-label-prop="label"
+          placeholder="请选择模块图标"
+          show-search
+          allowClear
+        >
           <template #option="{ label, value }">
             <component :is="antdIcons[value]" />
             &nbsp;{{ label }}
@@ -94,12 +157,25 @@
 </template>
 
 <script>
-import { computed, defineComponent, onMounted, onUpdated, reactive, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  onUpdated,
+  reactive,
+  ref,
+} from "vue";
 import { debounce } from "lodash";
 import * as antdIcons from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
-import { findAll, removeById, insertDevModule, updateById } from "@/apis/devModule";
+import {
+  findAll,
+  removeById,
+  insertDevModule,
+  updateById,
+} from "@/apis/devModule";
 import { findList } from "@/apis/devRoute";
+
 import { useStore } from "vuex";
 const columns = [
   {
@@ -134,6 +210,13 @@ const rules = {
       message: "请输入模块名称",
     },
   ],
+  path: [
+    {
+      required: true,
+      trigger: "change",
+      message: "请输入模块路径",
+    },
+  ],
   companyId: [
     {
       required: true,
@@ -153,19 +236,19 @@ const rules = {
 /* 静态表单 */
 const staticform = {
   router: new Array(),
-  name: "",
-  companyId: '',
-  objectId: '',
-  icon: '',
-  user: '',
-}
+  name: null,
+  companyId: null,
+  objectId: null,
+  icon: null,
+  user: null,
+  path: null,
+};
 
 import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {},
   async setup() {
-
-    const { pagination, loading } = Mixins()
+    const { pagination, loading } = Mixins();
 
     const visible = ref(false);
 
@@ -173,7 +256,7 @@ export default defineComponent({
 
     const store = useStore();
     let antdIconOptions = Object.keys(antdIcons).map((key) => {
-      return { label: key, value: key, };
+      return { label: key, value: key };
     });
     antdIconOptions = antdIconOptions.filter((item) => {
       return (
@@ -187,7 +270,9 @@ export default defineComponent({
     /* 添加/修改数据表单 */
     let formValue = reactive({ ...JSON.parse(JSON.stringify(staticform)) });
 
-    const showModal = (params = { ...JSON.parse(JSON.stringify(staticform)) }) => {
+    const showModal = (
+      params = { ...JSON.parse(JSON.stringify(staticform)) }
+    ) => {
       visible.value = true;
       Object.keys(params).forEach((key) => {
         if (key == "router") {
@@ -209,10 +294,16 @@ export default defineComponent({
       try {
         await formRef.value.validateFields();
         visible.value = false;
-        const { router, name, objectId, companyId, icon, user } = formValue;
+        const { router, name, objectId, companyId, icon, user, path } =
+          formValue;
 
         const { code, msg, data } = await submitForm({
-          router, name, objectId, user, meta: { companyId, icon },
+          router,
+          name,
+          objectId,
+          user,
+          meta: { companyId, icon },
+          path,
         });
         if (code == 200) {
           notification["success"]({ message: "提醒", description: msg });
@@ -221,7 +312,10 @@ export default defineComponent({
         }
         loadData(pagination);
       } catch (errorInfo) {
-        notification["error"]({ message: "提醒", description: errorInfo.msg || "缺少必填项" });
+        notification["error"]({
+          message: "提醒",
+          description: errorInfo.msg || "缺少必填项",
+        });
       }
     }, 100);
 
@@ -313,7 +407,7 @@ export default defineComponent({
       loadData,
       confirmDelete,
       Users,
-      loading
+      loading,
     };
   },
 });

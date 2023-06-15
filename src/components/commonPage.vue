@@ -125,7 +125,7 @@
   ></CommonPageImport>
 </template>
 <script>
-import { computed, defineComponent, reactive, ref, watch } from "vue";
+import { defineComponent, reactive, ref } from "vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import * as xlsx from "xlsx";
@@ -133,57 +133,24 @@ import { debounce } from "lodash";
 import CommonPageImport from "./CommonPageImport.vue";
 import CommonPageForm from "./CommonPageForm.vue";
 import * as base from "@/apis/base";
-import { useRoute } from "vue-router";
-import { useStore } from "vuex";
 import { Mixins } from "@/mixins";
 export default defineComponent({
   components: { ...antdIcon, CommonPageForm, CommonPageImport },
   props: {},
   async setup(props, ctx) {
-    const route = useRoute();
-    const store = useStore();
-    let { meta } = route;
-    const { pagination, loading } = Mixins();
-    let { companyId, className, columns, fields, modalWidth } = meta;
-    pagination.companyId = companyId;
-    pagination.className = className;
+    let {
+      pagination,
+      loading,
+      tables,
+      incHeader,
+      tableColums,
+      companyId,
+      className,
+      fields,
+      modalWidth,
+    } = Mixins();
     const formValue = reactive(new Object());
     const visible = ref(false);
-    /* 表头 */
-    const tables = computed(() => {
-      return store.getters["GETTABLES"];
-    });
-    let tableColums = ref(new Array());
-    const incHeader = ref(new Array());
-    watch(
-      tables,
-      (n, o) => {
-        if (Object.keys(n).length) {
-          Object.keys(n?.[className]).forEach((item) => {
-            if (item != "company" && n?.[className]?.[item]?.chineseName) {
-              incHeader.value.push({
-                title: n?.[className]?.[item]?.chineseName,
-                key: item,
-              });
-            }
-          });
-          tableColums.value = columns.map((field) => {
-            return {
-              key: field,
-              dataIndex: field,
-              title: n?.[className]?.[field]?.chineseName,
-            };
-          });
-          tableColums.value.push({
-            title: "操作",
-            key: "operation",
-            fixed: "right",
-            width: 200,
-          });
-        }
-      },
-      { deep: true, immediate: true }
-    );
 
     /* 加载数据 */
     const tableData = ref(new Array());

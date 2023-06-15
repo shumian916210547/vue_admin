@@ -1,10 +1,10 @@
-import router from "@/router/index";
+
 import {
   findList
 } from "@/apis/company";
 import * as schema from "@/apis/schema";
-import * as devModule from "@/apis/devModule";
-import * as commonAPI from "@/apis/base";
+import * as base from "@/apis/base";
+import { SystemRoute } from "@/router/dynamicRoute";
 export default {
   state: {
     modules: [],
@@ -17,7 +17,8 @@ export default {
     identity: [],
     users: [],
     switchs: [],
-    tableLoading: false
+    tableLoading: false,
+    switchs: [],
   },
   getters: {
     GETLOADING: state => {
@@ -63,6 +64,10 @@ export default {
     GETCURRENTSWITCHS(state) {
       return state.switchs;
     },
+
+    GETSWITCHS(state) {
+      return state.switchs
+    }
   },
 
   mutations: {
@@ -84,26 +89,8 @@ export default {
 
     SETMODULES(state, value) {
       sessionStorage.setItem("MODULES", JSON.stringify(value));
-      state.modules = value.map((module) => {
-        module.router = module.router.map((route) => {
-          try {
-            require("@/views" + route.pagePath);
-            route["component"] = () => import("@/views" + route.pagePath);
-          } catch (error) {
-            route["component"] = () => import("@/components" + route.pagePath);
-          }
-          route["meta"] = Object.assign({}, {
-            companyId: module?.meta?.companyId
-          },
-            route.option, {
-            switchs: route.switchs
-          }
-          );
-          router.addRoute("index", route);
-          return route;
-        });
-        return module;
-      });
+      state.modules = value
+      SystemRoute(state.modules)
     },
 
     SETCOMPANY(state, value) {
@@ -141,12 +128,16 @@ export default {
     SETIDENTITY(state, value) {
       state.identity = value;
     },
+
+    SETSWITCHS(state, value) {
+      state.switchs = value;
+    },
   },
 
   actions: {
 
     SETUSERS(ctx) {
-      commonAPI.findList({
+      base.findList({
         className: "_User",
         name: "",
       }).then(result => {
@@ -204,10 +195,9 @@ export default {
     },
 
     SETIDENTITY(ctx) {
-      commonAPI
+      base
         .findList({
           className: "Identity",
-
           name: "",
         })
         .then((result) => {
@@ -216,6 +206,18 @@ export default {
           }
         });
     },
+
+    SETSWITCHS(ctx) {
+      base.findList({
+        className: "Switch",
+        name: "",
+      }).then(result => {
+        if (result.code == 200) {
+          ctx.commit('SETSWITCHS', result.data)
+        }
+      })
+
+    }
   },
   modules: {},
 };

@@ -67,9 +67,9 @@ export function findById({ objectId }) {
  * @param {object} meta 模块参数
  * @returns {Promise}
  */
-export function insertDevModule({ name, router, meta, user }) {
+export function insertDevModule({ name, router, meta, user, path }) {
   return new Promise((resolve, reject) => {
-    post("/admin/devModule/insertDevModule", { name, router, meta, user })
+    post("/admin/devModule/insertDevModule", { name, router, meta, user, path })
       .then((result) => {
         resolve(result);
       })
@@ -90,9 +90,9 @@ export function insertDevModule({ name, router, meta, user }) {
  * @param {object} meta 模块参数
  * @returns {Promise}
  */
-export function updateById({ objectId, name, router, meta, user }) {
+export function updateById({ objectId, name, router, meta, user, path }) {
   return new Promise((resolve, reject) => {
-    put("/admin/devModule/updateById", { objectId, name, router, meta, user })
+    put("/admin/devModule/updateById", { objectId, name, router, meta, user, path })
       .then((result) => {
         resolve(result);
       })

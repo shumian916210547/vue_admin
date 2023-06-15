@@ -4,17 +4,28 @@
       <a-row style="display: flex; align-items: center; padding: 10px 0">
         <a-col :span="8">Schema</a-col>
         <a-col :span="8" offset="2">
-          <a-button type="primary" @click="
-            () => {
-              schemaVisible = true;
-            }
-          ">create class
+          <a-button
+            type="primary"
+            @click="
+              () => {
+                schemaVisible = true;
+              }
+            "
+            >create class
           </a-button>
         </a-col>
       </a-row>
-      <a-menu v-model:selectedKeys="current" mode="inline" style="flex: 1; overflow-y: scroll; overflow-x: hidden">
+      <a-menu
+        v-model:selectedKeys="current"
+        mode="inline"
+        style="flex: 1; overflow-y: scroll; overflow-x: hidden"
+      >
         <template v-if="schemas.length">
-          <a-menu-item v-for="schema in schemas" :key="schema.objectId" @click="handleClick(schema)">
+          <a-menu-item
+            v-for="schema in schemas"
+            :key="schema.objectId"
+            @click="handleClick(schema)"
+          >
             {{ schema.name }}
           </a-menu-item>
         </template>
@@ -29,36 +40,50 @@
         <a-col span="6"></a-col>
         <a-col span="6"></a-col>
         <a-col span="4" offset="2">
-          <a-button type="primary" @click="showModal('add')" v-if="current.length">添加字段</a-button>
+          <a-button
+            type="primary"
+            @click="showModal('add')"
+            v-if="current.length"
+            >添加字段</a-button
+          >
         </a-col>
       </a-row>
 
-      <div :style="
-        fields.length
-          ? {
-            display: 'flex',
-            'flex-wrap': 'wrap',
-            'overflow-y': 'scroll',
-            flex: '1',
-          }
-          : {
-            display: 'flex',
-            'flex-wrap': 'wrap',
-            'overflow-y': 'scroll',
-            flex: '1',
-            'align-items': 'center',
-            'justify-content': 'center',
-          }
-      ">
+      <div
+        :style="
+          fields.length
+            ? {
+                display: 'flex',
+                'flex-wrap': 'wrap',
+                'overflow-y': 'scroll',
+                flex: '1',
+              }
+            : {
+                display: 'flex',
+                'flex-wrap': 'wrap',
+                'overflow-y': 'scroll',
+                flex: '1',
+                'align-items': 'center',
+                'justify-content': 'center',
+              }
+        "
+      >
         <template v-if="fields.length">
           <template v-for="field in fields" :key="field.name">
-            <a-card style="width: 300px; height: min-content; margin-bottom: 10px">
+            <a-card
+              style="width: 300px; height: min-content; margin-bottom: 10px"
+            >
               <a-descriptions :title="field.chineseName" bordered>
                 <template #extra>
                   <a-button type="primary" @click="showModal('edit', field)">
                     编辑
                   </a-button>
-                  <a-popconfirm title="确定删除此字段" ok-text="Yes" cancel-text="No" @confirm="handleDelete(field)">
+                  <a-popconfirm
+                    title="确定删除此字段"
+                    ok-text="Yes"
+                    cancel-text="No"
+                    @confirm="handleDelete(field)"
+                  >
                     <a-button type="primary" danger style="margin: 0 0 0 10px">
                       删除
                     </a-button>
@@ -79,13 +104,21 @@
                 <a-descriptions-item label="编辑组件" :span="3">
                   {{ field.editComponent }}
                 </a-descriptions-item>
-                <a-descriptions-item v-if="field.editComponent == 'a-select'" label="组件数据源" :span="3">
+                <a-descriptions-item
+                  v-if="field.editComponent == 'a-select'"
+                  label="组件数据源"
+                  :span="3"
+                >
                   {{ field.dataSource }}
                 </a-descriptions-item>
                 <a-descriptions-item label="默认值" :span="3">
                   {{ field.defaultValue }}
                 </a-descriptions-item>
-                <a-descriptions-item label="指向表名" v-if="field.type == 'Pointer'" :span="3">
+                <a-descriptions-item
+                  label="指向表名"
+                  v-if="field.type == 'Pointer'"
+                  :span="3"
+                >
                   {{ field.targetClass }}
                 </a-descriptions-item>
               </a-descriptions>
@@ -100,96 +133,147 @@
   </a-layout>
 
   <!-- 新建Schema modal -->
-  <a-modal v-model:visible="schemaVisible" title="新建Schema" @ok="schemaSubmit()">
+  <a-modal
+    v-model:visible="schemaVisible"
+    title="新建Schema"
+    @ok="schemaSubmit()"
+  >
     <a-form :model="schemaState" ref="schemaForm" autocomplete="off">
-      <a-form-item label="schema名称" name="name" :rules="[{ required: true, message: 'Please input your schema名称!' }]">
+      <a-form-item
+        label="schema名称"
+        name="name"
+        :rules="[{ required: true, message: 'Please input your schema名称!' }]"
+      >
         <a-input placeholder="请输入表名" v-model:value="schemaState.name" />
       </a-form-item>
     </a-form>
   </a-modal>
 
   <!-- 编辑/新建字段 -->
-  <a-modal v-model:visible="fieldVisible" :title="modalType == 'add' ? '新建字段' : '修改字段'" @ok="fieldSubmit()">
+  <a-modal
+    v-model:visible="fieldVisible"
+    :title="modalType == 'add' ? '新建字段' : '修改字段'"
+    @ok="fieldSubmit()"
+  >
     <a-form :model="fieldState" ref="fieldForm" autocomplete="off">
-      <a-form-item label="字段名称" name="name" :rules="[{ required: true, message: 'Please input your 字段名称!' }]">
-        <a-input v-model:value="fieldState.name" placeholder="请输入字段名称" :disabled="modalType == 'edit'" />
+      <a-form-item
+        label="字段名称"
+        name="name"
+        :rules="[{ required: true, message: 'Please input your 字段名称!' }]"
+      >
+        <a-input
+          v-model:value="fieldState.name"
+          placeholder="请输入字段名称"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
-      <a-form-item label="中文名称" name="chineseName" :rules="[{ required: true, message: 'Please input your 中文名称!' }]">
-        <a-input placeholder="请输入字段中文名称" v-model:value="fieldState.chineseName" />
+      <a-form-item
+        label="中文名称"
+        name="chineseName"
+        :rules="[{ required: true, message: 'Please input your 中文名称!' }]"
+      >
+        <a-input
+          placeholder="请输入字段中文名称"
+          v-model:value="fieldState.chineseName"
+        />
       </a-form-item>
-      <a-form-item label="是否必填" name="required" :rules="[{ required: true, message: 'Please select your 是否必填!' }]">
-        <a-switch v-model:checked="fieldState.required" :disabled="modalType == 'edit'" />
+      <a-form-item
+        label="是否必填"
+        name="required"
+        :rules="[{ required: true, message: 'Please select your 是否必填!' }]"
+      >
+        <a-switch
+          v-model:checked="fieldState.required"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
-      <a-form-item label="字段类型" name="type" :rules="[{ required: true, message: 'Please select your 字段类型!' }]">
-        <a-select v-model:value="fieldState.type" style="width: 100%" placeholder="请选择字段类型"
-          :disabled="modalType == 'edit'" show-search allowClear :options="[
-            {
-              label: 'String',
-              value: 'String',
-            },
-            {
-              label: 'Number',
-              value: 'Number',
-            },
-            {
-              label: 'Object',
-              value: 'Object',
-            },
-            {
-              label: 'Array',
-              value: 'Array',
-            },
-            {
-              label: 'Pointer',
-              value: 'Pointer',
-            },
-            {
-              label: 'Boolean',
-              value: 'Boolean',
-            },
-            {
-              label: 'Date',
-              value: 'Date',
-            },
-          ]"></a-select>
+      <a-form-item
+        label="字段类型"
+        name="type"
+        :rules="[{ required: true, message: 'Please select your 字段类型!' }]"
+      >
+        <a-select
+          v-model:value="fieldState.type"
+          style="width: 100%"
+          placeholder="请选择字段类型"
+          :disabled="modalType == 'edit'"
+          show-search
+          allowClear
+          :options="fieldTypes"
+        ></a-select>
       </a-form-item>
       <a-form-item label="字段默认值" name="defaultValue">
-        <a-input v-model:value="fieldState.defaultValue" placeholder="请输入字段默认值" :disabled="modalType == 'edit'" />
+        <a-input
+          v-model:value="fieldState.defaultValue"
+          placeholder="请输入字段默认值"
+          :disabled="modalType == 'edit'"
+        />
       </a-form-item>
-      <a-form-item label="编辑组件" name="editComponent" :rules="[
-        { required: false, message: 'Please select your 字段编辑组件!' },
-      ]">
-        <a-select v-model:value="fieldState.editComponent" style="width: 100%" placeholder="请选择字段编辑组件"
-          :options="antdComponents" show-search allowClear></a-select>
+      <a-form-item
+        label="编辑组件"
+        name="editComponent"
+        :rules="[
+          { required: false, message: 'Please select your 字段编辑组件!' },
+        ]"
+      >
+        <a-select
+          v-model:value="fieldState.editComponent"
+          style="width: 100%"
+          placeholder="请选择字段编辑组件"
+          :options="antdComponents"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
-      <a-form-item v-if="fieldState.editComponent == 'Select'" label="数据源" name="type"
-        :rules="[{ required: true, message: 'Please select your 数据源!' }]">
-        <a-select v-model:value="fieldState.dataSource" style="width: 100%" placeholder="请选择数据源" :options="dataOrigin"
-          show-search allowClear></a-select>
+      <a-form-item
+        v-if="fieldState.editComponent == 'Select'"
+        label="数据源"
+        name="type"
+        :rules="[{ required: true, message: 'Please select your 数据源!' }]"
+      >
+        <a-select
+          v-model:value="fieldState.dataSource"
+          style="width: 100%"
+          placeholder="请选择数据源"
+          :options="dataOrigin"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
-      <a-form-item v-if="fieldState.type == 'Pointer'" label="指向表名" name="type"
-        :rules="[{ required: true, message: 'Please select your 指向表名!' }]">
-        <a-select :disabled="modalType == 'edit'" v-model:value="fieldState.targetClass" style="width: 100%"
-          placeholder="请选择指向表名" :options="schemaOptions" show-search allowClear></a-select>
+      <a-form-item
+        v-if="fieldState.type == 'Pointer'"
+        label="指向表名"
+        name="type"
+        :rules="[{ required: true, message: 'Please select your 指向表名!' }]"
+      >
+        <a-select
+          :disabled="modalType == 'edit'"
+          v-model:value="fieldState.targetClass"
+          style="width: 100%"
+          placeholder="请选择指向表名"
+          :options="schemaOptions"
+          show-search
+          allowClear
+        ></a-select>
       </a-form-item>
 
-      <a-form-item v-if="fieldState.targetClass === '_User'" label="仅自己" name="type">
-        <a-switch v-model:checked="fieldState.isOneself" checked-children="是" un-checked-children="否" />
+      <a-form-item
+        v-if="fieldState.targetClass === '_User'"
+        label="仅自己"
+        name="type"
+      >
+        <a-switch
+          v-model:checked="fieldState.isOneself"
+          checked-children="是"
+          un-checked-children="否"
+        />
       </a-form-item>
     </a-form>
   </a-modal>
 </template>
 
 <script>
-import {
-  defineComponent,
-  onMounted,
-  reactive,
-  ref,
-  computed,
-  onUpdated,
-  watch,
-} from "vue";
+import { defineComponent, reactive, ref, computed, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 import * as base from "@/apis/base";
 import { notification, Empty } from "ant-design-vue";
@@ -274,12 +358,12 @@ export default defineComponent({
         };
         return record.fields[key]["type"] == "Pointer"
           ? Object.assign({}, field, {
-            targetClass: record.fields[key]["targetClass"],
-            isOneself:
-              record.fields[key]["targetClass"] === "_User"
-                ? record.fields[key]["isOneself"]
-                : false,
-          })
+              targetClass: record.fields[key]["targetClass"],
+              isOneself:
+                record.fields[key]["targetClass"] === "_User"
+                  ? record.fields[key]["isOneself"]
+                  : false,
+            })
           : field;
       });
     };
@@ -300,10 +384,10 @@ export default defineComponent({
           fieldState[key] = undefined;
           fieldState["required"] = false;
         });
-      }
-    }
+      },
+    };
     const showModal = (t, record) => {
-      modalOption[t](record)
+      modalOption[t](record);
       modalType.value = t;
       fieldVisible.value = true;
     };
@@ -340,7 +424,7 @@ export default defineComponent({
               return item.objectId == current.value[0];
             })?.[0].name,
             fieldState,
-          })
+          });
         }
         loadSchema(meta);
         fieldVisible.value = false;
@@ -364,12 +448,31 @@ export default defineComponent({
       }
     };
 
+    /* 字段类型列表获取 */
+    const fieldTypes = ref([]);
+    const getFieldTypes = async () => {
+      const result = await base.findList({
+        className: "FieldType",
+        name: "",
+      });
+      if (result.code == 200) {
+        fieldTypes.value = [
+          ...result.data.map((item) => {
+            return {
+              label: item.name,
+              value: item.name,
+            };
+          }),
+        ];
+      }
+    };
+
     onUpdated(() => {
       store.dispatch("UpdateStore");
     });
 
     await loadSchema(meta);
-
+    await getFieldTypes();
     return {
       current,
       schemas,
@@ -385,6 +488,7 @@ export default defineComponent({
       dataOrigin,
       antdComponents,
       simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
+      fieldTypes,
       schemaSubmit,
       fieldSubmit,
       handleClick,

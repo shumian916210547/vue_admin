@@ -100,22 +100,13 @@
   ></CommonPageForm>
 </template>
 <script>
-import {
-  computed,
-  defineComponent,
-  onMounted,
-  reactive,
-  ref,
-  watch,
-} from "vue";
+import { defineComponent, onMounted, reactive, ref } from "vue";
 import { InboxOutlined } from "@ant-design/icons-vue";
 import * as antdComponent from "ant-design-vue";
 import CommonPageForm from "@/components/CommonPageForm.vue";
 import { notification } from "ant-design-vue";
 import * as base from "@/apis/base";
 import * as user from "@/apis/user";
-import { useRoute } from "vue-router";
-import { useStore } from "vuex";
 import { Mixins } from "@/mixins";
 export default defineComponent({
   components: {
@@ -125,51 +116,11 @@ export default defineComponent({
   props: {},
 
   setup(props, ctx) {
-    const route = useRoute();
-    const store = useStore();
-    let { meta } = route;
-    const { pagination, loading } = Mixins();
-    let { companyId, className, columns, fields, modalWidth } = meta;
-    pagination.companyId = companyId;
-    pagination.className = className;
+    const { pagination, loading, companyId, className, fields, modalWidth } =
+      Mixins();
     const formValue = reactive({});
     const visible = ref(false);
     let antd = antdComponent;
-    /* 表头 */
-    const tables = computed(() => {
-      return store.getters["GETTABLES"];
-    });
-    let tableColums = ref([]);
-    const incHeader = ref([]);
-    watch(
-      tables,
-      (n, o) => {
-        if (Object.keys(n).length) {
-          Object.keys(n?.[className]).forEach((item) => {
-            if (item != "company" && n?.[className]?.[item]?.chineseName) {
-              incHeader.value.push({
-                title: n?.[className]?.[item]?.chineseName,
-                key: item,
-              });
-            }
-          });
-          tableColums.value = columns.map((field) => {
-            return {
-              key: field,
-              dataIndex: field,
-              title: n?.[className]?.[field]?.chineseName,
-            };
-          });
-          tableColums.value.push({
-            title: "操作",
-            key: "operation",
-            fixed: "right",
-            width: 200,
-          });
-        }
-      },
-      { deep: true, immediate: true }
-    );
 
     /* 加载数据 */
     const tableData = ref([]);

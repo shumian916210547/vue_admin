@@ -4,12 +4,22 @@
       <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
         <div class="logo">
           <!-- VUE ADMIN -->
-          <img style="height: 100%; width: 100%; object-fit: contain"
-            src="http://api.shumian.top:4200/cmn/readFile/resources/uJArJaY5Hw/2023/3/9/logo.png" alt="" srcset="" />
+          <img
+            style="height: 100%; width: 100%; object-fit: contain"
+            src="http://api.shumian.top:4200/cmn/readFile/resources/uJArJaY5Hw/2023/3/9/logo.png"
+            alt=""
+            srcset=""
+          />
         </div>
 
-        <a-menu style="flex: 1; overflow-y: scroll; overflow-x: hidden" v-model:openKeys="openKeys"
-          v-model:selectedKeys="selectedKeys" mode="inline" theme="dark" :inline-collapsed="collapsed">
+        <a-menu
+          style="flex: 1; overflow-y: scroll; overflow-x: hidden"
+          v-model:openKeys="openKeys"
+          v-model:selectedKeys="selectedKeys"
+          mode="inline"
+          theme="dark"
+          :inline-collapsed="collapsed"
+        >
           <a-menu-item key="/home" @click="toPage('/home')">
             <template #icon>
               <HomeOutlined />
@@ -21,43 +31,61 @@
               <component :is="antdIcons[module.meta.icon]"></component>
             </template>
             <template #title>{{ module.name }}</template>
-            <a-menu-item v-for="route in module.router" :key="route.path" @click="toPage(route.path)">{{ route.name
-            }}</a-menu-item>
+            <a-menu-item
+              v-for="route in module.router"
+              :key="module.path + route.path"
+              @click="toPage(module.path + route.path)"
+              >{{ route.name }}</a-menu-item
+            >
           </a-sub-menu>
         </a-menu>
       </a-layout-sider>
       <a-layout>
-        <a-layout-header style="
-              background: #fff;
-              padding: 0;
-              display: flex;
-              justify-content: space-between;
-            ">
-          <menu-unfold-outlined v-if="collapsed" class="trigger" @click="() => (collapsed = !collapsed)" />
-          <menu-fold-outlined v-else class="trigger" @click="() => (collapsed = !collapsed)" />
+        <a-layout-header
+          :style="{
+            background: '#fff',
+            padding: 0,
+            display: 'flex',
+            justifyContent: 'space-between',
+          }"
+        >
+          <menu-unfold-outlined
+            v-if="collapsed"
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          />
+          <menu-fold-outlined
+            v-else
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          />
           <div>
             <span>{{ userInfo?.username }}</span>
             <a-popover placement="bottomRight">
               <template #content>
                 <div style="display: flex; flex-direction: column">
                   <a-button @click="reLogin()">重新登录</a-button>
-                  <a-button @click="loginOut()" style="margin-top: 10px">退出登录</a-button>
+                  <a-button @click="loginOut()" style="margin-top: 10px"
+                    >退出登录</a-button
+                  >
                 </div>
               </template>
               <user-outlined style="font-size: 24px; margin: 0 24px" />
             </a-popover>
           </div>
         </a-layout-header>
-        <a-layout-content :style="{
-          margin: '10px 10px',
-          padding: '24px',
-          background: '#fff',
-          minHeight: '280px',
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          overflowY: 'scroll',
-        }">
+        <a-layout-content
+          :style="{
+            margin: '10px 10px',
+            padding: '24px',
+            background: '#fff',
+            minHeight: '280px',
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflowY: 'scroll',
+          }"
+        >
           <router-view v-slot="{ Component, route }">
             <suspense>
               <template #default>
@@ -119,7 +147,7 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const zhcn = zhCN;
-    const { toPage } = Mixins()
+    const { toPage } = Mixins();
     const store = useStore();
     let antdComponents = Object.keys(antd).map((key) => {
       return {
