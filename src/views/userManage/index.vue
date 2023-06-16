@@ -102,7 +102,6 @@
 <script>
 import { defineComponent, onMounted, reactive, ref } from "vue";
 import { InboxOutlined } from "@ant-design/icons-vue";
-import * as antdComponent from "ant-design-vue";
 import CommonPageForm from "@/components/CommonPageForm.vue";
 import { notification } from "ant-design-vue";
 import * as base from "@/apis/base";
@@ -113,14 +112,19 @@ export default defineComponent({
     InboxOutlined,
     CommonPageForm,
   },
-  props: {},
 
   setup(props, ctx) {
-    const { pagination, loading, companyId, className, fields, modalWidth } =
-      Mixins();
+    const {
+      pagination,
+      loading,
+      tableColums,
+      companyId,
+      className,
+      fields,
+      modalWidth,
+    } = Mixins();
     const formValue = reactive({});
     const visible = ref(false);
-    let antd = antdComponent;
 
     /* 加载数据 */
     const tableData = ref([]);
@@ -214,7 +218,6 @@ export default defineComponent({
       handleSubmit,
       fields,
       modalWidth,
-      antd,
       showModal,
       loadData,
       handleDelete,

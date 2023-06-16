@@ -6,7 +6,7 @@
           <!-- VUE ADMIN -->
           <img
             style="height: 100%; width: 100%; object-fit: contain"
-            src="http://api.shumian.top:4200/cmn/readFile/resources/uJArJaY5Hw/2023/3/9/logo.png"
+            src=""
             alt=""
             srcset=""
           />
@@ -87,16 +87,7 @@
           }"
         >
           <router-view v-slot="{ Component, route }">
-            <suspense>
-              <template #default>
-                <component :is="Component" :key="route.path" />
-              </template>
-              <template #fallback>
-                <div class="example">
-                  <a-spin tip="loading..." size="large" />
-                </div>
-              </template>
-            </suspense>
+            <component :is="Component" :key="route.path" />
           </router-view>
         </a-layout-content>
       </a-layout>
@@ -124,7 +115,6 @@ import {
   reactive,
   ref,
   toRefs,
-  watch,
 } from "vue";
 import { useRoute } from "vue-router";
 import zhCN from "ant-design-vue/es/locale/zh_CN";

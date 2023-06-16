@@ -5,7 +5,7 @@
         <component :is="Component" :key="route.path" />
       </template>
       <template #fallback>
-        <div class="example">
+        <div class="pageLoading">
           <a-spin tip="loading..." size="large" />
         </div>
       </template>
@@ -23,3 +23,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.pageLoading {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
