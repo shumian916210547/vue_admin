@@ -167,7 +167,7 @@ import {
   reactive,
   ref,
 } from "vue";
-import { debounce } from "lodash";
+import { debounce } from "@/utils/utils";
 import * as antdIcons from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import {

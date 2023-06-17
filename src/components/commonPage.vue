@@ -132,7 +132,7 @@ import { defineComponent, reactive, ref } from "vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import * as xlsx from "xlsx";
-import { debounce } from "lodash";
+import { debounce } from "@/utils/utils";
 import CommonPageImport from "./CommonPageImport.vue";
 import CommonPageForm from "./CommonPageForm.vue";
 import * as base from "@/apis/base";

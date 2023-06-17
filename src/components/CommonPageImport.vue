@@ -35,7 +35,7 @@
 import { message } from "ant-design-vue";
 import * as antdIcon from "@ant-design/icons-vue";
 import * as xlsx from "xlsx";
-import { debounce } from "lodash";
+import { debounce } from "@/utils/utils";
 import { defineComponent, watch, ref } from "vue";
 
 export default defineComponent({

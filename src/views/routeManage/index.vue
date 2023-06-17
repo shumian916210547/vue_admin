@@ -196,7 +196,7 @@
 
 <script>
 import { computed, defineComponent, onUpdated, reactive, ref } from "vue";
-import { debounce } from "lodash";
+import { debounce } from "@/utils/utils";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import {

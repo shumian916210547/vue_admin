@@ -38,7 +38,7 @@
 
 <script>
 import FormItemComponent from "./FormItemComponent.vue";
-import { debounce } from "lodash";
+import { debounce } from "@/utils/utils";
 import { defineComponent, reactive, ref, watch } from "vue";
 import { useStore } from "vuex";
 export default defineComponent({

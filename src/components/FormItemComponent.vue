@@ -32,6 +32,8 @@
     :filter-option="filterOption"
     style="width: 100%"
   />
+
+  <!-- @preview="handlePreview" -->
   <a-upload
     v-else-if="ComponentName == 'Upload'"
     v-model:file-list="componentValue"
@@ -39,7 +41,6 @@
     :data="{
       userid: userInfo.userid,
     }"
-    accept="video/*,image/*"
   >
     <a-button>
       <upload-outlined></upload-outlined>
@@ -54,6 +55,19 @@
     v-model:value="componentValue"
     style="width: 100%"
   />
+
+  <a-modal
+    v-model:visible="previewObj.visible"
+    width="1000px"
+    @ok="visible = false"
+  >
+    <iframe
+      sandbox="allow-scripts allow-top-navigation allow-same-origin allow-popups"
+      :src="previewObj.previewUrl"
+      frameborder="0"
+      style="z-index: 1000; height: 560px; width: 100%"
+    ></iframe>
+  </a-modal>
 </template>
 
 
@@ -61,7 +75,7 @@
 import richText from "./richText.vue";
 import * as antdComponent from "ant-design-vue";
 import * as antdIcon from "@ant-design/icons-vue";
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, reactive, ref, watch } from "vue";
 export default defineComponent({
   /* 名称 */
   name: "FormItemComponent",
@@ -111,10 +125,24 @@ export default defineComponent({
       return option.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     };
 
+    let previewObj = reactive({
+      visible: false,
+      previewUrl: "",
+    });
+
+    const handlePreview = (ev) => {
+      if (ev.name.indexOf(".doc") > -1) {
+        previewObj.previewUrl = ev.url;
+        previewObj.visible = true;
+      } else return window.open(ev.url, "_blank");
+    };
+
     return {
       antdComponent,
       componentValue,
+      previewObj,
       filterOption,
+      handlePreview,
       baseUrl: process.env.VUE_APP_BASE_API,
       userInfo: JSON.parse(sessionStorage.getItem("userInfo")),
     };
