@@ -31,62 +31,64 @@
       </a-col>
     </a-row>
   </a-form>
+  <div class="tableContent">
+    <a-table
+      :pagination="pagination"
+      :loading="loading"
+      sticky
+      @change="loadData(pagination)"
+      :columns="columns"
+      :data-source="tableData"
+      style="flex: 1"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'name'">
+          <span>{{ record.name }}</span>
+        </template>
 
-  <a-table
-    :pagination="pagination"
-    :loading="loading"
-    @change="loadData(pagination)"
-    :columns="columns"
-    :data-source="tableData"
-    style="flex: 1"
-  >
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'name'">
-        <span>{{ record.name }}</span>
-      </template>
+        <template v-else-if="column.key === 'isDelete'">
+          <span v-if="record.isDelete">是</span>
+          <span v-else>否</span>
+        </template>
 
-      <template v-else-if="column.key === 'isDelete'">
-        <span v-if="record.isDelete">是</span>
-        <span v-else>否</span>
-      </template>
-
-      <template v-else-if="column.key === 'operation'">
-        <a-button
-          type="primary"
-          @click="
-            showModal({
-              path: record.path,
-              name: record.name,
-              objectId: record.objectId,
-              pagePath: record.pagePath,
-              isDelete: record.isDelete,
-              className: record?.option?.className || new Array(),
-              column: record?.option?.columns || new Array(),
-              fields: record?.option?.fields || new Array(),
-              modalWidth: record?.option?.modalWidth || 520,
-              switchs: record?.switchs || new Array(),
-            })
-          "
-          >编辑</a-button
-        >
-        <a-popconfirm
-          title="确定删除此路由"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="confirmDelete(record)"
-        >
+        <template v-else-if="column.key === 'operation'">
           <a-button
             type="primary"
-            danger
-            style="margin: 0 0 0 10px"
-            :hidden="record.isDelete"
+            @click="
+              showModal({
+                path: record.path,
+                name: record.name,
+                objectId: record.objectId,
+                pagePath: record.pagePath,
+                isDelete: record.isDelete,
+                className: record?.option?.className || new Array(),
+                column: record?.option?.columns || new Array(),
+                fields: record?.option?.fields || new Array(),
+                modalWidth: record?.option?.modalWidth || 520,
+                switchs: record?.switchs || new Array(),
+              })
+            "
+            >编辑</a-button
           >
-            删除
-          </a-button>
-        </a-popconfirm>
+          <a-popconfirm
+            title="确定删除此路由"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="confirmDelete(record)"
+          >
+            <a-button
+              type="primary"
+              danger
+              style="margin: 0 0 0 10px"
+              :hidden="record.isDelete"
+            >
+              删除
+            </a-button>
+          </a-popconfirm>
+        </template>
       </template>
-    </template>
-  </a-table>
+    </a-table>
+  </div>
 
   <!-- 表单 -->
   <a-modal v-model:visible="visible" @ok="handleSubmit">
@@ -442,5 +444,12 @@ export default defineComponent({
 :deep(.ant-spin-container),
 :deep(.ant-spin-nested-loading) {
   height: 100%;
+}
+
+.tableContent {
+  overflow-y: scroll;
+}
+.tableContent::-webkit-scrollbar {
+  width: 0 !important;
 }
 </style>

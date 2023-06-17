@@ -60,53 +60,56 @@
       </a-col>
     </a-row>
   </a-form>
-  <a-table
-    :pagination="pagination"
-    :loading="loading"
-    @change="loadData(pagination)"
-    :columns="tableColums"
-    :data-source="tableData"
-  >
-    <template #bodyCell="{ column, record }">
-      <template v-if="column?.key === 'isDelete'">
-        <span v-if="record.isDelete">是</span>
-        <span v-else>否</span>
-      </template>
-      <template v-else-if="column?.key === 'status'">
-        <span v-if="record.status">已完成</span>
-        <span v-else>未完成</span>
-      </template>
-      <template v-else-if="column?.key === 'operation'">
-        <a-button
-          v-permission="'Edit'"
-          type="primary"
-          @click="showModal(record)"
-          >编辑</a-button
-        >
-
-        <a-popconfirm
-          title="确定删除此行"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="handleDelete(record)"
-        >
+  <div class="tableContent">
+    <a-table
+      sticky
+      :pagination="pagination"
+      :loading="loading"
+      @change="loadData(pagination)"
+      :columns="tableColums"
+      :data-source="tableData"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column?.key === 'isDelete'">
+          <span v-if="record.isDelete">是</span>
+          <span v-else>否</span>
+        </template>
+        <template v-else-if="column?.key === 'status'">
+          <span v-if="record.status">已完成</span>
+          <span v-else>未完成</span>
+        </template>
+        <template v-else-if="column?.key === 'operation'">
           <a-button
-            v-permission="'Delete'"
+            v-permission="'Edit'"
             type="primary"
-            danger
-            style="margin: 0 0 0 10px"
+            @click="showModal(record)"
+            >编辑</a-button
           >
-            删除
-          </a-button>
-        </a-popconfirm>
+
+          <a-popconfirm
+            title="确定删除此行"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="handleDelete(record)"
+          >
+            <a-button
+              v-permission="'Delete'"
+              type="primary"
+              danger
+              style="margin: 0 0 0 10px"
+            >
+              删除
+            </a-button>
+          </a-popconfirm>
+        </template>
+        <span v-else>{{
+          record[column?.key]?.name ||
+          record[column?.key]?.username ||
+          record[column?.key]
+        }}</span>
       </template>
-      <span v-else>{{
-        record[column?.key]?.name ||
-        record[column?.key]?.username ||
-        record[column?.key]
-      }}</span>
-    </template>
-  </a-table>
+    </a-table>
+  </div>
   <!-- 表单 -->
   <CommonPageForm
     v-model:visible="visible"
@@ -352,3 +355,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.tableContent {
+  overflow-y: scroll;
+}
+.tableContent::-webkit-scrollbar {
+  width: 0 !important;
+}
+</style>

@@ -3,7 +3,7 @@
     <a-layout-sider>
       <a-row style="display: flex; align-items: center; padding: 10px 0">
         <a-col :span="8">Schema</a-col>
-        <a-col :span="8" offset="2">
+        <a-col :span="8" offset="1">
           <a-button
             type="primary"
             @click="
@@ -11,7 +11,7 @@
                 schemaVisible = true;
               }
             "
-            >create class
+            >Create Schema
           </a-button>
         </a-col>
       </a-row>
@@ -26,7 +26,10 @@
             :key="schema.objectId"
             @click="handleClick(schema)"
           >
-            {{ schema.name }}
+            <a-tag color="green">{{ schema.name }}</a-tag>
+            <a-tag color="orange">{{
+              Object.keys(schema.fields)?.length
+            }}</a-tag>
           </a-menu-item>
         </template>
         <template v-else>
@@ -49,85 +52,31 @@
         </a-col>
       </a-row>
 
-      <div
-        :style="
-          fields.length
-            ? {
-                display: 'flex',
-                'flex-wrap': 'wrap',
-                'overflow-y': 'scroll',
-                flex: '1',
-              }
-            : {
-                display: 'flex',
-                'flex-wrap': 'wrap',
-                'overflow-y': 'scroll',
-                flex: '1',
-                'align-items': 'center',
-                'justify-content': 'center',
-              }
-        "
-      >
-        <template v-if="fields.length">
-          <template v-for="field in fields" :key="field.name">
-            <a-card
-              style="width: 300px; height: min-content; margin-bottom: 10px"
-            >
-              <a-descriptions :title="field.chineseName" bordered>
-                <template #extra>
-                  <a-button type="primary" @click="showModal('edit', field)">
-                    编辑
-                  </a-button>
-                  <a-popconfirm
-                    title="确定删除此字段"
-                    ok-text="Yes"
-                    cancel-text="No"
-                    @confirm="handleDelete(field)"
-                  >
-                    <a-button type="primary" danger style="margin: 0 0 0 10px">
-                      删除
-                    </a-button>
-                  </a-popconfirm>
-                </template>
-                <a-descriptions-item label="字段名称" :span="3">
-                  {{ field.name }}
-                </a-descriptions-item>
-                <a-descriptions-item label="中文名称" :span="3">
-                  {{ field.chineseName }}
-                </a-descriptions-item>
-                <a-descriptions-item label="是否必填" :span="3">
-                  {{ field.required }}
-                </a-descriptions-item>
-                <a-descriptions-item label="字段类型" :span="3">
-                  {{ field.type }}
-                </a-descriptions-item>
-                <a-descriptions-item label="编辑组件" :span="3">
-                  {{ field.editComponent }}
-                </a-descriptions-item>
-                <a-descriptions-item
-                  v-if="field.editComponent == 'a-select'"
-                  label="组件数据源"
-                  :span="3"
-                >
-                  {{ field.dataSource }}
-                </a-descriptions-item>
-                <a-descriptions-item label="默认值" :span="3">
-                  {{ field.defaultValue }}
-                </a-descriptions-item>
-                <a-descriptions-item
-                  label="指向表名"
-                  v-if="field.type == 'Pointer'"
-                  :span="3"
-                >
-                  {{ field.targetClass }}
-                </a-descriptions-item>
-              </a-descriptions>
-            </a-card>
+      <div class="fieldContent">
+        <a-table
+          :pagination="false"
+          sticky
+          :dataSource="fields"
+          :columns="columns"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'operation'">
+              <a-button type="primary" @click="showModal('edit', record)">
+                编辑
+              </a-button>
+              <a-popconfirm
+                title="确定删除此字段"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="handleDelete(record)"
+              >
+                <a-button type="primary" danger style="margin: 0 0 0 10px">
+                  删除
+                </a-button>
+              </a-popconfirm>
+            </template>
           </template>
-        </template>
-        <template v-else>
-          <a-empty :image="simpleImage" />
-        </template>
+        </a-table>
       </div>
     </a-layout-content>
   </a-layout>
@@ -280,6 +229,61 @@ import { notification, Empty } from "ant-design-vue";
 import { insertSchema, updateById, removeFields } from "@/apis/schema";
 import { updateOption } from "@/apis/devRoute";
 import { useStore } from "vuex";
+const columns = [
+  {
+    title: "名称",
+    dataIndex: "name",
+    key: "name",
+    ellipsis: true,
+  },
+  {
+    title: "中文名称",
+    dataIndex: "chineseName",
+    key: "chineseName",
+    ellipsis: true,
+  },
+  {
+    title: "是否必填",
+    dataIndex: "required",
+    key: "required",
+    ellipsis: true,
+  },
+  {
+    title: "字段类型",
+    dataIndex: "type",
+    key: "type",
+    ellipsis: true,
+  },
+  {
+    title: "编辑组件",
+    dataIndex: "editComponent",
+    key: "editComponent",
+    ellipsis: true,
+  },
+  {
+    title: "组件数据源",
+    dataIndex: "dataSource",
+    key: "dataSource",
+    ellipsis: true,
+  },
+  {
+    title: "默认值",
+    dataIndex: "defaultValue",
+    key: "defaultValue",
+    ellipsis: true,
+  },
+  {
+    title: "指向表名",
+    dataIndex: "targetClass",
+    key: "targetClass",
+    ellipsis: true,
+  },
+  {
+    title: "操作",
+    dataIndex: "operation",
+    width: 180,
+  },
+];
 export default defineComponent({
   async setup() {
     const store = useStore();
@@ -494,6 +498,7 @@ export default defineComponent({
       handleClick,
       showModal,
       handleDelete,
+      columns,
     };
   },
 });
@@ -506,10 +511,22 @@ export default defineComponent({
 }
 
 :deep(.ant-menu-inline::-webkit-scrollbar) {
-  width: 0;
+  width: 0 !important;
+}
+
+.fieldContent {
+  overflow-y: scroll;
+}
+
+.fieldContent::-webkit-scrollbar {
+  width: 0 !important;
 }
 
 .ant-layout-sider {
   background: white;
+  width: 220px !important;
+  flex: 0 0 220px !important;
+  max-width: none !important;
+  min-width: none !important;
 }
 </style>

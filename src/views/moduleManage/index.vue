@@ -31,55 +31,56 @@
       </a-col>
     </a-row>
   </a-form>
+  <div class="tableContent">
+    <a-table
+      :pagination="pagination"
+      :loading="loading"
+      sticky
+      @change="loadData(pagination)"
+      :columns="columns"
+      :data-source="tableData"
+      style="flex: 1"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'name'">
+          <span>{{ record.name }}</span>
+        </template>
 
-  <a-table
-    :pagination="pagination"
-    :loading="loading"
-    @change="loadData(pagination)"
-    :columns="columns"
-    :data-source="tableData"
-    style="flex: 1"
-  >
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'name'">
-        <span>{{ record.name }}</span>
+        <template v-else-if="column.key === 'isDelete'">
+          <span v-if="record.isDelete">是</span>
+          <span v-else>否</span>
+        </template>
+
+        <template v-else-if="column.key === 'operation'">
+          <a-button
+            type="primary"
+            @click="
+              showModal({
+                objectId: record.objectId,
+                name: record.name,
+                path: record.path,
+                router: record.router,
+                companyId: record?.meta?.companyId || [],
+                icon: record?.meta?.icon || [],
+                user: record?.user?.objectId || [],
+              })
+            "
+            >编辑</a-button
+          >
+          <a-popconfirm
+            title="确定删除此模块"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="confirmDelete(record)"
+          >
+            <a-button type="primary" danger style="margin: 0 0 0 10px">
+              删除
+            </a-button>
+          </a-popconfirm>
+        </template>
       </template>
-
-      <template v-else-if="column.key === 'isDelete'">
-        <span v-if="record.isDelete">是</span>
-        <span v-else>否</span>
-      </template>
-
-      <template v-else-if="column.key === 'operation'">
-        <a-button
-          type="primary"
-          @click="
-            showModal({
-              objectId: record.objectId,
-              name: record.name,
-              path: record.path,
-              router: record.router,
-              companyId: record?.meta?.companyId || [],
-              icon: record?.meta?.icon || [],
-              user: record?.user?.objectId || [],
-            })
-          "
-          >编辑</a-button
-        >
-        <a-popconfirm
-          title="确定删除此模块"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="confirmDelete(record)"
-        >
-          <a-button type="primary" danger style="margin: 0 0 0 10px">
-            删除
-          </a-button>
-        </a-popconfirm>
-      </template>
-    </template>
-  </a-table>
-
+    </a-table>
+  </div>
   <!-- 表单 -->
   <a-modal v-model:visible="visible" @ok="handleSubmit">
     <a-form
@@ -417,5 +418,12 @@ export default defineComponent({
 :deep(.ant-spin-container),
 :deep(.ant-spin-nested-loading) {
   height: 100%;
+}
+
+.tableContent {
+  overflow-y: scroll;
+}
+.tableContent::-webkit-scrollbar {
+  width: 0 !important;
 }
 </style>
