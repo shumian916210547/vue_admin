@@ -1,4 +1,5 @@
 import { get, post, remove, put } from "@/http/index";
+import md5 from "MD5";
 /**
  * 用户登录
  * @path /admin/user/loggingIn
@@ -9,7 +10,7 @@ import { get, post, remove, put } from "@/http/index";
  */
 export function loggingIn({ username, password }) {
   return new Promise((resolve, reject) => {
-    post("/admin/user/loggingIn", { username, password })
+    post("/admin/user/loggingIn", { username, password: md5(password) })
       .then((result) => {
         resolve(result);
       })
@@ -34,7 +35,7 @@ export function loggingIn({ username, password }) {
  */
 export function signUp({ username, password, email, companyId, identity, nickname }) {
   return new Promise((resolve, reject) => {
-    post("/admin/user/signUp", { username, password, email, companyId, identity, nickname })
+    post("/admin/user/signUp", { username, password: md5(password), email, companyId, identity, nickname })
       .then((result) => {
         resolve(result);
       })

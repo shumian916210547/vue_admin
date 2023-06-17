@@ -41,7 +41,7 @@ export default defineComponent({
     const onFinish = async (values) => {
       let { code, data, msg } = await loggingIn(values);
       if (code == 200) {
-        sessionStorage.setItem("token", data.sessionToken);
+        sessionStorage.setItem("token", data.token);
         sessionStorage.setItem(
           "userInfo",
           JSON.stringify({

@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "@/store";
+import { notification } from "ant-design-vue";
 import {
   useRoute,
   useRouter
@@ -20,6 +21,7 @@ axios.interceptors.request.use(
     if (config.url.includes('/findAll')) {
       store.commit('SETLOADING', true)
     }
+    config.headers = Object.assign({}, config.headers, { Authorization: sessionStorage.getItem('token') ? 'Bearer ' + sessionStorage.getItem('token') : '', })
     return config;
   },
   (error) => { }
@@ -32,7 +34,13 @@ axios.interceptors.response.use(
     if (response) {
       if (response.data.code == 200) {
         return response;
-      } else { }
+      } else {
+        notification["error"]({
+          message: "错误",
+          description: response.data.msg,
+        });
+
+      }
     } else { }
     return response;
   },
