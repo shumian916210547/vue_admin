@@ -3,7 +3,6 @@
     <a-layout style="height: 100vh">
       <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
         <div class="logo">
-          <!-- VUE ADMIN -->
           <img
             style="height: 100%; width: 100%; object-fit: contain"
             src=""
