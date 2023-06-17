@@ -29,6 +29,7 @@
     v-model:value="componentValue"
     :options="options"
     :field-names="{ label: 'name', value: 'objectId' }"
+    :filter-option="filterOption"
     style="width: 100%"
   />
   <a-upload
@@ -106,9 +107,14 @@ export default defineComponent({
       emit("update:value", n);
     });
 
+    const filterOption = (input, option) => {
+      return option.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    };
+
     return {
       antdComponent,
       componentValue,
+      filterOption,
       baseUrl: process.env.VUE_APP_BASE_API,
       userInfo: JSON.parse(sessionStorage.getItem("userInfo")),
     };

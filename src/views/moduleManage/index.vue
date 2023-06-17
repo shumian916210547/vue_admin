@@ -107,6 +107,7 @@
           :options="routes"
           show-search
           allowClear
+          :filter-option="filterOption"
         ></a-select>
       </a-form-item>
 
@@ -372,6 +373,10 @@ export default defineComponent({
       }
     };
 
+    const filterOption = (input, option) => {
+      return option.name.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+    };
+
     /* 公司列表 */
     let company = computed(() => {
       return store.getters["GETCOMPANY"];
@@ -407,6 +412,7 @@ export default defineComponent({
       handleSubmit,
       loadData,
       confirmDelete,
+      filterOption,
       Users,
       loading,
     };
