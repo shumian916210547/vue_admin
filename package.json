@@ -1,14 +1,16 @@
 {
-  "name": "admin",
+  "name": "backstage_management_system",
   "version": "0.1.0",
   "private": true,
+  "author": "shumian",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "ant-design-vue": "^3.2.20",
     "core-js": "^3.8.3",
-    "element-plus": "^2.3.7",
+    "parse": "^4.1.0",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",

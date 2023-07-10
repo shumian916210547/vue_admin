@@ -15,5 +15,5 @@ npm run serve
 npm run build
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 创建表格须知
+创建Table统一进入表格管理页面进行Table创建以及字段的创建
