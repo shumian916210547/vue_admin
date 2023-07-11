@@ -6,7 +6,7 @@ export function Mixins() {
 
     // 页面跳转
     const toPage = (path) => {
-        router.push(path);
+        router.push({ path });
     };
 
     return {

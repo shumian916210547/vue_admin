@@ -1,5 +1,5 @@
 import Parse, { Schema } from 'parse'
-import { Capture, FindList } from '@/service/service.config'
+import { Capture, FindList, handleParseError } from '@/service/service.config'
 import { UpdateTablePermission } from './schema.service';
 
 /* 查询所有数据 */
@@ -8,7 +8,7 @@ export const findAll = async (className) => {
     table.includeAll()
     table.descending('createdAt')
     table.limit(1000)
-    return (await table.find()).map(item => item.toJSON())
+    return (await table.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
 
 /* 查询列表 */
@@ -21,7 +21,7 @@ export const findList = async (query) => {
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
     table.descending('createdAt')
     table.includeAll()
-    return new FindList((await table.find()).map(item => item.toJSON()), await table.count())
+    return new FindList((await table.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON()), await table.count().catch(err => { handleParseError(err) }))
 }
 
 /* 查询字段 */
@@ -30,7 +30,7 @@ export const findSchema = async (query) => {
     table.includeAll()
     table.equalTo('name', query.className)
     table.select(['fields'])
-    return await table.first()
+    return await table.first().catch(err => { handleParseError(err) })
 }
 
 /* 新增一行 */
@@ -54,7 +54,7 @@ export const InsertRow = async ({ className, fields, params }) => {
     acl.setPublicWriteAccess(true)
     table.setACL(acl)
     return await Capture(table.save()).then(success => {
-       /*  UpdateTablePermission(className, success) */
+        /*  UpdateTablePermission(className, success) */
     })
 }
 

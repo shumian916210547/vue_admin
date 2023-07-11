@@ -1,3 +1,4 @@
+/* 深拷贝 */
 export const deepClone = (payload, map = new Map()) => {
     if (map.has(payload)) return map.get(payload);
     if (typeof payload === 'function') return eval(payload.toString())
@@ -20,6 +21,8 @@ export const deepClone = (payload, map = new Map()) => {
     return res;
 }
 
+
+/* 防抖 */
 export const debounce = (fn, wait) => {
     let timer = null
     return () => {

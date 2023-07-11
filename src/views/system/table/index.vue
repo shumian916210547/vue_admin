@@ -134,8 +134,10 @@ const tableList = ref([...store.getters["GET_TABLES"]]);
 
 /* 获取table列表*/
 const getSchemaList = async (query) => {
+  const result = await loadSchemas(query);
+  if (!result) return;
   tableList.value = [
-    ...(await loadSchemas(query)).map((item, index) => {
+    ...result.map((item, index) => {
       item.className = item.name;
       item.key = index;
       item.fields = Object.keys(item.fields).map((fieldName) => {

@@ -42,9 +42,9 @@
         </template>
         <a-button @click="emit('onEdit', record)">修改</a-button>
         <a-divider type="vertical" />
-        <a-button type="danger" @click="emit('onDelete', record)"
-          >删除</a-button
-        >
+        <a-button type="danger" @click="emit('onDelete', record)">
+          删除
+        </a-button>
       </template>
       <template v-else-if="column.key == 'icon'">
         <component :is="AntdIcon[record[column.key]]"></component>

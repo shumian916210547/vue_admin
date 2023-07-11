@@ -1,4 +1,4 @@
-import { Capture } from "@/service/service.config";
+import { Capture, handleParseError } from "@/service/service.config";
 import Parse from "parse";
 
 /* 更新所有表格权限 */
@@ -18,7 +18,7 @@ export const UpdateTablePermission = async (className,arg2) => {
 
 /* 获取所有schema列表（包含系统schema） */
 export const loadAllSchema = async () => {
-    return await Parse.Schema.all()
+    return await Parse.Schema.all().catch(err => { handleParseError(err) })
 }
 
 /* 获取所有schema */
@@ -77,7 +77,7 @@ const GetSchemaList = async (query) => {
     const Schema = new Parse.Query('Schema');
     Schema.contains('name', query.name)
     Schema.descending("createdAt")
-    return (await Schema.find()).map(item => item.toJSON())
+    return (await Schema.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
 
 

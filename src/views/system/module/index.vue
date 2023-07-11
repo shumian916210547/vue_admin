@@ -122,6 +122,7 @@ const columns = reactive([]);
 /* 获取table字段并且保存 */
 const loadFields = async () => {
   const result = await findSchema({ className: "Route" });
+  if (!result) return;
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
     if (fields[key].type == "String") {

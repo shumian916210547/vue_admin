@@ -93,6 +93,7 @@ const tableColumns = ref([]);
 /* 获取table字段并且保存 */
 const loadFields = async (query) => {
   const result = await findSchema(query);
+  if (!result) return;
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
   });

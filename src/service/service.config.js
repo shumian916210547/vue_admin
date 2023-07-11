@@ -1,4 +1,20 @@
+
 import { notification } from "ant-design-vue";
+import Parse from "parse";
+export const handleParseError = (err) => {
+    switch (err.code) {
+        case Parse.Error.INVALID_SESSION_TOKEN:
+            sessionStorage.clear()
+            localStorage.clear()
+        default:
+            notification.error({
+                message: err.code,
+                description: String(err),
+            });
+            location.reload()
+            break;
+    }
+}
 
 export const Capture = (func) => {
     return new Promise((resolve, reject) => {
@@ -13,7 +29,8 @@ export const Capture = (func) => {
                 message: 'error',
                 description: error.toString(),
             });
-          /*   reject(error) */
+            handleParseError(error)
+            /*   reject(error) */
         })
     })
 }
