@@ -54,7 +54,7 @@ export const InsertRow = async ({ className, fields, params }) => {
     acl.setPublicWriteAccess(true)
     table.setACL(acl)
     return await Capture(table.save()).then(success => {
-        UpdateTablePermission(className, success)
+       /*  UpdateTablePermission(className, success) */
     })
 }
 

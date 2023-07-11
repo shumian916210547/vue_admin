@@ -138,5 +138,6 @@ const loadFields = async () => {
     key: "operation",
   });
 };
-loadFields();
+
+await loadFields();
 </script>

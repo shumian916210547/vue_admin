@@ -79,6 +79,7 @@
           minHeight: '280px',
         }"
       >
+      <!--   <router-view></router-view> -->
         <router-view v-slot="{ Component, route }">
           <suspense>
             <template #default>

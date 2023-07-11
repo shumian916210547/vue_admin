@@ -1,9 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { loadRoutes } from './dynamicRoute'
 import { routes } from './staticRoute'
 import Parse from 'parse'
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
   routes
 })
 let oneEnter = true;
@@ -24,9 +24,11 @@ router.beforeEach(async (to, from, next) => {
         ...to,
         replace: true
       });
-    } else {
-      next()
-    }
+    } else if (to.path == '/') {
+      next({
+        path: "/home"
+      });
+    } else { next() }
   }
 });
 

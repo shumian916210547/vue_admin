@@ -410,7 +410,7 @@ const handleOk = () => {
           required,
           targetClass,
           chineseName,
-          defaultValue,
+          defaultValue: eval("(" + deepClone(defaultValue) + ")"),
           editComponent,
           componentOption: {
             placeholder,

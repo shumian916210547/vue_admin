@@ -96,7 +96,6 @@
 <script setup>
 import IndexField from "./index.field.vue";
 import InsertTable from "./insert.table.vue";
-import CommonForm from "@/components/CommonForm.vue";
 import {
   addField,
   createSchema,
@@ -220,7 +219,7 @@ const queryReset = () => {
   getSchemaList(queryState);
 };
 
-getSchemaList(queryState);
+await getSchemaList(queryState);
 </script>
 
 <style lang="scss" scoped>

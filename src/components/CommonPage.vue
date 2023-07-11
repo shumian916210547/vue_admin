@@ -185,8 +185,8 @@ const handleEdit = async (arg) => {
   formModal.show = true;
 };
 
-loadFields(queryState);
-loadData(queryState);
+await loadFields(queryState);
+await loadData(queryState);
 
 defineExpose({ loadData, queryState });
 </script>

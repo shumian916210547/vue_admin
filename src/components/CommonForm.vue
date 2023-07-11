@@ -136,7 +136,7 @@ const visible = ref(props.modalVisible);
 watch(visible, (n) => {
   if (!n) {
     Object.keys(props.fields).forEach((key) => {
-      formState[key] = undefined;
+      formState[key] = props.fields[key].defaultValue || undefined;
     });
   }
   emit("update:modalVisible", n);
@@ -154,7 +154,7 @@ watch(
   (n) => {
     if (props.type == "add") {
       Object.keys(props.fields).forEach((key) => {
-        formState[key] = undefined;
+        formState[key] = props.fields[key].defaultValue || undefined;
         if (props.fields[key].componentOption.selectTable) {
           loadSelectOptions(props.fields[key].componentOption.selectTable);
         }

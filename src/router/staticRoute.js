@@ -1,6 +1,5 @@
 import Layout from '@/components/Layout'
-export let chil_routes = [
-]
+export let chil_routes = []
 export const routes = [
     {
         path: '/',

@@ -8,6 +8,7 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
     "ant-design-vue": "^3.2.20",
     "core-js": "^3.8.3",
     "parse": "^4.1.0",
