@@ -64,7 +64,21 @@
                 </a-button>
               </div>
             </template>
+            <img
+              v-if="Parse.User.current().get('avatar')"
+              :src="Parse.User.current().get('avatar')"
+              style="
+                height: 40px;
+                width: 40px;
+                object-fit: cover;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-left: 10px;
+              "
+              alt=""
+            />
             <component
+              v-else
               :is="AntdIcon['UserOutlined']"
               style="font-size: 24px; margin: 0 24px"
             ></component>
@@ -79,7 +93,7 @@
           minHeight: '280px',
         }"
       >
-      <!--   <router-view></router-view> -->
+        <!--   <router-view></router-view> -->
         <router-view v-slot="{ Component, route }">
           <suspense>
             <template #default>
@@ -115,7 +129,7 @@ if (!store.getters["GET_SCHEMAS"].length) {
 }
 const loginOut = async () => {
   await Parse.User.logOut();
-  sessionStorage.clear();
+  localStorage.clear();
   store.commit("SET_MODULES", []);
   toPage("/login");
 };

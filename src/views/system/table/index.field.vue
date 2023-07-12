@@ -203,6 +203,7 @@
     >
       <!-- Select 组件配置 -->
       <template v-if="optionState.editComponent == 'ASelect'">
+
         <!-- 模式 -->
         <a-form-item
           label="模式"
@@ -215,6 +216,7 @@
             <a-radio-button value="combobox">combobox</a-radio-button>
           </a-radio-group>
         </a-form-item>
+
         <!-- label key -->
         <a-form-item
           label="labelKey"
@@ -229,6 +231,7 @@
             placeholder="请输入labelKey"
           />
         </a-form-item>
+
         <!-- value key -->
         <a-form-item
           label="valueKey"
@@ -243,6 +246,7 @@
             placeholder="请输入valueKey"
           />
         </a-form-item>
+
       </template>
 
       <!-- Select、TreeSelect 组件配置 -->
@@ -281,6 +285,24 @@
           v-model:value="componentOption.fieldNames"
           allowClear
           placeholder="请输入子数据集key"
+        />
+      </a-form-item>
+
+      <!-- Upload 组件配置 -->
+      <a-form-item
+        v-if="optionState.editComponent == 'AUpload'"
+        label="图片数量"
+        name="maxLength"
+        :rules="[
+          { required: true, message: 'Please input your 请输入图片数量' },
+        ]"
+      >
+        <a-input-number
+          placeholder="请输入图片数量"
+          allowClear
+          id="inputNumber"
+          v-model:value="componentOption.maxLength"
+          :min="1"
         />
       </a-form-item>
 
@@ -333,6 +355,7 @@
           un-checked-children="关"
         />
       </a-form-item>
+      
     </a-form>
   </a-modal>
 </template>
@@ -402,6 +425,7 @@ const handleOk = () => {
         fieldNames,
         valueKey,
         labelKey,
+        maxLength,
       } = success[2];
       const params = {
         fieldType,
@@ -421,6 +445,7 @@ const handleOk = () => {
             fieldNames,
             valueKey,
             labelKey,
+            maxLength,
           },
         },
       };
@@ -468,6 +493,7 @@ const state = {
     valueKey: "objectId",
     labelKey: "name",
     selectTable: undefined,
+    maxLength: 8,
   },
 };
 
@@ -491,6 +517,7 @@ let componentOption = reactive({
   fieldNames: undefined,
   valueKey: "objectId",
   labelKey: "name",
+  maxLength: 8,
 });
 
 const visible = ref(props.modalVisible);

@@ -48,11 +48,24 @@
       </template>
       <template v-else-if="column.key == 'icon'">
         <component :is="AntdIcon[record[column.key]]"></component>
-
         <span>&nbsp;{{ record[column.key] }}</span>
       </template>
       <template v-else>
-        <span>{{ record[column.key]?.name || record[column.key] }}</span>
+        <a-tooltip placement="top" arrowPointAtCenter>
+          <template #title>
+            <span> {{ record[column.key]?.name || record[column.key] }}</span>
+          </template>
+          <p
+            style="
+              max-width: 200px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            "
+          >
+            {{ record[column.key]?.name || record[column.key] }}
+          </p>
+        </a-tooltip>
       </template>
     </template>
     <template

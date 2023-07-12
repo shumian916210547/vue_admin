@@ -9,7 +9,7 @@ Parse.initialize("shumian0511");
 Parse.masterKey = "shumian100329";
 Parse.serverURL = process.env.VUE_APP_BACK_SERVER + '/parse'
 export const loadRoutes = async () => {
-    const role = JSON.parse(sessionStorage.getItem("role"));
+    const role = JSON.parse(localStorage.getItem("role"));
     if (store.getters['GET_MODULES'].length) {
         routes = [...chil_routes, ...store.getters['GET_MODULES']]
     } else {

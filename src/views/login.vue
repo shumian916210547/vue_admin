@@ -67,7 +67,7 @@ const toLogin = async (arg) => {
     query.equalTo("objectId", user.id);
     query.includeAll();
     const result = (await query.first()).toJSON();
-    sessionStorage.setItem("role", JSON.stringify(result.role));
+    localStorage.setItem("role", JSON.stringify(result.role));
     toPage("/");
   } catch (error) {
     notification.error(error.toString());

@@ -4,14 +4,14 @@ import Parse from "parse";
 export const handleParseError = (err) => {
     switch (err.code) {
         case Parse.Error.INVALID_SESSION_TOKEN:
-            sessionStorage.clear()
             localStorage.clear()
+            location.reload()
+            break;
         default:
             notification.error({
                 message: err.code,
                 description: String(err),
             });
-            location.reload()
             break;
     }
 }

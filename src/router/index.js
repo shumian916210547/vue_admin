@@ -3,7 +3,7 @@ import { loadRoutes } from './dynamicRoute'
 import { routes } from './staticRoute'
 import Parse from 'parse'
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
+  history: createWebHashHistory(),
   routes
 })
 let oneEnter = true;

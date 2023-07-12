@@ -43,6 +43,7 @@
           }"
           :is="fields[key].editComponent"
         ></component>
+
         <component
           v-else-if="
             fields[key].editComponent == 'ASelect' &&
@@ -69,6 +70,15 @@
             {{ item[fields[key].componentOption.labelKey] }}
           </a-select-option>
         </component>
+
+        <component
+          v-else-if="fields[key].editComponent == 'AUpload'"
+          v-model:files="formState[key]"
+          :maxLength="fields[key].componentOption.maxLength"
+          :disabled="fields[key].componentOption.disabled"
+          :is="Upload"
+        ></component>
+
         <component
           v-else
           v-model:value="formState[key]"
@@ -93,6 +103,8 @@
 import { findAll } from "@/service/base.service";
 import { reactive, watch, ref } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
+import Upload from "./Upload.vue";
+import { deepClone } from "@/utils/utils";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
 const props = defineProps({
   className: {
@@ -127,7 +139,23 @@ watch(
     visible.value = n;
     if (n && props.type == "edit") {
       Object.keys(props.editState).forEach((key) => {
-        formState[key] = props.editState[key];
+        if (
+          props.fields[key] &&
+          props.fields[key].editComponent &&
+          props.fields[key].editComponent == "AUpload" &&
+          props.fields[key].componentOption.maxLength == 1
+        ) {
+          formState[key] = [
+            {
+              uid: new Date().getMilliseconds(),
+              name: key,
+              status: "done",
+              url: props.editState[key],
+            },
+          ];
+        } else {
+          formState[key] = props.editState[key];
+        }
       });
     }
   }
@@ -167,7 +195,20 @@ watch(
 const handleOk = () => {
   Promise.all([form1.value.validate()])
     .then((success) => {
-      emit("onOk", success[0]);
+      const params = deepClone(success[0]);
+      Object.keys(success[0]).forEach((key) => {
+        if (
+          props.fields[key] &&
+          props.fields[key].editComponent &&
+          props.fields[key].editComponent == "AUpload" &&
+          props.fields[key].componentOption.maxLength == 1
+        ) {
+          params[key] = params[key][0].url;
+        } else {
+          params[key] = params[key];
+        }
+      });
+      emit("onOk", params);
     })
     .catch((error) => {
       console.log(error);
