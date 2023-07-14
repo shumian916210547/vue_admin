@@ -6,8 +6,8 @@ import { UpdateTablePermission } from './schema.service';
 export const findAll = async (className) => {
     const table = new Parse.Query(className);
     table.includeAll()
+    table.limit(10000)
     table.descending('createdAt')
-    table.limit(1000)
     return (await table.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
 
@@ -16,20 +16,19 @@ export const findList = async (query) => {
     const { className, pageSize, pageNum, name } = query;
     if (!className) return
     const table = new Parse.Query(className)
+    table.includeAll()
     table.contains('name', name)
     table.limit(pageSize || 200)
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
     table.descending('createdAt')
-    table.includeAll()
     return new FindList((await table.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON()), await table.count().catch(err => { handleParseError(err) }))
 }
 
 /* 查询字段 */
 export const findSchema = async (query) => {
     const table = new Parse.Query('Schema');
-    table.includeAll()
     table.equalTo('name', query.className)
-    table.select(['fields'])
+    table.includeAll()
     return await table.first().catch(err => { handleParseError(err) })
 }
 

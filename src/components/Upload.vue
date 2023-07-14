@@ -64,7 +64,7 @@ function getBase64(file) {
 const previewVisible = ref(false);
 const previewImage = ref("");
 const previewTitle = ref("");
-const fileList = ref([]);
+const fileList = ref(props.files);
 const handleUpload = async (file) => {
   const parseFile = new Parse.File(file.file.name, file.file, file.file.type);
   const result = await parseFile.save().catch((err) => {});

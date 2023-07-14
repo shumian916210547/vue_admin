@@ -13,19 +13,21 @@ export const loadRoutes = async () => {
     if (store.getters['GET_MODULES'].length) {
         routes = [...chil_routes, ...store.getters['GET_MODULES']]
     } else {
-
-        const AllModules = await findAll('Module')
         /* 筛选用户有权限的页面 */
         const modules = (await findAll('Module')).filter((module) => {
             if (module.routes) {
                 module.routes = module.routes.filter((route) => {
                     return role.module.includes(route.objectId);
+                }).sort((a, b) => {
+                    return a.index - b.index
                 });
                 if (!module.routes.length) {
                     delete module.routes;
                 }
             }
             return role.module.includes(module.objectId) || module.routes;
+        }).sort((a, b) => {
+            return a.index - b.index
         });
 
         /* 添加到路由 */

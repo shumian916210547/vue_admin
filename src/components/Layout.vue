@@ -55,7 +55,7 @@
         ></component>
 
         <div>
-          <span>{{ Parse.User.current().get("username") }}</span>
+          <span>{{ Parse.User.current().get("name") }}</span>
           <a-popover placement="bottomRight">
             <template #content>
               <div style="display: flex; flex-direction: column">
@@ -116,7 +116,7 @@
 import { Mixins } from "@/mixins/index";
 import * as AntdIcon from "@ant-design/icons-vue";
 import Parse from "parse";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import store from "@/store";
 const { toPage } = Mixins();
 const selectedKeys = ref(["1"]);

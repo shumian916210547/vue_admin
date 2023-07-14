@@ -45,9 +45,15 @@
           新建字段
         </a-button>
         <a-divider type="vertical" />
-        <a-button type="danger" @click="handelDeleteSchema(record)"
-          >删除表格</a-button
+        <a-popconfirm
+          title="Are you sure delete this task?"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="handelDeleteSchema(record)"
+          @cancel="() => {}"
         >
+          <a-button type="danger"> 删除表格 </a-button>
+        </a-popconfirm>
       </template>
     </template>
     <template #expandedRowRender="{ record }">
@@ -63,9 +69,15 @@
                 修改字段
               </a-button>
               <a-divider type="vertical" />
-              <a-button @click="handleRemoveField(record, index)" type="danger">
-                删除字段
-              </a-button>
+              <a-popconfirm
+                title="Are you sure delete this task?"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="handleRemoveField(record, index)"
+                @cancel="() => {}"
+              >
+                <a-button type="danger"> 删除字段 </a-button>
+              </a-popconfirm>
             </span>
           </template>
 

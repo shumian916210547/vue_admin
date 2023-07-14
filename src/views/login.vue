@@ -76,7 +76,7 @@ const toLogin = async (arg) => {
 const onFinishFailed = () => {};
 </script>
   
-  <style lang="scss" scoped>
+<style lang="scss" scoped>
 .login {
   height: 100vh;
   width: 100%;

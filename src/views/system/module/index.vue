@@ -18,10 +18,41 @@
             <span class="table-operation">
               <a-button @click="handleEdit(record, index)"> 修改 </a-button>
               <a-divider type="vertical" />
-              <a-button type="danger" @click="handleDelete(record, index)">
-                删除
-              </a-button>
+              <a-popconfirm
+                title="Are you sure delete this task?"
+                ok-text="Yes"
+                cancel-text="No"
+                @confirm="handleDelete(record, index)"
+                @cancel="() => {}"
+              >
+                <a-button type="danger"> 删除 </a-button>
+              </a-popconfirm>
             </span>
+          </template>
+          <template v-else>
+            <a-tooltip placement="top" arrowPointAtCenter>
+              <template #title>
+                <span>
+                  {{
+                    record.routes[index][column.key]?.name ||
+                    record.routes[index][column.key]
+                  }}
+                </span>
+              </template>
+              <p
+                style="
+                  max-width: 200px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                "
+              >
+                {{
+                  record.routes[index][column.key]?.name ||
+                  record.routes[index][column.key]
+                }}
+              </p>
+            </a-tooltip>
           </template>
         </template>
       </a-table>
@@ -42,7 +73,7 @@
 
 <script setup>
 import CommonPage from "@/components/CommonPage.vue";
-import { reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import { deepClone } from "@/utils/utils";
 import {
   UpdateById,
@@ -51,20 +82,20 @@ import {
   DeleteRoute,
 } from "@/service/module.service";
 import CommonForm from "@/components/CommonForm.vue";
-import { findSchema } from "@/service/base.service";
+import { findAll, findSchema } from "@/service/base.service";
+import { visibleType } from "@/config/table.config";
 const commonPage = ref();
 const modalState = reactive({
   type: "add",
   show: false,
 });
 const editState = reactive({});
-const arr = ["name", "path", "pageComponent", "targetClass"];
 watch(
   () => modalState.show,
   (n) => {
     if (!n) {
-      arr.forEach((key) => {
-        editState[key] = undefined;
+      Object.keys(fields).forEach((key) => {
+        editState[key] = fields[key].defaultValue || undefined;
       });
     }
   },
@@ -85,7 +116,7 @@ const handleEdit = (record, index) => {
   editState["routes"] = deepClone(record.routes);
   modalState.type = "edit";
   Object.keys(record.routes[index]).forEach((key) => {
-    if (arr.includes(key)) {
+    if (Object.keys(fields).includes(key)) {
       editState[key] = record.routes[index][key];
     }
   });
@@ -125,7 +156,7 @@ const loadFields = async () => {
   if (!result) return;
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
-    if (fields[key].type == "String") {
+    if (visibleType.includes(fields[key].type)) {
       columns.push({
         title: fields[key].chineseName,
         dataIndex: key,
@@ -141,4 +172,5 @@ const loadFields = async () => {
 };
 
 await loadFields();
+await findAll("Route");
 </script>

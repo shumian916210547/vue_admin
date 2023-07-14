@@ -50,6 +50,7 @@ import {
 } from "@/service/base.service";
 import { reactive, ref } from "vue";
 import { deepClone } from "@/utils/utils";
+import { visibleType } from "@/config/table.config";
 const emit = defineEmits(["add"]);
 const props = defineProps({
   className: {
@@ -104,7 +105,7 @@ const loadFields = async (query) => {
 const loadColumns = async (arg) => {
   tableColumns.value = Object.keys(arg)
     .filter((key) => {
-      return arg[key]["type"] == "String" || arg[key]["type"] == "Pointer";
+      return visibleType.includes(arg[key]["type"]);
     })
     .map((key) => ({
       title: arg[key].chineseName,
