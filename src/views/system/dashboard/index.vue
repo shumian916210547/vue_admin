@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-const url = `${process.env.VUE_APP_BACK_SERVER}/dashboard/apps/back-server`;
+const url = `http://127.0.0.1:1337/dashboard/apps/back-server`;
 </script>
 
 <style lang="scss" scoped>
