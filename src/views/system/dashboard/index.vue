@@ -1,10 +1,11 @@
 <template>
-  <iframe
-    src="http://localhost:1337/dashboard/apps/back-server"
-    frameborder="0"
-    class="iframe"
-  ></iframe>
+  <iframe :src="url" frameborder="0" class="iframe"></iframe>
 </template>
+
+<script setup>
+const url = `${process.env.VUE_APP_BACK_SERVER}/dashboard/apps/back-server`;
+console.log(url);
+</script>
 
 <style lang="scss" scoped>
 .iframe {
