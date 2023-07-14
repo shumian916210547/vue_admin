@@ -4,7 +4,6 @@
 
 <script setup>
 const url = `${process.env.VUE_APP_BACK_SERVER}/dashboard/apps/back-server`;
-console.log(url);
 </script>
 
 <style lang="scss" scoped>
