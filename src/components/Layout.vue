@@ -124,9 +124,6 @@ const collapsed = ref(false);
 const modules = computed(() => {
   return store.getters["GET_MODULES"];
 });
-if (!store.getters["GET_SCHEMAS"].length) {
-  store.dispatch("SET_SCHEMAS");
-}
 const loginOut = async () => {
   await Parse.User.logOut();
   localStorage.clear();
