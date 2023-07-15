@@ -7,7 +7,6 @@ import PageLoading from '@/components/PageLoading'
 let routes = []
 Parse.initialize("shumian0511", "shumian100329");
 Parse.serverURL = process.env.VUE_APP_BACK_SERVER + '/parse'
-Parse.masterKey = "shumian100329"
 
 export const loadRoutes = async () => {
     const role = JSON.parse(localStorage.getItem("role"));

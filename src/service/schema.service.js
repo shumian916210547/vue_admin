@@ -13,11 +13,11 @@ export const UpdateTablePermission = async (className, arg2) => {
     clp.setPublicAddFieldAccess(true)
     clp.setPublicCreateAccess(true)
     schema.setCLP(clp)
-    return await schema.update()
 }
 
 /* 获取所有schema列表（包含系统schema） */
 export const loadAllSchema = async () => {
+    Parse.masterKey = "shumian100329"
     return await Parse.Schema.all().catch(err => { handleParseError(err) })
 }
 
