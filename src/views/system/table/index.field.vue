@@ -133,8 +133,8 @@
           placeholder="情选择指向表名"
           allowClear
           :fieldNames="{
-            label: 'className',
-            value: 'className',
+            label: 'name',
+            value: 'name',
           }"
           :options="schemas"
         ></a-select>
@@ -395,7 +395,7 @@ watch(
 );
 
 const schemas = computed(() => {
-  return store.getters["GET_SCHEMAS"];
+  return store.getters["GET_TABLES"];
 });
 
 const form1 = ref();
