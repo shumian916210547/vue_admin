@@ -1,8 +1,8 @@
 import { Capture, handleParseError } from "@/service/service.config";
 import Parse from "parse";
-
+Parse.masterKey = "shumian100329";
 /* 更新所有表格权限 */
-export const UpdateTablePermission = async (className,arg2) => {
+export const UpdateTablePermission = async (className, arg2) => {
     const schema = new Parse.Schema(className)
     const clp = new Parse.CLP(arg2)
     clp.setPublicCountAccess(true)

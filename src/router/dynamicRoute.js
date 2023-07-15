@@ -6,7 +6,6 @@ import { chil_routes } from "./staticRoute";
 import PageLoading from '@/components/PageLoading'
 let routes = []
 Parse.initialize("shumian0511");
-Parse.masterKey = "shumian100329";
 Parse.serverURL = process.env.VUE_APP_BACK_SERVER + '/parse'
 export const loadRoutes = async () => {
     const role = JSON.parse(localStorage.getItem("role"));

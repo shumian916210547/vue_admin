@@ -1,4 +1,5 @@
 import Parse, { Schema } from 'parse'
+Parse.masterKey = "shumian100329";
 import { Capture, FindList, handleParseError } from '@/service/service.config'
 import { UpdateTablePermission } from './schema.service';
 

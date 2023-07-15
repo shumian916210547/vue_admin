@@ -1,6 +1,7 @@
 
 import { notification } from "ant-design-vue";
 import Parse from "parse";
+Parse.masterKey = "shumian100329";
 export const handleParseError = (err) => {
     switch (err.code) {
         case Parse.Error.INVALID_SESSION_TOKEN:
