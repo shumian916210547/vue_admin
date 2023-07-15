@@ -1,19 +1,14 @@
-# admin
+# 采用Vue3 + Vuex + Vue-Router + Parse + Antd Design开发的后台管理系统
+## 目前已开发以下功能：
+### 1、表格管理
 
-## Project setup
-```
-npm install
-```
+### 2、路由管理
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+### 3、模块管理
 
-### Compiles and minifies for production
-```
-npm run build
-```
+### 4、用户管理
 
-### 创建表格须知
-创建Table统一进入表格管理页面进行Table创建以及字段的创建
+### 5、角色管理
+
+### 6、公司管理
+
