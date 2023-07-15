@@ -1,5 +1,4 @@
 import Parse from "parse";
-Parse.masterKey = "shumian100329";
 import { Capture } from "./service.config";
 
 /* 新增路由 */

@@ -1,7 +1,5 @@
-import Parse, { Schema } from 'parse'
-Parse.masterKey = "shumian100329";
+import Parse from 'parse'
 import { Capture, FindList, handleParseError } from '@/service/service.config'
-import { UpdateTablePermission } from './schema.service';
 
 /* 查询所有数据 */
 export const findAll = async (className) => {
