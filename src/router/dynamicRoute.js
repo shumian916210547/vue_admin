@@ -5,8 +5,8 @@ import store from "@/store";
 import { chil_routes } from "./staticRoute";
 import PageLoading from '@/components/PageLoading'
 let routes = []
-Parse.initialize("shumian0511", "shumian100329");
-Parse.serverURL = process.env.VUE_APP_BACK_SERVER + '/parse'
+Parse.initialize(process.env.PARSE_SERVER_APPLICATION_ID || "shumian0511", "shumian100329");
+Parse.serverURL = process.env.PARSE_SERVER_HOST + '/parse'
 
 export const loadRoutes = async () => {
     const role = JSON.parse(localStorage.getItem("role"));
