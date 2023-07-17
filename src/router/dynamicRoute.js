@@ -19,7 +19,7 @@ export const loadRoutes = async () => {
                 module.routes = module.routes.filter((route) => {
                     return role.module.includes(route.objectId);
                 }).sort((a, b) => {
-                    return a.index - b.index
+                    return a.rank - b.rank
                 });
                 if (!module.routes.length) {
                     delete module.routes;
@@ -27,7 +27,7 @@ export const loadRoutes = async () => {
             }
             return role.module.includes(module.objectId) || module.routes;
         }).sort((a, b) => {
-            return a.index - b.index
+            return a.rank - b.rank
         });
 
         /* 添加到路由 */

@@ -5,7 +5,7 @@
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
         <template v-for="(item, index) in modules">
           <template v-if="item.children">
-            <a-sub-menu :key="'sub' + index">
+            <a-sub-menu :key="'sub' + item.objectId">
               <template #title>
                 <span>
                   <component :is="AntdIcon[item.meta.icon]"></component>
@@ -14,15 +14,15 @@
               </template>
 
               <a-menu-item
-                v-for="(chil, chil_idx) in item.children"
-                :key="'chil' + chil_idx"
+                v-for="chil in item.children"
+                :key="'chil' + chil.objectId"
                 @click="toPage('/' + item.path + '/' + chil.path)"
                 >{{ chil.name }}</a-menu-item
               >
             </a-sub-menu>
           </template>
           <template v-else>
-            <a-menu-item :key="index" @click="toPage('/' + item.path)">
+            <a-menu-item :key="item.objectId" @click="toPage('/' + item.path)">
               <component :is="AntdIcon[item.meta.icon]"></component>
               <span>{{ item.name }}</span>
             </a-menu-item>
