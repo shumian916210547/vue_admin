@@ -3,7 +3,7 @@
     <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
       <div class="logo" />
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
-        <template v-for="(item, index) in modules">
+        <template v-for="(item) in modules">
           <template v-if="item.children">
             <a-sub-menu :key="'sub' + item.objectId">
               <template #title>
