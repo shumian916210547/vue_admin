@@ -64,8 +64,17 @@ export const loadRoutes = async () => {
             router.addRoute('Layout', module)
             return module
         })]
+        router.addRoute('Layout', {
+            path: '404',
+            component: () => import("@/views/404")
+        })
+        router.addRoute('Layout', {
+            path: '/:all(.*)*',
+            redirect: '/404'
+        })
         store.commit('SET_MODULES', routes)
     }
+
     return routes
 }
 

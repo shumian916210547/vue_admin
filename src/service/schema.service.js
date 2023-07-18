@@ -6,7 +6,7 @@ const defaultFields = [
         "fieldName": "objectId",
         "type": "String",
         "fieldOption": {
-            "required": true,
+            "required": false,
             "chineseName": "objectId",
             "editComponent": "AInput",
             "componentOption": {
@@ -20,7 +20,7 @@ const defaultFields = [
         "fieldName": "createdAt",
         "type": "Date",
         "fieldOption": {
-            "required": true,
+            "required": false,
             "chineseName": "createdAt",
             "editComponent": "AInput",
             "componentOption": {
@@ -34,7 +34,7 @@ const defaultFields = [
         "fieldName": "updatedAt",
         "type": "Date",
         "fieldOption": {
-            "required": true,
+            "required": false,
             "chineseName": "updatedAt",
             "editComponent": "AInput",
             "componentOption": {

@@ -216,7 +216,7 @@ const handleOk = () => {
           props.fields[key].editComponent == "AUpload" &&
           props.fields[key].componentOption.maxLength == 1
         ) {
-          params[key] = params[key][0].url;
+          params[key] = params[key]?.[0]?.url;
         } else {
           params[key] = params[key];
         }

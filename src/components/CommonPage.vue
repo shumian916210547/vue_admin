@@ -133,7 +133,7 @@ const tableData = ref([]);
 const loadData = async (query) => {
   const result = await findList(query);
   queryState.total = result.count;
-  tableData.value = result.data.map((item) => {
+  tableData.value = result.data?.map((item) => {
     Object.keys(item).forEach((key) => {
       if (["updatedAt", "createdAt"].includes(key)) {
         item[key] = moment(item[key]).format("YYYY-MM-DD HH:mm:ss");

@@ -5,15 +5,7 @@ export const routes = [
         path: '/',
         name: "Layout",
         component: Layout,
-        children: [...chil_routes,
-        {
-            path: '404',
-            component: () => import("@/views/404")
-        },
-        {
-            path: '/:all(.*)*',
-            redirect: '/404'
-        }]
+        children: [...chil_routes]
     },
     {
         path: '/login',

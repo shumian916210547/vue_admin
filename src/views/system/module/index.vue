@@ -10,7 +10,7 @@
     <template #innerContainer="{ record }">
       <a-table
         :columns="columns"
-        :data-source="record.routes"
+        :data-source="formattingData(record.routes)"
         :pagination="false"
       >
         <template #bodyCell="{ column, index }">
@@ -74,6 +74,7 @@
 <script setup>
 import CommonPage from "@/components/CommonPage.vue";
 import { onMounted, reactive, ref, watch } from "vue";
+import moment from "moment";
 import { deepClone } from "@/utils/utils";
 import {
   UpdateById,
@@ -168,6 +169,18 @@ const loadFields = async () => {
     title: "操作",
     dataIndex: "operation",
     key: "operation",
+  });
+};
+
+const formattingData = (list) => {
+  if (!list || !list.length) return [];
+  return list.map((item) => {
+    Object.keys(item).forEach((key) => {
+      if (["updatedAt", "createdAt"].includes(key)) {
+        item[key] = moment(item[key]).format("YYYY-MM-DD HH:mm:ss");
+      }
+    });
+    return item;
   });
 };
 

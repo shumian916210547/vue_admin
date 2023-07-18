@@ -54,22 +54,24 @@
         </a-popconfirm>
       </template>
       <template v-else-if="column.key == 'icon'">
-        <component :is="AntdIcon[record[column.key]]"></component>
-        <span>&nbsp;{{ record[column.key] }}</span>
+        <div style="display: flex; align-items: center">
+          <component :is="AntdIcon[record[column.key]]"></component>
+          <p>&nbsp;{{ record[column.key] }}</p>
+        </div>
       </template>
       <template
         v-else-if="[column.key] == 'updatedAt' || [column.key] == 'createdAt'"
       >
-        <span>{{ record[column.key] }}</span>
+        <p>{{ record[column.key] }}</p>
       </template>
       <template v-else>
         <a-tooltip placement="top" arrowPointAtCenter>
           <template #title>
-            <span> {{ record[column.key]?.name || record[column.key] }}</span>
+            <p>{{ record[column.key]?.name || record[column.key] }}</p>
           </template>
           <p
             style="
-              max-width: 200px;
+              max-width: 120px;
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
@@ -158,3 +160,10 @@ function handleResizeColumn(w, col) {
   col.width = w;
 }
 </script>
+
+<style lang="scss" scoped>
+:deep(p) {
+  max-width: auto !important;
+  margin-bottom: 0 !important;
+}
+</style>
