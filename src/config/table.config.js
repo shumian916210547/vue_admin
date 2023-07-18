@@ -33,4 +33,4 @@ export const innerColumns = [
     },
 ];
 
-export const visibleType = ["String", "Pointer", "Number"]
+export const visibleType = ["String", "Pointer", "Number", "Date"]

@@ -6,6 +6,7 @@
     :queryState="queryState"
     :innerContainer="innerContainer"
     :innerContainerTitle="innerContainerTitle"
+    :fields="fields"
     @onQueryReset="handleReset()"
     @onQuery="loadData(queryState)"
     @onInsert="handleInsert()"
@@ -50,6 +51,7 @@ import {
 } from "@/service/base.service";
 import { reactive, ref } from "vue";
 import { deepClone } from "@/utils/utils";
+import moment from "moment";
 import { visibleType } from "@/config/table.config";
 const emit = defineEmits(["add"]);
 const props = defineProps({
@@ -111,11 +113,17 @@ const loadColumns = async (arg) => {
       title: arg[key].chineseName,
       dataIndex: key,
       key: key,
+      resizable: true,
+      width: 50,
+      minWidth: 50,
     }));
   tableColumns.value.push({
     title: "操作",
     dataIndex: "operation",
     key: "operation",
+    resizable: true,
+    width: 50,
+    minWidth: 50,
   });
 };
 
@@ -125,7 +133,14 @@ const tableData = ref([]);
 const loadData = async (query) => {
   const result = await findList(query);
   queryState.total = result.count;
-  tableData.value = result.data;
+  tableData.value = result.data.map((item) => {
+    Object.keys(item).forEach((key) => {
+      if (["updatedAt", "createdAt"].includes(key)) {
+        item[key] = moment(item[key]).format("YYYY-MM-DD HH:mm:ss");
+      }
+    });
+    return item;
+  });
 };
 
 /* 重置表格筛选数据 */

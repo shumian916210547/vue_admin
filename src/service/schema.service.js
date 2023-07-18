@@ -1,6 +1,51 @@
 import { Capture, handleParseError } from "@/service/service.config";
 import Parse from "parse";
 
+const defaultFields = [
+    {
+        "fieldName": "objectId",
+        "type": "String",
+        "fieldOption": {
+            "required": true,
+            "chineseName": "objectId",
+            "editComponent": "AInput",
+            "componentOption": {
+                "disabled": true,
+                "allowClear": false,
+                "placeholder": ""
+            }
+        }
+    },
+    {
+        "fieldName": "createdAt",
+        "type": "Date",
+        "fieldOption": {
+            "required": true,
+            "chineseName": "createdAt",
+            "editComponent": "AInput",
+            "componentOption": {
+                "disabled": true,
+                "allowClear": false,
+                "placeholder": ""
+            }
+        }
+    },
+    {
+        "fieldName": "updatedAt",
+        "type": "Date",
+        "fieldOption": {
+            "required": true,
+            "chineseName": "updatedAt",
+            "editComponent": "AInput",
+            "componentOption": {
+                "disabled": true,
+                "allowClear": false,
+                "placeholder": ""
+            }
+        }
+    }
+]
+
 /* 更新所有表格权限 */
 export const UpdateTablePermission = async (className, arg2) => {
     const schema = new Parse.Schema(className)
@@ -87,6 +132,14 @@ const InsertSchema = async (className) => {
     schema.set('name', className);
     schema.set('fields', {});
     await schema.save()
+    defaultFields.forEach(item => {
+        setDefaultFields({ className, ...item })
+    })
+}
+
+/* 设置默认字段 */
+const setDefaultFields = async ({ className, type, fieldName, fieldOption }) => {
+    await UpdateSchema(className, type, fieldName, fieldOption)
 }
 
 const UpdateSchema = async (className, type, fieldName, fieldOption) => {

@@ -31,6 +31,7 @@
     rowKey="objectId"
     @change="emit('onChange', $event)"
     bordered
+    @resizeColumn="handleResizeColumn"
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
@@ -55,6 +56,11 @@
       <template v-else-if="column.key == 'icon'">
         <component :is="AntdIcon[record[column.key]]"></component>
         <span>&nbsp;{{ record[column.key] }}</span>
+      </template>
+      <template
+        v-else-if="[column.key] == 'updatedAt' || [column.key] == 'createdAt'"
+      >
+        <span>{{ record[column.key] }}</span>
       </template>
       <template v-else>
         <a-tooltip placement="top" arrowPointAtCenter>
@@ -117,6 +123,10 @@ const props = defineProps({
     type: [Boolean, String],
     default: "新增",
   },
+  fields: {
+    required: true,
+    type: Object,
+  },
 });
 const name = ref(props.queryVal);
 const emit = defineEmits([
@@ -143,4 +153,8 @@ watch(
     name.value = n;
   }
 );
+
+function handleResizeColumn(w, col) {
+  col.width = w;
+}
 </script>

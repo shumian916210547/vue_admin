@@ -16,7 +16,9 @@ export const findList = async (query) => {
     if (!className) return
     const table = new Parse.Query(className)
     table.includeAll()
-    table.contains('name', name)
+    if (name) {
+        table.contains('name', name)
+    }
     table.limit(pageSize || 200)
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
     table.descending('createdAt')
