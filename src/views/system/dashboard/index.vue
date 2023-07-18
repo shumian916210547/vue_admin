@@ -3,7 +3,10 @@
 </template>
 
 <script setup>
-const url = `${process.env.VUE_APP_PARSE_SERVER_HOST}/dashboard`;
+const url = `${
+  process.env.VUE_APP_PARSE_DASHBOARD_HOST ||
+  process.env.VUE_APP_PARSE_SERVER_HOST
+}/dashboard`;
 </script>
 
 <style lang="scss" scoped>
