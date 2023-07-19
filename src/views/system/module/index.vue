@@ -6,12 +6,13 @@
     :innerContainer="true"
     innerContainerTitle="新增"
   >
-    <!-- 字段列表 -->
+    <!-- 路由列表 -->
     <template #innerContainer="{ record }">
       <a-table
         :columns="columns"
         :data-source="formattingData(record.routes)"
         :pagination="false"
+        rowKey="objectId"
       >
         <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'operation'">
@@ -59,7 +60,7 @@
     </template>
   </CommonPage>
 
-  <!-- 字段编辑 -->
+  <!-- 路由编辑 -->
   <CommonForm
     :className="'Route'"
     :fields="fields"
@@ -103,7 +104,7 @@ watch(
   { deep: true }
 );
 
-/* 添加字段 */
+/* 添加路由 */
 const handleAdd = (arg) => {
   modalState.type = "add";
   modalState.show = true;
@@ -111,7 +112,7 @@ const handleAdd = (arg) => {
   editState["routes"] = arg.routes || [];
 };
 
-/* 编辑字段 */
+/* 编辑路由 */
 const handleEdit = (record, index) => {
   editState["moduleId"] = record.objectId;
   editState["routes"] = deepClone(record.routes);
@@ -125,12 +126,17 @@ const handleEdit = (record, index) => {
   modalState.show = true;
 };
 
-/* 删除字段 */
+/* 删除路由 */
 const handleDelete = async (record, index) => {
-  let routes = deepClone(record.routes);
-  await DeleteRoute(routes.splice(index, 1)[0]);
-  await ModuleUpdateRoute(record.objectId, routes);
-  commonPage.value.loadData(commonPage.value.queryState);
+  await DeleteRoute(record.routes.splice(index, 1)[0]);
+  await ModuleUpdateRoute(
+    record.objectId,
+    record.routes.map((item) => {
+      item.__type = "Pointer";
+      return item;
+    })
+  );
+  await commonPage.value.loadData(commonPage.value.queryState);
 };
 
 /* 上传数据 */
@@ -146,12 +152,12 @@ const handleSubmit = async (arg) => {
       break;
   }
   modalState.show = false;
-  commonPage.value.loadData(commonPage.value.queryState);
+  await commonPage.value.loadData(commonPage.value.queryState);
 };
 let fields = reactive({});
 const columns = reactive([]);
 
-/* 获取table字段并且保存 */
+/* 获取table路由并且保存 */
 const loadFields = async () => {
   const result = await findSchema({ className: "Route" });
   if (!result) return;

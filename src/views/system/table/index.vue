@@ -121,11 +121,6 @@ import { columns, innerColumns } from "@/config/table.config";
 import { reactive, ref } from "vue";
 import store from "@/store";
 
-const staticQuery = {
-  pageSize: 10,
-  pageNum: 1,
-  name: "",
-};
 const queryState = reactive({
   pageSize: 10,
   pageNum: 1,

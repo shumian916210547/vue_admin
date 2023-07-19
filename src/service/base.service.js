@@ -4,10 +4,13 @@ import { Capture, FindList, handleParseError } from '@/service/service.config'
 /* 查询所有数据 */
 export const findAll = async (className) => {
     const table = new Parse.Query(className);
+    console.log(className);
     table.includeAll()
     table.limit(10000)
     table.descending('createdAt')
-    return (await table.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
+    return (await table.find().catch(err => { handleParseError(err) }))?.filter(
+        item => { return item.id })?.map(
+            item => { return item.toJSON() })
 }
 
 /* 查询列表 */

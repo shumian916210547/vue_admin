@@ -75,6 +75,7 @@
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;
+              text-align: center;
             "
           >
             {{ record[column.key]?.name || record[column.key] }}

@@ -31,7 +31,7 @@
   </CommonTable>
   <CommonForm
     :className="className"
-    :fields="fields"
+    :fields="formFields"
     :editState="editState"
     :type="formModal.type"
     v-model:modalVisible="formModal.show"
@@ -53,6 +53,7 @@ import { reactive, ref } from "vue";
 import { deepClone } from "@/utils/utils";
 import moment from "moment";
 import { visibleType } from "@/config/table.config";
+import { defaultFields } from "@/service/schema.service";
 const emit = defineEmits(["add"]);
 const props = defineProps({
   className: {
@@ -90,15 +91,22 @@ const formModal = reactive({
   type: "add",
 });
 
+const systemFields = defaultFields.map((item) => item.fieldName);
+
 let fields = reactive({});
 const tableColumns = ref([]);
 
+const formFields = reactive({});
 /* 获取table字段并且保存 */
 const loadFields = async (query) => {
   const result = await findSchema(query);
   if (!result) return;
+
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
+    if (!systemFields.includes(key)) {
+      formFields[key] = result.get("fields")[key];
+    }
   });
   loadColumns(fields);
 };
@@ -107,23 +115,23 @@ const loadFields = async (query) => {
 const loadColumns = async (arg) => {
   tableColumns.value = Object.keys(arg)
     .filter((key) => {
-      return visibleType.includes(arg[key]["type"]);
+      return (
+        visibleType.includes(arg[key]["type"]) && !systemFields.includes(key)
+      );
     })
     .map((key) => ({
       title: arg[key].chineseName,
       dataIndex: key,
       key: key,
       resizable: true,
-      width: 50,
-      minWidth: 50,
+      width: 200,
     }));
   tableColumns.value.push({
     title: "操作",
     dataIndex: "operation",
     key: "operation",
     resizable: true,
-    width: 50,
-    minWidth: 50,
+    width: 120,
   });
 };
 
@@ -205,5 +213,5 @@ const handleEdit = async (arg) => {
 await loadFields(queryState);
 await loadData(queryState);
 
-defineExpose({ loadData, queryState });
+defineExpose({ loadData, queryState, tableData });
 </script>

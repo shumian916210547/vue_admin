@@ -1,7 +1,7 @@
 import { Capture, handleParseError } from "@/service/service.config";
 import Parse from "parse";
 
-const defaultFields = [
+export const defaultFields = [
     {
         "fieldName": "objectId",
         "type": "String",
