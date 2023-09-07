@@ -6,7 +6,7 @@
 const url = `${
   process.env.VUE_APP_PARSE_DASHBOARD_HOST ||
   process.env.VUE_APP_PARSE_SERVER_HOST
-}/dashboard`;
+}/dashboard/login`;
 </script>
 
 <style lang="scss" scoped>
