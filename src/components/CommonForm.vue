@@ -196,6 +196,7 @@ watch(
     if (props.type == "add") {
       Object.keys(props.fields).forEach((key) => {
         formState[key] = props.fields[key].defaultValue || undefined;
+        /* 获取下拉组件数据 */
         if (props.fields[key].componentOption.selectTable) {
           loadSelectOptions(props.fields[key].componentOption.selectTable);
         }

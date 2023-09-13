@@ -4,7 +4,6 @@ import { Capture, FindList, handleParseError } from '@/service/service.config'
 /* 查询所有数据 */
 export const findAll = async (className) => {
     const table = new Parse.Query(className);
-    console.log(className);
     table.includeAll()
     table.limit(10000)
     table.descending('createdAt')

@@ -104,10 +104,13 @@ const loadFields = async (query) => {
 
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
+
+    /* 筛选系统字段，不在新增或者修改表单中展示 */
     if (!systemFields.includes(key)) {
       formFields[key] = result.get("fields")[key];
     }
   });
+
   loadColumns(fields);
 };
 
@@ -201,7 +204,7 @@ const handleEdit = async (arg) => {
   formModal.type = "edit";
   Object.keys(fields).forEach((key) => {
     if (fields[key].type == "Pointer") {
-      editState[key] = arg[key].objectId;
+      editState[key] = arg[key]?.objectId || "";
     } else {
       editState[key] = arg[key];
     }
@@ -213,5 +216,6 @@ const handleEdit = async (arg) => {
 await loadFields(queryState);
 await loadData(queryState);
 
+/* 将组件内方法暴露出来，使其他组件可以访问 */
 defineExpose({ loadData, queryState, tableData });
 </script>

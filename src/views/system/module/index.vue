@@ -63,7 +63,7 @@
   <!-- 路由编辑 -->
   <CommonForm
     :className="'Route'"
-    :fields="fields"
+    :fields="formFields"
     :editState="editState"
     :type="modalState.type"
     v-model:modalVisible="modalState.show"
@@ -86,6 +86,7 @@ import {
 import CommonForm from "@/components/CommonForm.vue";
 import { findAll, findSchema } from "@/service/base.service";
 import { visibleType } from "@/config/table.config";
+import { defaultFields } from "@/service/schema.service";
 const commonPage = ref();
 const modalState = reactive({
   type: "add",
@@ -156,13 +157,17 @@ const handleSubmit = async (arg) => {
 };
 let fields = reactive({});
 const columns = reactive([]);
-
+const formFields = reactive({});
 /* 获取table路由并且保存 */
+const systemFields = defaultFields.map((item) => item.fieldName);
 const loadFields = async () => {
   const result = await findSchema({ className: "Route" });
   if (!result) return;
   Object.keys(result.get("fields")).forEach((key) => {
     fields[key] = result.get("fields")[key];
+    if (!systemFields.includes(key)) {
+      formFields[key] = result.get("fields")[key];
+    }
     if (visibleType.includes(fields[key].type)) {
       columns.push({
         title: fields[key].chineseName,

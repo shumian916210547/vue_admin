@@ -50,6 +50,8 @@ const formState = reactive({
   remember: false,
 });
 
+document.title = "登录";
+
 const onFinish = () => {
   Promise.all([form.value.validate()])
     .then((success) => {
@@ -69,10 +71,20 @@ const toLogin = async (arg) => {
     const result = (await query.first()).toJSON();
     localStorage.setItem("role", JSON.stringify(result.role));
     toPage("/");
+    getSystemTitle(user.id);
   } catch (error) {
     notification.error(error.toString());
   }
 };
+
+const getSystemTitle = async (uid) => {
+  const query = new Parse.Query("Company");
+  query.equalTo("admin", uid);
+  query.select(["name"]);
+  const result = await query.first();
+  document.title = result.get("name");
+};
+
 const onFinishFailed = () => {};
 </script>
   
