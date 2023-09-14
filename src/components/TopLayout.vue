@@ -18,7 +18,7 @@
           alignItems: 'center',
         }"
       >
-        <div class="logo" />
+        <div class="logo" style="width: 200px" />
         <a-menu
           v-model:selectedKeys="selectedKeys"
           :theme="props.systemOptions.theme"
