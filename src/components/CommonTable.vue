@@ -35,23 +35,25 @@
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
-        <template v-if="innerContainerTitle">
-          <a-button @click="emit('onAdd', record)">
-            {{ innerContainerTitle }}
-          </a-button>
+        <div style="max-width: 230px;display: flex;align-items: center;">
+          <template v-if="innerContainerTitle">
+            <a-button @click="emit('onAdd', record)">
+              {{ innerContainerTitle }}
+            </a-button>
+            <a-divider type="vertical" />
+          </template>
+          <a-button @click="emit('onEdit', record)">修改</a-button>
           <a-divider type="vertical" />
-        </template>
-        <a-button @click="emit('onEdit', record)">修改</a-button>
-        <a-divider type="vertical" />
-        <a-popconfirm
-          title="Are you sure delete this task?"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="emit('onDelete', record)"
-          @cancel="() => {}"
-        >
-          <a-button type="danger"> 删除 </a-button>
-        </a-popconfirm>
+          <a-popconfirm
+            title="Are you sure delete this task?"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="emit('onDelete', record)"
+            @cancel="() => {}"
+          >
+            <a-button type="danger"> 删除 </a-button>
+          </a-popconfirm>
+        </div>
       </template>
       <template v-else-if="column.key == 'icon'">
         <div style="display: flex; align-items: center">
@@ -71,7 +73,7 @@
           </template>
           <p
             style="
-              max-width: 120px;
+              /* max-width: 120px; */
               overflow: hidden;
               text-overflow: ellipsis;
               white-space: nowrap;

@@ -1,181 +1,109 @@
 <template>
-  <a-layout>
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo" />
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
-        <template v-for="(item) in modules">
-          <template v-if="item.children">
-            <a-sub-menu :key="'sub' + item.objectId">
-              <template #title>
-                <span>
-                  <component :is="AntdIcon[item.meta.icon]"></component>
-                  <span>{{ item.name }}</span>
-                </span>
-              </template>
+  <component
+    @toPage="toPage"
+    @loginOut="loginOut"
+    @setting="() => (systemModal.show = true)"
+    :AntdIcon="AntdIcon"
+    :modules="modules"
+    :systemOptions="systemOptions"
+    :UserInfo="Parse.User.current()"
+    :is="LayoutComponents[systemOptions.layout]"
+  ></component>
 
-              <a-menu-item
-                v-for="chil in item.children"
-                :key="'chil' + chil.objectId"
-                @click="toPage('/' + item.path + '/' + chil.path)"
-                >{{ chil.name }}</a-menu-item
-              >
-            </a-sub-menu>
-          </template>
-          <template v-else>
-            <a-menu-item :key="item.objectId" @click="toPage('/' + item.path)">
-              <component :is="AntdIcon[item.meta.icon]"></component>
-              <span>{{ item.name }}</span>
-            </a-menu-item>
-          </template>
-        </template>
-      </a-menu>
-    </a-layout-sider>
-    <a-layout>
-      <a-layout-header
-        :style="{
-          background: '#fff',
-          padding: 0,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }"
-      >
-        <component
-          :is="AntdIcon['MenuUnfoldOutlined']"
-          v-if="collapsed"
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        ></component>
+  <!-- 设置弹窗 -->
+  <a-drawer
+    zIndex="2000"
+    v-model:visible="systemModal.show"
+    title="设置"
+    placement="right"
+  >
+    <a-form
+      :model="systemOptions"
+      name="basic"
+      :label-col="{ span: 8 }"
+      :wrapper-col="{ span: 16 }"
+      autocomplete="off"
+    >
+      <a-form-item label="页面布局">
+        <a-radio-group
+          v-model:value="systemOptions.layout"
+          size="large"
+          @change="onChange"
+        >
+          <a-radio value="LeftLayout">左右布局</a-radio>
+          <a-radio value="TopLayout">上下布局</a-radio>
+        </a-radio-group>
+      </a-form-item>
 
-        <component
-          :is="AntdIcon['MenuFoldOutlined']"
-          v-else
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        ></component>
-
-        <div>
-          <span>{{ Parse.User.current().get("name") }}</span>
-          <a-popover placement="bottomRight">
-            <template #content>
-              <div style="display: flex; flex-direction: column">
-                <a-button @click="loginOut()" style="margin-top: 10px">
-                  退出登录
-                </a-button>
-              </div>
-            </template>
-            <img
-              v-if="Parse.User.current().get('avatar')"
-              :src="Parse.User.current().get('avatar')"
-              style="
-                height: 40px;
-                width: 40px;
-                object-fit: cover;
-                border-radius: 50%;
-                overflow: hidden;
-                margin-left: 10px;
-              "
-              alt=""
-            />
-            <component
-              v-else
-              :is="AntdIcon['UserOutlined']"
-              style="font-size: 24px; margin: 0 24px"
-            ></component>
-          </a-popover>
-        </div>
-      </a-layout-header>
-      <a-layout-content
-        :style="{
-          margin: '24px 16px',
-          padding: '24px',
-          background: '#fff',
-          minHeight: '280px',
-        }"
-      >
-        <!--   <router-view></router-view> -->
-        <router-view v-slot="{ Component, route }">
-          <suspense>
-            <template #default>
-              <component :is="Component" :key="route.path" />
-            </template>
-            <template #fallback>
-              <div class="pageLoading">
-                <a-spin tip="loading..." size="large" />
-              </div>
-            </template>
-          </suspense>
-        </router-view>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+      <a-form-item label="菜单栏主题">
+        <a-radio-group
+          v-model:value="systemOptions.theme"
+          size="large"
+          @change="onChange"
+        >
+          <a-radio value="light">light</a-radio>
+          <a-radio value="dark">dark</a-radio>
+        </a-radio-group>
+      </a-form-item>
+    </a-form>
+  </a-drawer>
 </template>
 
 
 <script setup>
 import { Mixins } from "@/mixins/index";
 import * as AntdIcon from "@ant-design/icons-vue";
+import LeftLayout from "./LeftLayout.vue";
+import TopLayout from "./TopLayout.vue";
 import Parse from "parse";
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import store from "@/store";
 const { toPage } = Mixins();
-const selectedKeys = ref(["1"]);
-const collapsed = ref(false);
+
+const LayoutComponents = {
+  LeftLayout,
+  TopLayout,
+};
+
+/* 设置弹窗 */
+const systemModal = reactive({
+  show: false,
+});
+
+/* 系统主题配置 */
+const systemOptions = reactive(
+  Object.assign(
+    {},
+    {
+      theme: "light",
+      layout: "TopLayout",
+    },
+    Parse.User.current().get("systemOptions")
+  )
+);
+
 const modules = computed(() => {
   return store.getters["GET_MODULES"];
 });
+
+/* 系统配置改变 */
+const onChange = () => {
+  const user = Parse.User.current();
+  user.set(
+    "systemOptions",
+    Object.assign({}, user.get("systemOptions"), systemOptions)
+  );
+  user.save();
+};
+
 const loginOut = async () => {
+  toPage("/login");
   await Parse.User.logOut();
   localStorage.clear();
   store.commit("SET_MODULES", []);
-  toPage("/login");
 };
 </script>
 
 <style lang="scss" scoped>
-#components-layout-demo-custom-trigger .trigger {
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 24px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-#components-layout-demo-custom-trigger .trigger:hover {
-  color: #1890ff;
-}
-
-#components-layout-demo-custom-trigger .logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 16px;
-}
-
-.ant-layout {
-  height: 100%;
-
-  .ant-layout-content {
-    height: 100%;
-    overflow-y: scroll;
-  }
-  .logo {
-    height: 60px;
-  }
-
-  .ant-layout-header {
-    padding: 0 20px !important;
-  }
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
-}
-
-.pageLoading {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+@import "@/assets/scss/Layout.scss";
 </style>

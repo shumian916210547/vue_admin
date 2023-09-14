@@ -35,25 +35,27 @@
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
-        <a-button
-          @click="
-            (fieldModal.type = 'add'),
-              (fieldModal.show = true),
-              (fieldModal.className = record.className)
-          "
-        >
-          新建字段
-        </a-button>
-        <a-divider type="vertical" />
-        <a-popconfirm
-          title="Are you sure delete this task?"
-          ok-text="Yes"
-          cancel-text="No"
-          @confirm="handelDeleteSchema(record)"
-          @cancel="() => {}"
-        >
-          <a-button type="danger"> 删除表格 </a-button>
-        </a-popconfirm>
+        <div style="max-width: 230px;display: flex;align-items: center;">
+          <a-button
+            @click="
+              (fieldModal.type = 'add'),
+                (fieldModal.show = true),
+                (fieldModal.className = record.className)
+            "
+          >
+            新建字段
+          </a-button>
+          <a-divider type="vertical" />
+          <a-popconfirm
+            title="Are you sure delete this task?"
+            ok-text="Yes"
+            cancel-text="No"
+            @confirm="handelDeleteSchema(record)"
+            @cancel="() => {}"
+          >
+            <a-button type="danger"> 删除表格 </a-button>
+          </a-popconfirm>
+        </div>
       </template>
     </template>
     <template #expandedRowRender="{ record }">

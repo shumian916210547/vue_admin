@@ -134,7 +134,6 @@ const loadColumns = async (arg) => {
     dataIndex: "operation",
     key: "operation",
     resizable: true,
-    width: 120,
   });
 };
 

@@ -16,19 +16,21 @@
       >
         <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'operation'">
-            <span class="table-operation">
-              <a-button @click="handleEdit(record, index)"> 修改 </a-button>
-              <a-divider type="vertical" />
-              <a-popconfirm
-                title="Are you sure delete this task?"
-                ok-text="Yes"
-                cancel-text="No"
-                @confirm="handleDelete(record, index)"
-                @cancel="() => {}"
-              >
-                <a-button type="danger"> 删除 </a-button>
-              </a-popconfirm>
-            </span>
+            <div style="max-width: 230px; display: flex; align-items: center">
+              <span class="table-operation">
+                <a-button @click="handleEdit(record, index)"> 修改 </a-button>
+                <a-divider type="vertical" />
+                <a-popconfirm
+                  title="Are you sure delete this task?"
+                  ok-text="Yes"
+                  cancel-text="No"
+                  @confirm="handleDelete(record, index)"
+                  @cancel="() => {}"
+                >
+                  <a-button type="danger"> 删除 </a-button>
+                </a-popconfirm>
+              </span>
+            </div>
           </template>
           <template v-else>
             <a-tooltip placement="top" arrowPointAtCenter>
@@ -168,7 +170,7 @@ const loadFields = async () => {
     if (!systemFields.includes(key)) {
       formFields[key] = result.get("fields")[key];
     }
-    if (visibleType.includes(fields[key].type)) {
+    if (!systemFields.includes(key) && visibleType.includes(fields[key].type)) {
       columns.push({
         title: fields[key].chineseName,
         dataIndex: key,

@@ -70,19 +70,29 @@ const toLogin = async (arg) => {
     query.includeAll();
     const result = (await query.first()).toJSON();
     localStorage.setItem("role", JSON.stringify(result.role));
-    toPage("/");
-    getSystemTitle(user.id);
+    const success = await getSystemTitle(user.id);
+    if (success) {
+      toPage("/");
+    } else {
+      notification.error({ message: "无登录权限" });
+    }
   } catch (error) {
-    notification.error(error.toString());
+    notification.error({ message: error.toString() || error });
   }
 };
 
 const getSystemTitle = async (uid) => {
   const query = new Parse.Query("Company");
-  query.equalTo("admin", uid);
+  query.containedIn("admin", [uid]);
   query.select(["name"]);
   const result = await query.first();
-  document.title = result.get("name");
+  if (result && result.id) {
+    document.title = result.get("name");
+    sessionStorage.setItem("systemTitle", document.title);
+    return true;
+  } else {
+    return false;
+  }
 };
 
 const onFinishFailed = () => {};
