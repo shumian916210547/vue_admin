@@ -182,6 +182,7 @@ const loadFields = async () => {
     title: "操作",
     dataIndex: "operation",
     key: "operation",
+    fixed: "right",
   });
 };
 

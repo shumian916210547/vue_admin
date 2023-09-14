@@ -35,7 +35,7 @@
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
-        <div style="max-width: 230px;display: flex;align-items: center;">
+        <div style="max-width: 230px; display: flex; align-items: center">
           <template v-if="innerContainerTitle">
             <a-button @click="emit('onAdd', record)">
               {{ innerContainerTitle }}
@@ -72,13 +72,14 @@
             <p>{{ record[column.key]?.name || record[column.key] }}</p>
           </template>
           <p
-            style="
-              /* max-width: 120px; */
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              text-align: center;
-            "
+            :style="{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              textAlign: 'center',
+              maxWidth: column.key == 'avatar' ? '120px' : '',
+              width: 'auto',
+            }"
           >
             {{ record[column.key]?.name || record[column.key] }}
           </p>
