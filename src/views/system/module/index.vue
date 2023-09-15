@@ -175,6 +175,7 @@ const loadFields = async () => {
         title: fields[key].chineseName,
         dataIndex: key,
         key: key,
+        width: 200,
       });
     }
   });
@@ -183,6 +184,7 @@ const loadFields = async () => {
     dataIndex: "operation",
     key: "operation",
     fixed: "right",
+    width: 230,
   });
 };
 

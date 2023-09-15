@@ -75,6 +75,7 @@ const toLogin = async (arg) => {
       toPage("/");
     } else {
       notification.error({ message: "无登录权限" });
+      Parse.User.loginOut();
     }
   } catch (error) {
     notification.error({ message: error.toString() || error });

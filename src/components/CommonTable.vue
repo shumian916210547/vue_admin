@@ -61,6 +61,11 @@
           <p>&nbsp;{{ record[column.key] }}</p>
         </div>
       </template>
+      <template v-else-if="column.key == 'avatar' || column.key == 'image'">
+        <div style="display: flex; align-items: center">
+          <a-image :width="80" :src="record[column.key]" />
+        </div>
+      </template>
       <template
         v-else-if="[column.key] == 'updatedAt' || [column.key] == 'createdAt'"
       >
