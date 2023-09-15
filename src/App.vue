@@ -3,7 +3,9 @@
 </template>
 
 <script setup>
+
 document.title = sessionStorage.getItem("systemTitle") || "后台管理系统";
+
 </script>
 
 <style lang="scss">

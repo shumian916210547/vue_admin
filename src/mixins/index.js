@@ -13,7 +13,7 @@ export function Mixins() {
         query.equalTo('route', id || route.meta.id)
         query.equalTo('role', Parse.User.current().get('role').id)
         const result = await query.first()
-        if (result.id) {
+        if (result && result.id) {
             return result.get("permissions")
         } else {
             return []

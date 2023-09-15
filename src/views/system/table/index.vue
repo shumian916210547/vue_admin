@@ -1,8 +1,11 @@
 <template>
-  <a-form>
+  <a-form style="height: 56px">
     <a-row>
       <a-col :span="8">
-        <a-form-item label="表格名称">
+        <a-form-item
+          label="表格名称"
+          v-permission="['permission:query', permissions]"
+        >
           <a-input
             placeholder="请输入表格名称"
             v-model:value="queryState.name"
@@ -20,10 +23,15 @@
           type="primary"
           @click="getSchemaList(queryState)"
           style="margin: 0 10px 0 0"
+          v-permission="['permission:query', permissions]"
         >
           查询
         </a-button>
-        <a-button @click="queryReset()">重置</a-button>
+        <a-button
+          @click="queryReset()"
+          v-permission="['permission:reset', permissions]"
+          >重置</a-button
+        >
       </a-col>
       <a-col :span="2" :offset="2">
         <a-button

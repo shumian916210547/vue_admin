@@ -1,9 +1,12 @@
 <template>
   <!-- 筛选 -->
-  <a-form>
+  <a-form style="height: 56px">
     <a-row>
       <a-col :span="8">
-        <a-form-item label="名称">
+        <a-form-item
+          label="名称"
+          v-permission="['permission:query', permissions]"
+        >
           <a-input placeholder="请输入名称" v-model:value="name" />
         </a-form-item>
       </a-col>
@@ -18,9 +21,14 @@
           type="primary"
           @click="emit('onQuery')"
           style="margin: 0 10px 0 0"
+          v-permission="['permission:query', permissions]"
           >查询</a-button
         >
-        <a-button @click="emit('onQueryReset')">重置</a-button>
+        <a-button
+          @click="emit('onQueryReset')"
+          v-permission="['permission:reset', permissions]"
+          >重置</a-button
+        >
       </a-col>
       <a-col :span="2" :offset="2">
         <a-button

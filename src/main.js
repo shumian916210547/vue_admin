@@ -26,4 +26,12 @@ app.directive('permission', {
     }
   },
 });
+
+app.config.errorHandler = (err, vm, info) => {
+  // 在这里处理错误
+  console.error('Error:', err);
+  console.error('Component:', vm);
+  console.error('Additional Info:', info);
+};
+
 app.mount('#app')
