@@ -23,7 +23,12 @@
         <a-button @click="emit('onQueryReset')">重置</a-button>
       </a-col>
       <a-col :span="2" :offset="2">
-        <a-button type="primary" @click="emit('onInsert')">新建</a-button>
+        <a-button
+          type="primary"
+          @click="emit('onInsert')"
+          v-permission="['permission:insert', permissions]"
+          >新建</a-button
+        >
       </a-col>
     </a-row>
   </a-form>
@@ -42,12 +47,19 @@
       <template v-if="column.key === 'operation'">
         <div style="max-width: 230px; display: flex; align-items: center">
           <template v-if="innerContainerTitle">
-            <a-button @click="emit('onAdd', record)">
+            <a-button
+              @click="emit('onAdd', record)"
+              v-permission="['permission:insertChildren', permissions]"
+            >
               {{ innerContainerTitle }}
             </a-button>
             <a-divider type="vertical" />
           </template>
-          <a-button @click="emit('onEdit', record)">修改</a-button>
+          <a-button
+            @click="emit('onEdit', record)"
+            v-permission="['permission:edit', permissions]"
+            >修改</a-button
+          >
           <a-divider type="vertical" />
           <a-popconfirm
             title="Are you sure delete this task?"
@@ -56,7 +68,12 @@
             @confirm="emit('onDelete', record)"
             @cancel="() => {}"
           >
-            <a-button type="danger"> 删除 </a-button>
+            <a-button
+              type="danger"
+              v-permission="['permission:remove', permissions]"
+            >
+              删除
+            </a-button>
           </a-popconfirm>
         </div>
       </template>
@@ -114,6 +131,7 @@
 <script setup>
 import { watch, reactive, ref } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
+import { Mixins } from "@/mixins";
 const props = defineProps({
   tableColumns: {
     type: Array,
@@ -145,6 +163,7 @@ const props = defineProps({
   },
 });
 const name = ref(props.queryVal);
+const { queryPermission } = Mixins();
 const emit = defineEmits([
   "onChange",
   "onQueryReset",
@@ -173,6 +192,8 @@ watch(
 function handleResizeColumn(w, col) {
   col.width = w;
 }
+
+const permissions = await queryPermission();
 </script>
 
 <style lang="scss" scoped>

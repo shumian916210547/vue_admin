@@ -18,7 +18,12 @@
           <template v-if="column.key === 'operation'">
             <div style="max-width: 230px; display: flex; align-items: center">
               <span class="table-operation">
-                <a-button @click="handleEdit(record, index)"> 修改 </a-button>
+                <a-button
+                  @click="handleEdit(record, index)"
+                  v-permission="['permission:edit', permissions]"
+                >
+                  修改
+                </a-button>
                 <a-divider type="vertical" />
                 <a-popconfirm
                   title="Are you sure delete this task?"
@@ -27,7 +32,12 @@
                   @confirm="handleDelete(record, index)"
                   @cancel="() => {}"
                 >
-                  <a-button type="danger"> 删除 </a-button>
+                  <a-button
+                    type="danger"
+                    v-permission="['permission:remove', permissions]"
+                  >
+                    删除
+                  </a-button>
                 </a-popconfirm>
               </span>
             </div>
@@ -89,6 +99,22 @@ import CommonForm from "@/components/CommonForm.vue";
 import { findAll, findSchema } from "@/service/base.service";
 import { visibleType } from "@/config/table.config";
 import { defaultFields } from "@/service/schema.service";
+
+import { Mixins } from "@/mixins";
+import Parse from "parse";
+
+const { queryPermission } = Mixins();
+
+/* 查询路由id */
+const queryRouteId = async () => {
+  const query = new Parse.Query("Route");
+  query.equalTo("targetClass", "Route");
+  const result = await query.first();
+  return result.id;
+};
+const routeId = await queryRouteId();
+const permissions = await queryPermission(routeId);
+
 const commonPage = ref();
 const modalState = reactive({
   type: "add",

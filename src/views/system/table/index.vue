@@ -26,7 +26,12 @@
         <a-button @click="queryReset()">重置</a-button>
       </a-col>
       <a-col :span="2" :offset="2">
-        <a-button type="primary" @click="tableModal.show = true">新建</a-button>
+        <a-button
+          type="primary"
+          @click="tableModal.show = true"
+          v-permission="['permission:insert', permissions]"
+          >新建</a-button
+        >
       </a-col>
     </a-row>
   </a-form>
@@ -46,6 +51,7 @@
                 (fieldModal.show = true),
                 (fieldModal.className = record.className)
             "
+            v-permission="['permission:insertField', permissions]"
           >
             新建字段
           </a-button>
@@ -57,7 +63,12 @@
             @confirm="handelDeleteSchema(record)"
             @cancel="() => {}"
           >
-            <a-button type="danger"> 删除表格 </a-button>
+            <a-button
+              type="danger"
+              v-permission="['permission:remove', permissions]"
+            >
+              删除表格
+            </a-button>
           </a-popconfirm>
         </div>
       </template>
@@ -71,7 +82,10 @@
         <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'operation'">
             <span class="table-operation">
-              <a-button @click="handleEditField(record, index)">
+              <a-button
+                @click="handleEditField(record, index)"
+                v-permission="['permission:editField', permissions]"
+              >
                 修改字段
               </a-button>
               <a-divider type="vertical" />
@@ -82,7 +96,12 @@
                 @confirm="handleRemoveField(record, index)"
                 @cancel="() => {}"
               >
-                <a-button type="danger"> 删除字段 </a-button>
+                <a-button
+                  type="danger"
+                  v-permission="['permission:removeField', permissions]"
+                >
+                  删除字段
+                </a-button>
               </a-popconfirm>
             </span>
           </template>
@@ -124,8 +143,22 @@ import {
 } from "@/service/schema.service";
 import { columns, innerColumns } from "@/config/table.config";
 
+import Parse from "parse";
 import { reactive, ref } from "vue";
 import store from "@/store";
+import { Mixins } from "@/mixins";
+
+const { queryPermission } = Mixins();
+
+/* 查询路由id */
+const querySchemaId = async () => {
+  const query = new Parse.Query("Route");
+  query.equalTo("targetClass", "Schema");
+  const result = await query.first();
+  return result.id;
+};
+const schemaId = await querySchemaId();
+const permissions = await queryPermission(schemaId);
 
 const queryState = reactive({
   pageSize: 10,

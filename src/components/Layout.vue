@@ -42,6 +42,7 @@
         v-model:selectedKeys="selectedKeys"
         :theme="systemOptions.theme"
         :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'inline'"
+        :style="{ width: systemOptions.layout == 'TopLayout' ? '70%' : 'auto' }"
       >
         <template v-for="item in modules">
           <template v-if="item.children">
@@ -74,6 +75,18 @@
 
     <template #layout-header-right>
       <div style="display: flex; align-items: center; min-width: 88px">
+        <!-- 主题配置 -->
+        <a-tooltip placement="bottom">
+          <template #title>
+            <span>主题配置</span>
+          </template>
+          <component
+            :is="AntdIcon['SkinOutlined']"
+            class="mini_btn"
+            @click="() => (systemModal.show = true)"
+          ></component>
+        </a-tooltip>
+
         <!-- 全屏 -->
         <a-tooltip placement="bottom" v-if="!isFullScreen">
           <template #title>
@@ -81,7 +94,7 @@
           </template>
           <component
             :is="AntdIcon['ExpandOutlined']"
-            style="font-size: 15px; color: gray"
+            class="mini_btn"
             @click="zoomPage"
           ></component>
         </a-tooltip>
@@ -93,7 +106,7 @@
           </template>
           <component
             :is="AntdIcon['CompressOutlined']"
-            style="font-size: 15px; color: gray; margin-left: 10px"
+            class="mini_btn"
             @click="zoomPage"
           ></component>
         </a-tooltip>
@@ -105,45 +118,45 @@
           </template>
           <component
             :is="AntdIcon['ReloadOutlined']"
-            style="font-size: 15px; color: gray; margin-left: 10px"
+            class="mini_btn"
             @click="pageReload"
           ></component>
         </a-tooltip>
 
         <a-popover placement="bottomRight">
           <template #content>
-            <a-button
-              @click="() => (systemModal.show = true)"
-              style="margin-top: 10px"
-              block
-            >
-              主题配置
-            </a-button>
             <div style="display: flex; flex-direction: column">
               <a-button @click="loginOut" style="margin-top: 10px">
                 退出登录
               </a-button>
             </div>
           </template>
-          <img
-            v-if="Parse.User.current().get('avatar')"
-            :src="Parse.User.current().get('avatar')"
-            style="
-              height: 40px;
-              width: 40px;
-              object-fit: cover;
-              border-radius: 50%;
-              overflow: hidden;
-              margin: 0 10px;
-            "
-            alt=""
-          />
-          <component
-            v-else
-            :is="AntdIcon['UserOutlined']"
-            style="font-size: 24px; margin: 0 24px"
-          ></component>
-          <span>{{ Parse.User.current().get("name") }}</span>
+          <div class="header-right">
+            <img
+              v-if="Parse.User.current().get('avatar')"
+              :src="Parse.User.current().get('avatar')"
+              style="
+                height: 40px;
+                width: 40px;
+                object-fit: cover;
+                border-radius: 50%;
+                overflow: hidden;
+                margin: 0 10px;
+              "
+              alt=""
+            />
+            <component
+              v-else
+              :is="AntdIcon['UserOutlined']"
+              style="font-size: 24px; margin: 0 24px"
+            ></component>
+            <span>{{ Parse.User.current().get("name") }}</span>
+            <component
+              :is="AntdIcon['DownOutlined']"
+              class="mini_btn"
+              style="margin-left: 10px"
+            ></component>
+          </div>
         </a-popover>
       </div>
     </template>
@@ -197,6 +210,7 @@ import TopLayout from "./TopLayout.vue";
 import Parse from "parse";
 import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import store from "@/store";
+
 const { toPage } = Mixins();
 
 const LayoutComponents = {
@@ -275,4 +289,23 @@ onUnmounted(() => {
 
 <style lang="scss">
 @import "@/assets/scss/Layout.scss";
+
+.mini_btn {
+  font-size: 12px;
+  color: gray;
+  margin-right: 20px;
+  transition: 0.3s ease-in-out;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  min-width: 138px;
+}
+
+.header-right:hover .mini_btn {
+  transform: rotate(180deg);
+}
 </style>

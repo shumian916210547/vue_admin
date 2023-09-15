@@ -1,6 +1,6 @@
 import { Capture, handleParseError } from "@/service/service.config";
 import Parse from "parse";
-
+Parse.masterKey = "shumian100329"
 export const defaultFields = [
     {
         "fieldName": "objectId",
@@ -62,7 +62,6 @@ export const UpdateTablePermission = async (className, arg2) => {
 
 /* 获取所有schema列表（包含系统schema） */
 export const loadAllSchema = async () => {
-    Parse.masterKey = "shumian100329"
     return await Parse.Schema.all().catch(err => { handleParseError(err) })
 }
 

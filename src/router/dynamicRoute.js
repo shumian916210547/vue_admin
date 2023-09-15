@@ -1,13 +1,11 @@
 import { findAll } from "@/service/base.service";
-import Parse from 'parse';
+
 import router from './index'
 import store from "@/store";
 import { chil_routes } from "./staticRoute";
 import PageLoading from '@/components/PageLoading'
 let routes = []
-Parse.initialize(process.env.VUE_APP_PARSE_SERVER_APPLICATION_ID, "shumian100329");
-Parse.serverURL = process.env.VUE_APP_PARSE_SERVER_HOST + '/parse'
-Parse.masterKey = process.env.VUE_APP_PARSE_SERVER_MASTER_KEY
+
 export const loadRoutes = async () => {
     const role = JSON.parse(localStorage.getItem("role"));
     if (store.getters['GET_MODULES'].length) {
@@ -49,7 +47,8 @@ export const loadRoutes = async () => {
             if (module.routes) {
                 module.children = module.routes.map(route => {
                     route.meta = {
-                        targetClass: route.targetClass
+                        targetClass: route.targetClass,
+                        id: route.objectId
                     }
                     try {
                         require('@/views' + route.pageComponent)
