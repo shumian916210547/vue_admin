@@ -16,7 +16,11 @@
         :offset="1"
         style="justify-content: space-evenly; display: flex"
       >
-        <a-button type="primary" @click="getSchemaList(queryState)">
+        <a-button
+          type="primary"
+          @click="getSchemaList(queryState)"
+          style="margin: 0 10px 0 0"
+        >
           查询
         </a-button>
         <a-button @click="queryReset()">重置</a-button>
@@ -35,7 +39,7 @@
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
-        <div style="max-width: 230px;display: flex;align-items: center;">
+        <div style="max-width: 230px; display: flex; align-items: center">
           <a-button
             @click="
               (fieldModal.type = 'add'),

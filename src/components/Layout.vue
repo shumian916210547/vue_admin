@@ -7,7 +7,10 @@
     <template #layout-content>
       <a-layout-content
         :style="{
-          margin: '88px 16px 24px',
+          margin:
+            systemOptions.layout == 'TopLayout'
+              ? '88px 16px 24px'
+              : '24px 16px',
           padding: '24px',
           background: '#fff',
           minHeight: '280px',
@@ -70,7 +73,43 @@
     </template>
 
     <template #layout-header-right>
-      <div style="display: flex; align-items: center">
+      <div style="display: flex; align-items: center; min-width: 88px">
+        <!-- 全屏 -->
+        <a-tooltip placement="bottom" v-if="!isFullScreen">
+          <template #title>
+            <span>全屏</span>
+          </template>
+          <component
+            :is="AntdIcon['ExpandOutlined']"
+            style="font-size: 15px; color: gray"
+            @click="zoomPage"
+          ></component>
+        </a-tooltip>
+
+        <!-- 退出全屏 -->
+        <a-tooltip placement="bottom" v-else>
+          <template #title>
+            <span>退出全屏</span>
+          </template>
+          <component
+            :is="AntdIcon['CompressOutlined']"
+            style="font-size: 15px; color: gray; margin-left: 10px"
+            @click="zoomPage"
+          ></component>
+        </a-tooltip>
+
+        <!-- 刷新按钮 -->
+        <a-tooltip placement="bottom">
+          <template #title>
+            <span>刷新</span>
+          </template>
+          <component
+            :is="AntdIcon['ReloadOutlined']"
+            style="font-size: 15px; color: gray; margin-left: 10px"
+            @click="pageReload"
+          ></component>
+        </a-tooltip>
+
         <a-popover placement="bottomRight">
           <template #content>
             <a-button
@@ -156,7 +195,7 @@ import * as AntdIcon from "@ant-design/icons-vue";
 import LeftLayout from "./LeftLayout.vue";
 import TopLayout from "./TopLayout.vue";
 import Parse from "parse";
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
 import store from "@/store";
 const { toPage } = Mixins();
 
@@ -165,7 +204,7 @@ const LayoutComponents = {
   TopLayout,
 };
 
-const selectedKeys = reactive([]);
+const selectedKeys = ref(["1"]);
 
 /* 设置弹窗 */
 const systemModal = reactive({
@@ -188,6 +227,8 @@ const modules = computed(() => {
   return store.getters["GET_MODULES"];
 });
 
+const isFullScreen = ref(false);
+
 /* 系统配置改变 */
 const onChange = () => {
   const user = Parse.User.current();
@@ -198,12 +239,38 @@ const onChange = () => {
   user.save();
 };
 
+/* 页面刷新 */
+const pageReload = () => {
+  window.location.reload();
+};
+
+/* 全屏，退出全屏 */
+const zoomPage = () => {
+  if (document.webkitIsFullScreen) {
+    document.exitFullscreen();
+  } else {
+    document.body.requestFullscreen();
+  }
+};
+
 const loginOut = async () => {
   toPage("/login");
   await Parse.User.logOut();
   localStorage.clear();
   store.commit("SET_MODULES", []);
 };
+
+document.onfullscreenchange = (e) => {
+  if (!document.webkitIsFullScreen) {
+    isFullScreen.value = false;
+  } else {
+    isFullScreen.value = true;
+  }
+};
+
+onUnmounted(() => {
+  document.onfullscreenchange = undefined;
+});
 </script>
 
 <style lang="scss">

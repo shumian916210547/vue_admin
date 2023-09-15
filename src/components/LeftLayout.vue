@@ -16,6 +16,7 @@
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          zIndex: 1,
         }"
       >
         <component

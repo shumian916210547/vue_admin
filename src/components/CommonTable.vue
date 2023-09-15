@@ -14,7 +14,12 @@
         :offset="1"
         style="justify-content: space-evenly; display: flex"
       >
-        <a-button type="primary" @click="emit('onQuery')">查询</a-button>
+        <a-button
+          type="primary"
+          @click="emit('onQuery')"
+          style="margin: 0 10px 0 0"
+          >查询</a-button
+        >
         <a-button @click="emit('onQueryReset')">重置</a-button>
       </a-col>
       <a-col :span="2" :offset="2">
