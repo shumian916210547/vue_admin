@@ -1,5 +1,6 @@
 import Parse from 'parse'
 import { Capture, FindList, handleParseError } from '@/service/service.config'
+import { notification } from 'ant-design-vue';
 
 /* 查询所有数据 */
 export const findAll = async (className) => {
@@ -56,6 +57,10 @@ export const InsertRow = async ({ className, fields, params }) => {
     acl.setPublicWriteAccess(true)
     table.setACL(acl)
     return await Capture(table.save()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '新增成功',
+        });
         /*  UpdateTablePermission(className, success) */
     })
 }
@@ -79,7 +84,12 @@ export const UpdateById = async ({ className, fields, params }) => {
             }
         }
     })
-    return await Capture(table.save())
+    return await Capture(table.save()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '修改成功',
+        });
+    })
 }
 
 /* 删除一行 */
@@ -87,5 +97,10 @@ export const removeById = async ({ className, objectId }) => {
     const Table = new Parse.Query(className);
     Table.equalTo('objectId', objectId)
     const table = await Table.first();
-    return await Capture(table.destroy())
+    return await Capture(table.destroy()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '删除成功',
+        });
+    })
 }

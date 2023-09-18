@@ -10,6 +10,8 @@ let oneEnter = true;
 router.beforeEach(async (to, from, next) => {
   if (!Parse.User.current()) {
     if (to.path === "/login") {
+      sessionStorage.clear()
+      localStorage.clear()
       next();
     } else {
       next({

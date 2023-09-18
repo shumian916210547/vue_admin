@@ -39,10 +39,12 @@
         }"
       />
       <a-menu
+        v-model:openKeys="openKeys"
         v-model:selectedKeys="selectedKeys"
         :theme="systemOptions.theme"
         :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'inline'"
         :style="{ width: systemOptions.layout == 'TopLayout' ? '70%' : 'auto' }"
+        @openChange="openChange"
       >
         <template v-for="item in modules">
           <template v-if="item.children">
@@ -57,14 +59,23 @@
               <a-menu-item
                 v-for="chil in item.children"
                 :key="'chil' + chil.objectId"
-                @click="toPage('/' + item.path + '/' + chil.path)"
+                @click="
+                  toPage(
+                    '/' + item.path + '/' + chil.path,
+                    'chil' + chil.objectId,
+                    chil.name
+                  )
+                "
               >
                 {{ chil.name }}
               </a-menu-item>
             </a-sub-menu>
           </template>
           <template v-else>
-            <a-menu-item :key="item.objectId" @click="toPage('/' + item.path)">
+            <a-menu-item
+              :key="item.objectId"
+              @click="toPage('/' + item.path, item.objectId, item.name)"
+            >
               <component :is="AntdIcon[item.meta.icon]"></component>
               <span>{{ item.name }}</span>
             </a-menu-item>
@@ -208,7 +219,7 @@ import * as AntdIcon from "@ant-design/icons-vue";
 import LeftLayout from "./LeftLayout.vue";
 import TopLayout from "./TopLayout.vue";
 import Parse from "parse";
-import { computed, onMounted, onUnmounted, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import store from "@/store";
 
 const { toPage } = Mixins();
@@ -218,7 +229,13 @@ const LayoutComponents = {
   TopLayout,
 };
 
-const selectedKeys = ref(["1"]);
+const openKeys = ref(JSON.parse(sessionStorage.getItem("openKeys")) || []);
+const selectedKeys = ref([sessionStorage.getItem("pageKey") || ""]);
+
+/* menu 打开/关闭回掉 */
+const openChange = (keys) => {
+  sessionStorage.setItem("openKeys", JSON.stringify(keys));
+};
 
 /* 设置弹窗 */
 const systemModal = reactive({

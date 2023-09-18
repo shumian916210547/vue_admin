@@ -21,8 +21,10 @@ export function Mixins() {
     }
 
     // 页面跳转
-    const toPage = (path) => {
+    const toPage = (path, pageKey, pageName) => {
         router.push({ path });
+        if (pageKey) sessionStorage.setItem('pageKey', pageKey)
+        if (pageName) sessionStorage.setItem('pageName', pageName)
     };
 
     return {
