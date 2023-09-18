@@ -8,7 +8,7 @@
       accept="image/*"
       :disabled="disabled"
     >
-      <div v-if="fileList.length <= maxLength">
+      <div v-if="fileList.length < props.maxLength">
         <plus-outlined />
         <div style="margin-top: 8px">Upload</div>
       </div>
@@ -51,7 +51,7 @@ watch(
   { deep: true }
 );
 
-const emit = defineEmits("update:files");
+const emit = defineEmits("update:files", "onChange");
 function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -94,6 +94,7 @@ const handleUpload = async (file) => {
     ];
   }
   emit("update:files", fileList.value);
+  emit("onChange", fileList.value);
 };
 const handleCancel = () => {
   previewVisible.value = false;

@@ -33,11 +33,20 @@
 
     <template #layout-menu>
       <div
+        v-if="systemOptions.showLogo"
         class="logo"
         :style="{
           width: systemOptions.layout == 'TopLayout' ? '200px' : 'auto',
+          padding: systemOptions.layout == 'TopLayout' ? '4px 0' : '4px 0 0 0',
         }"
-      />
+      >
+        <img
+          :src="systemOptions.logoURL[0]?.url"
+          alt=""
+          style="height: 100%; width: 100%; object-fit: contain"
+          @click="toPage('/')"
+        />
+      </div>
       <a-menu
         v-model:openKeys="openKeys"
         v-model:selectedKeys="selectedKeys"
@@ -208,6 +217,26 @@
           <a-radio value="dark">dark</a-radio>
         </a-radio-group>
       </a-form-item>
+
+      <a-form-item label="是否显示LOGO">
+        <a-radio-group
+          v-model:value="systemOptions.showLogo"
+          size="large"
+          @change="onChange"
+        >
+          <a-radio :value="true">是</a-radio>
+          <a-radio :value="false">否</a-radio>
+        </a-radio-group>
+      </a-form-item>
+
+      <a-form-item label="自定义LOGO" v-if="systemOptions.showLogo">
+        <component
+          v-model:files="systemOptions.logoURL"
+          :maxLength="1"
+          @change="onChange"
+          :is="Upload"
+        ></component>
+      </a-form-item>
     </a-form>
   </a-drawer>
 </template>
@@ -218,6 +247,7 @@ import { Mixins } from "@/mixins/index";
 import * as AntdIcon from "@ant-design/icons-vue";
 import LeftLayout from "./LeftLayout.vue";
 import TopLayout from "./TopLayout.vue";
+import Upload from "./Upload.vue";
 import Parse from "parse";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import store from "@/store";
@@ -249,6 +279,8 @@ const systemOptions = reactive(
     {
       theme: "light",
       layout: "TopLayout",
+      showLogo: true,
+      logoURL: [],
     },
     Parse.User.current().get("systemOptions")
   )
