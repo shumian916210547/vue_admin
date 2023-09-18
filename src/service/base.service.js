@@ -4,7 +4,7 @@ import { notification } from 'ant-design-vue';
 
 /* 查询所有数据 */
 export const findAll = async (className) => {
-    const table = new Parse.Query(className);
+    const table = new Parse.Query(className == '_User' ? Parse.User : className);
     table.includeAll()
     table.limit(10000)
     table.descending('createdAt')
@@ -17,7 +17,7 @@ export const findAll = async (className) => {
 export const findList = async (query) => {
     const { className, pageSize, pageNum, name } = query;
     if (!className) return
-    const table = new Parse.Query(className)
+    const table = new Parse.Query(className == '_User' ? Parse.User : className)
     table.includeAll()
     if (name) {
         table.contains('name', name)

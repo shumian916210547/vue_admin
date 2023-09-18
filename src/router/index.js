@@ -30,6 +30,8 @@ router.beforeEach(async (to, from, next) => {
       next({
         path: "/home"
       });
+      sessionStorage.setItem('historyPage', JSON.stringify([{ path: "/home", pageKey: "tuFQjORBab", pageName: "首页" }]))
+      sessionStorage.setItem('pageKey', "tuFQjORBab")
     } else { next() }
   }
 });

@@ -3,14 +3,13 @@
     :AntdIcon="AntdIcon"
     :systemOptions="systemOptions"
     :is="LayoutComponents[systemOptions.layout]"
+    :key="systemOptions.showTags"
   >
     <template #layout-content>
       <a-layout-content
         :style="{
           margin:
-            systemOptions.layout == 'TopLayout'
-              ? '88px 16px 24px'
-              : '24px 16px',
+            systemOptions.layout == 'TopLayout' ? '24px 16px' : '24px 16px',
           padding: '24px',
           background: '#fff',
           minHeight: '280px',
@@ -181,6 +180,27 @@
         </a-popover>
       </div>
     </template>
+
+    <template #layout-tags v-if="systemOptions.showTags">
+      <div
+        class="tags-view"
+        :style="{
+          padding:
+            systemOptions.layout == 'TopLayout' ? '4px 0 4px 200px' : '4px 10px',
+        }"
+      >
+        <template v-for="(item, index) in historyPage" :key="item.pageKey">
+          <a-tag
+            :color="item.pageKey == selectedKeys[0] ? '#108ee9' : '#87d068'"
+            @click="handleTag(item)"
+            closable
+            @close="removeHistoryRoute(index)"
+          >
+            {{ item.pageName }}
+          </a-tag>
+        </template>
+      </div>
+    </template>
   </component>
 
   <!-- 设置弹窗 -->
@@ -238,6 +258,17 @@
           :is="Upload"
         ></component>
       </a-form-item>
+
+      <a-form-item label="显示tag-view">
+        <a-radio-group
+          v-model:value="systemOptions.showTags"
+          size="large"
+          @change="onChange"
+        >
+          <a-radio :value="true">是</a-radio>
+          <a-radio :value="false">否</a-radio>
+        </a-radio-group>
+      </a-form-item>
     </a-form>
   </a-drawer>
 </template>
@@ -254,7 +285,15 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import store from "@/store";
 import { arrayImgsToString } from "@/utils/utils";
 
-const { toPage } = Mixins();
+const { toPage, historyPage, removeHistoryRoute } = Mixins();
+
+watch(
+  historyPage,
+  (n) => {
+    console.log(n);
+  },
+  { deep: true }
+);
 
 const LayoutComponents = {
   LeftLayout,
@@ -283,6 +322,7 @@ const systemOptions = reactive(
       layout: "TopLayout",
       showLogo: true,
       logoURL: "",
+      showTags: true,
     },
     Parse.User.current().get("systemOptions")
   )
@@ -316,6 +356,12 @@ const onChange = () => {
     Object.assign({}, user.get("systemOptions"), systemOptions)
   );
   user.save();
+};
+
+/* tag点击 */
+const handleTag = (ev) => {
+  toPage(ev.path, ev.pageKey, ev.pageName);
+  selectedKeys.value = [sessionStorage.getItem("pageKey")];
 };
 
 /* 页面刷新 */
@@ -372,5 +418,18 @@ onUnmounted(() => {
 
 .header-right:hover .mini_btn {
   transform: rotate(180deg);
+}
+
+.tags-view {
+  display: flex;
+  align-items: center;
+  /* height: 80px; */
+  padding: 4px 0;
+
+  .ant-tag {
+    height: 30px;
+    display: flex;
+    align-items: center;
+  }
 }
 </style>

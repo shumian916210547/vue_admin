@@ -14,26 +14,38 @@
           background: '#fff',
           padding: 0,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           zIndex: 1,
+          flexDirection: 'column',
         }"
+        id="layoutHeader"
       >
-        <component
-          :is="AntdIcon['MenuUnfoldOutlined']"
-          v-if="collapsed"
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        ></component>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            padding: 0 10px;
+          "
+        >
+          <component
+            :is="AntdIcon['MenuUnfoldOutlined']"
+            v-if="collapsed"
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          ></component>
 
-        <component
-          :is="props.AntdIcon['MenuFoldOutlined']"
-          v-else
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        ></component>
+          <component
+            :is="props.AntdIcon['MenuFoldOutlined']"
+            v-else
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          ></component>
 
-        <slot name="layout-header-right"></slot>
+          <slot name="layout-header-right"></slot>
+        </div>
+
+        <slot name="layout-tags"> </slot>
       </a-layout-header>
       <slot name="layout-content"> </slot>
     </a-layout>
@@ -41,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const props = defineProps({
   systemOptions: {
