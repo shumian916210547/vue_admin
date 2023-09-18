@@ -7,7 +7,7 @@ import PageLoading from '@/components/PageLoading'
 let routes = []
 
 export const loadRoutes = async () => {
-    const role = Parse.User.current().get("role").toJSON()
+    const role = JSON.parse(localStorage.getItem("role"));
     if (store.getters['GET_MODULES'].length) {
         routes = [...chil_routes, ...store.getters['GET_MODULES']]
     } else {

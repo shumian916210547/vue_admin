@@ -32,3 +32,16 @@ export const debounce = (fn, wait) => {
         timer = setTimeout(fn, wait)
     }
 }
+
+
+/* 处理图片数组转string */
+export const arrayImgsToString = (arr, key) => {
+    let urls = ""
+    arr.forEach((item, index) => {
+        urls += item[key]
+        if (index != 0 && index != arr.length - 1) {
+            urls += ','
+        }
+    })
+    return urls
+}

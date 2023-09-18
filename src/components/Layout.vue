@@ -41,7 +41,8 @@
         }"
       >
         <img
-          :src="systemOptions.logoURL[0]?.url"
+          v-if="systemOptions.logoURL"
+          :src="systemOptions.logoURL"
           alt=""
           style="height: 100%; width: 100%; object-fit: contain"
           @click="toPage('/')"
@@ -251,6 +252,7 @@ import Upload from "./Upload.vue";
 import Parse from "parse";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import store from "@/store";
+import { arrayImgsToString } from "@/utils/utils";
 
 const { toPage } = Mixins();
 
@@ -280,10 +282,22 @@ const systemOptions = reactive(
       theme: "light",
       layout: "TopLayout",
       showLogo: true,
-      logoURL: [],
+      logoURL: "",
     },
     Parse.User.current().get("systemOptions")
   )
+);
+
+watch(
+  systemOptions,
+  (n) => {
+    if (n.layout == "TopLayout") {
+      openKeys.value = [];
+    } else {
+      openKeys.value = JSON.parse(sessionStorage.getItem("openKeys"));
+    }
+  },
+  { deep: true, immediate: true }
 );
 
 const modules = computed(() => {
@@ -294,6 +308,8 @@ const isFullScreen = ref(false);
 
 /* 系统配置改变 */
 const onChange = () => {
+  if (typeof systemOptions.logoURL == "array")
+    systemOptions.logoURL = arrayImgsToString(systemOptions.logoURL, "url");
   const user = Parse.User.current();
   user.set(
     "systemOptions",

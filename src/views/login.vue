@@ -69,6 +69,7 @@ const toLogin = async (arg) => {
     query.equalTo("objectId", user.id);
     query.includeAll();
     const result = (await query.first()).toJSON();
+    localStorage.setItem("role", JSON.stringify(result.role));
     const success = await getSystemTitle(user.id);
     if (success) {
       toPage("/");

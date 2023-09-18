@@ -7,6 +7,7 @@
       @preview="handlePreview"
       accept="image/*"
       :disabled="disabled"
+      @remove="handleRemove"
     >
       <div v-if="fileList.length < props.maxLength">
         <plus-outlined />
@@ -43,15 +44,7 @@ const props = defineProps({
   },
 });
 
-watch(
-  () => props.files,
-  () => {
-    fileList.value = props.files;
-  },
-  { deep: true }
-);
-
-const emit = defineEmits("update:files", "onChange");
+const emit = defineEmits(["update:files", "change"]);
 function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -64,7 +57,23 @@ function getBase64(file) {
 const previewVisible = ref(false);
 const previewImage = ref("");
 const previewTitle = ref("");
-const fileList = ref(props.files);
+const fileList = ref([]);
+if (typeof props.files == "string") {
+  if (props.files.length > 0) {
+    props.files.split(",").forEach((url) => {
+      fileList.value.push({
+        uid: new Date().getMilliseconds(),
+        name: url,
+        status: "done",
+        url,
+      });
+    });
+  } else {
+    fileList.value = [];
+  }
+} else {
+  fileList.value = props.files;
+}
 const handleUpload = async (file) => {
   const parseFile = new Parse.File(file.file.name, file.file, file.file.type);
   const result = await parseFile.save().catch((err) => {});
@@ -94,8 +103,15 @@ const handleUpload = async (file) => {
     ];
   }
   emit("update:files", fileList.value);
-  emit("onChange", fileList.value);
+  emit("change");
 };
+
+const handleRemove = (ev) => {
+  emit("update:files", fileList.value);
+  emit("change");
+  return true;
+};
+
 const handleCancel = () => {
   previewVisible.value = false;
   previewTitle.value = "";
