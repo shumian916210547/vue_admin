@@ -6,7 +6,7 @@ import { notification } from 'ant-design-vue';
 export const findAll = async (className, where = { company: sessionStorage.getItem('companyId') }) => {
     const table = new Parse.Query(className == '_User' ? Parse.User : className);
     Object.keys(where).forEach(key => {
-        if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session') {
+        if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session' && className != 'Permission') {
             if (where[key]) table.equalTo(key, where[key])
         }
     })
@@ -39,14 +39,9 @@ export const findList = async (query, where = { company: sessionStorage.getItem(
 }
 
 /* 查询字段 */
-export const findSchema = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
+export const findSchema = async (query) => {
     const table = new Parse.Query('Schema');
     table.equalTo('name', query.className)
-    Object.keys(where).forEach(key => {
-        if (query.className != 'AntdIcon' && query.className != 'UserLogs' && query.className != '_Session') {
-            if (where[key]) table.equalTo(key, where[key])
-        }
-    })
     table.includeAll()
     return await table.first().catch(err => { handleParseError(err) })
 }

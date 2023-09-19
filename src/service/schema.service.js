@@ -74,18 +74,16 @@ export const loadSchemas = async (query) => {
 /* 新建schema */
 export const createSchema = async (className) => {
     const table = new Parse.Schema(className)
-    return await Capture(table.save()).then(success => {
-        InsertSchema(className)
-    })
+    await Capture(table.save())
+    return await InsertSchema(className)
 }
 
 /* 新增字段 */
 export const addField = async (className, fieldType, fieldName, fieldOption) => {
     const table = new Parse.Schema(className)
     table.addField(fieldName, fieldType, fieldOption)
-    return await Capture(table.update()).then(success => {
-        UpdateSchema(className, fieldType, fieldName, fieldOption)
-    })
+    await Capture(table.update())
+    return await UpdateSchema(className, fieldType, fieldName, fieldOption)
 }
 
 /* 修改字段 */
@@ -104,18 +102,16 @@ export const updateField = async (className, fieldType, fieldName, fieldOption) 
 export const removeField = async (className, fieldName) => {
     const table = new Parse.Schema(className)
     table.deleteField(fieldName)
-    return await Capture(table.update()).then(success => {
-        RemoveTableField(className, fieldName)
-    })
+    await Capture(table.update())
+    return await RemoveTableField(className, fieldName)
 }
 
 /* 删除schema */
 export const removeSchema = async (className) => {
     const table = new Parse.Schema(className)
     await table.purge()
-    return await Capture(table.delete()).then(success => {
-        RemoveTable(className)
-    })
+    await Capture(table.delete())
+    return await RemoveTable(className)
 }
 
 const GetSchemaList = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
@@ -127,7 +123,6 @@ const GetSchemaList = async (query, where = { company: sessionStorage.getItem('c
     Schema.descending("createdAt")
     return (await Schema.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
-
 
 const InsertSchema = async (className) => {
     const Schema = Parse.Object.extend("Schema")

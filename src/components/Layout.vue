@@ -311,8 +311,8 @@ const LayoutComponents = {
   TopLayout,
 };
 
-const openKeys = ref(JSON.parse(sessionStorage.getItem("openKeys")) || []);
-const selectedKeys = ref([sessionStorage.getItem("pageKey") || ""]);
+const openKeys = ref([]);
+const selectedKeys = ref([""]);
 
 /* menu 打开/关闭回掉 */
 const openChange = (keys) => {
@@ -340,14 +340,18 @@ const systemOptions = reactive(
     Parse.User.current().get("systemOptions")
   )
 );
-
+/* 恢复菜单栏状态 */
+const recoverMenuStatus = () => {
+  openKeys.value = JSON.parse(sessionStorage.getItem("openKeys")) || [];
+  selectedKeys.value = [sessionStorage.getItem("pageKey") || ""];
+};
 watch(
   systemOptions,
   (n) => {
     if (n.layout == "TopLayout") {
       openKeys.value = [];
     } else {
-      openKeys.value = [JSON.parse(sessionStorage.getItem("openKeys")) || ""];
+      recoverMenuStatus();
     }
   },
   { deep: true, immediate: true }
@@ -419,6 +423,7 @@ document.onfullscreenchange = (e) => {
 
 onMounted(() => {
   setIcon();
+  recoverMenuStatus();
 });
 
 onUnmounted(() => {
