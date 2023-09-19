@@ -25,14 +25,14 @@
         <a-input-password v-model:value="formState.password" />
       </a-form-item>
 
-     <!--  <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
+      <!--  <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
         <a-checkbox v-model:checked="formState.remember"
           >Remember me</a-checkbox
         >
       </a-form-item> -->
 
       <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">Submit</a-button>
+        <a-button type="primary" html-type="submit">登录</a-button>
       </a-form-item>
     </a-form>
   </div>
@@ -89,6 +89,7 @@ const getSystemTitle = async (uid) => {
   const result = await query.first();
   if (result && result.id) {
     document.title = result.get("name");
+    sessionStorage.setItem("companyId", result.id);
     sessionStorage.setItem("systemTitle", document.title);
     return true;
   } else {

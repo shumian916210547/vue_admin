@@ -1,4 +1,5 @@
 import { Capture, handleParseError } from "@/service/service.config";
+import { notification } from "ant-design-vue";
 import Parse from "parse";
 Parse.masterKey = "shumian100329"
 export const defaultFields = [
@@ -117,9 +118,12 @@ export const removeSchema = async (className) => {
     })
 }
 
-const GetSchemaList = async (query) => {
+const GetSchemaList = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
     const Schema = new Parse.Query('Schema');
     Schema.contains('name', query.name)
+    Object.keys(where).forEach(key => {
+        if (where[key]) Schema.equalTo(key, where[key])
+    })
     Schema.descending("createdAt")
     return (await Schema.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
@@ -130,9 +134,21 @@ const InsertSchema = async (className) => {
     const schema = new Schema()
     schema.set('name', className);
     schema.set('fields', {});
-    await schema.save()
-    defaultFields.forEach(item => {
-        setDefaultFields({ className, ...item })
+    if (sessionStorage.getItem('companyId')) {
+        schema.set('company', {
+            __type: 'Pointer',
+            className: 'Company',
+            objectId: sessionStorage.getItem('companyId')
+        })
+    }
+    return await Capture(schema.save()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '添加成功',
+        });
+        defaultFields.forEach(item => {
+            setDefaultFields({ className, ...item })
+        })
     })
 }
 
@@ -151,7 +167,12 @@ const UpdateSchema = async (className, type, fieldName, fieldOption) => {
         ...fieldOption
     }
     schema.set('fields', fields)
-    await schema.save()
+    return await Capture(schema.save()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '更新成功',
+        });
+    })
 }
 
 const RemoveTableField = async (className, fieldName) => {
@@ -161,12 +182,22 @@ const RemoveTableField = async (className, fieldName) => {
     let fields = schema.get('fields')
     delete fields[fieldName]
     schema.set('fields', fields)
-    await schema.save()
+    return await Capture(schema.save()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: '字段' + fieldName + '删除成功',
+        });
+    })
 }
 
 const RemoveTable = async (className) => {
     let Schema = new Parse.Query('Schema');
     Schema.equalTo('name', className);
     const schema = await Schema.first()
-    await schema.destroy()
+    return await Capture(schema.destroy()).then(success => {
+        notification.success({
+            message: sessionStorage.getItem('pageName'),
+            description: (success.get('name') || success.get('objectId')) + '删除成功',
+        });
+    })
 }

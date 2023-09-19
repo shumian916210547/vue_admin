@@ -347,7 +347,7 @@ watch(
     if (n.layout == "TopLayout") {
       openKeys.value = [];
     } else {
-      openKeys.value = JSON.parse(sessionStorage.getItem("openKeys"));
+      openKeys.value = [JSON.parse(sessionStorage.getItem("openKeys")) || ""];
     }
   },
   { deep: true, immediate: true }
@@ -458,6 +458,7 @@ onUnmounted(() => {
     height: 30px;
     display: flex;
     align-items: center;
+    cursor: pointer;
   }
 }
 

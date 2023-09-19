@@ -10,6 +10,13 @@ export const InsertRoute = async ({ name, path, pageComponent, targetClass, rank
     table.set('rank', rank)
     table.set('pageComponent', pageComponent)
     table.set('targetClass', targetClass)
+    if (sessionStorage.getItem('companyId')) {
+        table.set('company', {
+            __type: 'Pointer',
+            className: 'Company',
+            objectId: sessionStorage.getItem('companyId')
+        })
+    }
     return await table.save()
 }
 

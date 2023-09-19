@@ -12,7 +12,7 @@ export const loadRoutes = async () => {
         routes = [...chil_routes, ...store.getters['GET_MODULES']]
     } else {
         /* 筛选用户有权限的页面 */
-        const modules = (await findAll('Module')).filter((module) => {
+        const modules = (await findAll('Module', {})).filter((module) => {
             if (module.routes) {
                 module.routes = module.routes.filter((route) => {
                     return role.module.includes(route.objectId);

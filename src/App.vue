@@ -4,6 +4,7 @@
 
 <script setup>
 document.title = sessionStorage.getItem("systemTitle") || "后台管理系统";
+window.companyId = sessionStorage.getItem("compangId");
 </script>
 
 <style lang="scss">

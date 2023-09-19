@@ -3,18 +3,23 @@ import { Capture, FindList, handleParseError } from '@/service/service.config'
 import { notification } from 'ant-design-vue';
 
 /* 查询所有数据 */
-export const findAll = async (className) => {
+export const findAll = async (className, where = { company: sessionStorage.getItem('companyId') }) => {
     const table = new Parse.Query(className == '_User' ? Parse.User : className);
-    table.includeAll()
+    Object.keys(where).forEach(key => {
+        if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session') {
+            if (where[key]) table.equalTo(key, where[key])
+        }
+    })
     table.limit(10000)
     table.descending('createdAt')
+    table.includeAll()
     return (await table.find().catch(err => { handleParseError(err) }))?.filter(
         item => { return item.id })?.map(
             item => { return item.toJSON() })
 }
 
 /* 查询列表 */
-export const findList = async (query) => {
+export const findList = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
     const { className, pageSize, pageNum, name } = query;
     if (!className) return
     const table = new Parse.Query(className == '_User' ? Parse.User : className)
@@ -22,6 +27,11 @@ export const findList = async (query) => {
     if (name) {
         table.contains('name', name)
     }
+    Object.keys(where).forEach(key => {
+        if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session') {
+            if (where[key]) table.equalTo(key, where[key])
+        }
+    })
     table.limit(pageSize || 200)
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
     table.descending('createdAt')
@@ -29,9 +39,14 @@ export const findList = async (query) => {
 }
 
 /* 查询字段 */
-export const findSchema = async (query) => {
+export const findSchema = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
     const table = new Parse.Query('Schema');
     table.equalTo('name', query.className)
+    Object.keys(where).forEach(key => {
+        if (query.className != 'AntdIcon' && query.className != 'UserLogs' && query.className != '_Session') {
+            if (where[key]) table.equalTo(key, where[key])
+        }
+    })
     table.includeAll()
     return await table.first().catch(err => { handleParseError(err) })
 }
@@ -51,7 +66,13 @@ export const InsertRow = async ({ className, fields, params }) => {
             table.set(key, params[key])
         }
     })
-
+    if (sessionStorage.getItem('companyId')) {
+        table.set('company', {
+            __type: 'Pointer',
+            className: 'Company',
+            objectId: sessionStorage.getItem('companyId')
+        })
+    }
     const acl = new Parse.ACL()
     acl.setPublicReadAccess(true)
     acl.setPublicWriteAccess(true)
@@ -84,6 +105,13 @@ export const UpdateById = async ({ className, fields, params }) => {
             }
         }
     })
+    if (sessionStorage.getItem('companyId')) {
+        table.set('company', {
+            __type: 'Pointer',
+            className: 'Company',
+            objectId: sessionStorage.getItem('companyId')
+        })
+    }
     return await Capture(table.save()).then(success => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
