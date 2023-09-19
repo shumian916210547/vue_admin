@@ -107,32 +107,34 @@
           ></component>
         </a-tooltip>
 
-        <!-- 全屏 -->
-        <a-tooltip placement="bottom" v-if="!isFullScreen">
-          <template #title>
-            <span>全屏</span>
-          </template>
-          <component
-            :is="AntdIcon['ExpandOutlined']"
-            class="mini_btn"
-            @click="zoomPage"
-          ></component>
-        </a-tooltip>
+        <template v-if="systemOptions.fullScreen">
+          <!-- 全屏 -->
+          <a-tooltip placement="bottom" v-if="!isFullScreen">
+            <template #title>
+              <span>全屏</span>
+            </template>
+            <component
+              :is="AntdIcon['ExpandOutlined']"
+              class="mini_btn"
+              @click="zoomPage"
+            ></component>
+          </a-tooltip>
 
-        <!-- 退出全屏 -->
-        <a-tooltip placement="bottom" v-else>
-          <template #title>
-            <span>退出全屏</span>
-          </template>
-          <component
-            :is="AntdIcon['CompressOutlined']"
-            class="mini_btn"
-            @click="zoomPage"
-          ></component>
-        </a-tooltip>
+          <!-- 退出全屏 -->
+          <a-tooltip placement="bottom" v-else>
+            <template #title>
+              <span>退出全屏</span>
+            </template>
+            <component
+              :is="AntdIcon['CompressOutlined']"
+              class="mini_btn"
+              @click="zoomPage"
+            ></component>
+          </a-tooltip>
+        </template>
 
         <!-- 刷新按钮 -->
-        <a-tooltip placement="bottom">
+        <a-tooltip placement="bottom" v-if="systemOptions.refresh">
           <template #title>
             <span>刷新</span>
           </template>
@@ -186,7 +188,9 @@
         class="tags-view"
         :style="{
           padding:
-            systemOptions.layout == 'TopLayout' ? '4px 0 4px 200px' : '4px 10px',
+            systemOptions.layout == 'TopLayout'
+              ? '4px 0 4px 200px'
+              : '4px 10px',
         }"
       >
         <template v-for="(item, index) in historyPage" :key="item.pageKey">
@@ -205,52 +209,51 @@
 
   <!-- 设置弹窗 -->
   <a-drawer
-    :zIndex="2000"
     v-model:visible="systemModal.show"
     title="主题配置"
     placement="right"
+    width="300"
   >
     <a-form
       :model="systemOptions"
       name="basic"
-      :label-col="{ span: 8 }"
-      :wrapper-col="{ span: 16 }"
+      :label-col="{ span: 10 }"
+      :wrapper-col="{ span: 14 }"
       autocomplete="off"
+      labelAlign="left"
     >
-      <a-form-item label="页面布局">
-        <a-radio-group
+      <a-form-item label="布局">
+        <a-select
           v-model:value="systemOptions.layout"
-          size="large"
           @change="onChange"
+          style="width: 120px"
         >
-          <a-radio value="LeftLayout">左右布局</a-radio>
-          <a-radio value="TopLayout">上下布局</a-radio>
-        </a-radio-group>
+          <a-select-option value="LeftLayout">纵向</a-select-option>
+          <a-select-option value="TopLayout">横向</a-select-option>
+        </a-select>
       </a-form-item>
 
-      <a-form-item label="菜单栏主题">
-        <a-radio-group
+      <a-form-item label="主题">
+        <a-select
           v-model:value="systemOptions.theme"
-          size="large"
           @change="onChange"
+          style="width: 120px"
         >
-          <a-radio value="light">light</a-radio>
-          <a-radio value="dark">dark</a-radio>
-        </a-radio-group>
+          <a-select-option value="light">light</a-select-option>
+          <a-select-option value="dark">dark</a-select-option>
+        </a-select>
       </a-form-item>
 
-      <a-form-item label="是否显示LOGO">
-        <a-radio-group
-          v-model:value="systemOptions.showLogo"
-          size="large"
+      <a-form-item label="图标">
+        <a-switch
+          v-model:checked="systemOptions.showLogo"
+          checked-children="开"
+          un-checked-children="关"
           @change="onChange"
-        >
-          <a-radio :value="true">是</a-radio>
-          <a-radio :value="false">否</a-radio>
-        </a-radio-group>
+        />
       </a-form-item>
 
-      <a-form-item label="自定义LOGO" v-if="systemOptions.showLogo">
+      <a-form-item label="资源" v-if="systemOptions.showLogo">
         <component
           v-model:files="systemOptions.logoURL"
           :maxLength="1"
@@ -259,15 +262,31 @@
         ></component>
       </a-form-item>
 
-      <a-form-item label="显示tag-view">
-        <a-radio-group
-          v-model:value="systemOptions.showTags"
-          size="large"
+      <a-form-item label="标签">
+        <a-switch
+          v-model:checked="systemOptions.showTags"
+          checked-children="开"
+          un-checked-children="关"
           @change="onChange"
-        >
-          <a-radio :value="true">是</a-radio>
-          <a-radio :value="false">否</a-radio>
-        </a-radio-group>
+        />
+      </a-form-item>
+
+      <a-form-item label="刷新">
+        <a-switch
+          v-model:checked="systemOptions.refresh"
+          checked-children="开"
+          un-checked-children="关"
+          @change="onChange"
+        />
+      </a-form-item>
+
+      <a-form-item label="全屏">
+        <a-switch
+          v-model:checked="systemOptions.fullScreen"
+          checked-children="开"
+          un-checked-children="关"
+          @change="onChange"
+        />
       </a-form-item>
     </a-form>
   </a-drawer>
@@ -286,14 +305,6 @@ import store from "@/store";
 import { arrayImgsToString } from "@/utils/utils";
 
 const { toPage, historyPage, removeHistoryRoute } = Mixins();
-
-watch(
-  historyPage,
-  (n) => {
-    console.log(n);
-  },
-  { deep: true }
-);
 
 const LayoutComponents = {
   LeftLayout,
@@ -323,6 +334,8 @@ const systemOptions = reactive(
       showLogo: true,
       logoURL: "",
       showTags: true,
+      refresh: true,
+      fullScreen: true,
     },
     Parse.User.current().get("systemOptions")
   )
@@ -431,5 +444,10 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
   }
+}
+
+.ant-form-item-control-input-content {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
