@@ -361,14 +361,25 @@ const isFullScreen = ref(false);
 
 /* 系统配置改变 */
 const onChange = () => {
-  if (typeof systemOptions.logoURL == "array")
+  if (typeof systemOptions.logoURL == "object")
     systemOptions.logoURL = arrayImgsToString(systemOptions.logoURL, "url");
   const user = Parse.User.current();
   user.set(
     "systemOptions",
     Object.assign({}, user.get("systemOptions"), systemOptions)
   );
+  setIcon();
   user.save();
+};
+
+const setIcon = () => {
+  const link =
+    document.querySelector("link[rel*='icon']") ||
+    document.createElement("link");
+  link.type = "image/x-icon";
+  link.rel = "shortcut icon";
+  link.href = systemOptions.logoURL;
+  document.getElementsByTagName("head")[0].appendChild(link);
 };
 
 /* tag点击 */
@@ -405,6 +416,10 @@ document.onfullscreenchange = (e) => {
     isFullScreen.value = true;
   }
 };
+
+onMounted(() => {
+  setIcon();
+});
 
 onUnmounted(() => {
   document.onfullscreenchange = undefined;
@@ -446,7 +461,7 @@ onUnmounted(() => {
   }
 }
 
-.ant-form-item-control-input-content {
+.ant-drawer .ant-form-item-control-input-content {
   display: flex;
   justify-content: flex-end;
 }

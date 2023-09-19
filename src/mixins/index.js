@@ -24,8 +24,9 @@ export function Mixins() {
 
     //删除历史数据中的其中一项
     const removeHistoryRoute = (index) => {
-        historyPage.value.splice(index, 1)
-        sessionStorage.setItem("historyPage", JSON.stringify(historyPage.value))
+        if (historyPage.value.length > 1)
+            historyPage.value.splice(index, 1),
+                sessionStorage.setItem("historyPage", JSON.stringify(historyPage.value))
     }
 
     //查询历史页面中是否存在
