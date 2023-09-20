@@ -23,6 +23,7 @@
           v-model:value="formState.fieldName"
           allowClear
           placeholder="请输入字段名称"
+          :disabled="props.type == 'edit'"
         />
       </a-form-item>
 
@@ -42,6 +43,7 @@
           show-search
           placeholder="情选择字段类型"
           allowClear
+          :disabled="props.type == 'edit'"
           :options="[
             {
               label: 'Boolean',
@@ -132,6 +134,7 @@
           show-search
           placeholder="情选择指向表名"
           allowClear
+          :disabled="props.type == 'edit'"
           :fieldNames="{
             label: 'name',
             value: 'name',
@@ -148,6 +151,7 @@
         <a-input
           v-model:value="optionState.defaultValue"
           allowClear
+          :disabled="props.type"
           placeholder="请输入字段默认值"
         />
       </a-form-item>
@@ -166,6 +170,7 @@
       >
         <a-switch
           v-model:checked="optionState.required"
+          :disabled="props.type == 'edit'"
           checked-children="是"
           un-checked-children="否"
         />
@@ -190,6 +195,14 @@
           :options="antdComponents"
         ></a-select>
       </a-form-item>
+
+      <a-form-item label="筛选字段" name="isFilter" style="min-width: 200px">
+        <a-switch
+          v-model:checked="optionState.isFilter"
+          checked-children="是"
+          un-checked-children="否"
+        />
+      </a-form-item>
     </a-form>
 
     <!-- 组件配置 -->
@@ -203,7 +216,6 @@
     >
       <!-- Select 组件配置 -->
       <template v-if="optionState.editComponent == 'ASelect'">
-
         <!-- 模式 -->
         <a-form-item
           label="模式"
@@ -246,7 +258,6 @@
             placeholder="请输入valueKey"
           />
         </a-form-item>
-
       </template>
 
       <!-- Select、TreeSelect 组件配置 -->
@@ -355,7 +366,6 @@
           un-checked-children="关"
         />
       </a-form-item>
-      
     </a-form>
   </a-modal>
 </template>
@@ -415,6 +425,7 @@ const handleOk = () => {
         defaultValue,
         editComponent,
         targetClass,
+        isFilter,
       } = success[1];
       const {
         placeholder,
@@ -436,6 +447,7 @@ const handleOk = () => {
           chineseName,
           defaultValue: eval("(" + deepClone(defaultValue) + ")"),
           editComponent,
+          isFilter,
           componentOption: {
             placeholder,
             disabled,
@@ -483,6 +495,7 @@ const state = {
     defaultValue: undefined,
     editComponent: undefined,
     targetClass: undefined,
+    isFilter: false,
   },
   componentOption: {
     placeholder: "",
@@ -507,6 +520,7 @@ let optionState = reactive({
   defaultValue: undefined,
   editComponent: undefined,
   targetClass: undefined,
+  isFilter: false,
 });
 let componentOption = reactive({
   placeholder: "",

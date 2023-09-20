@@ -86,7 +86,7 @@ export const addField = async (className, fieldType, fieldName, fieldOption) => 
     return await UpdateSchema(className, fieldType, fieldName, fieldOption)
 }
 
-/* 修改字段 */
+/* 重新建立相同字段（修改字段） */
 export const updateField = async (className, fieldType, fieldName, fieldOption) => {
     const table = new Parse.Schema(className)
     table.deleteField(fieldName)
@@ -114,12 +114,10 @@ export const removeSchema = async (className) => {
     return await RemoveTable(className)
 }
 
-const GetSchemaList = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
+const GetSchemaList = async (query) => {
     const Schema = new Parse.Query('Schema');
     Schema.contains('name', query.name)
-    Object.keys(where).forEach(key => {
-        if (where[key]) Schema.equalTo(key, where[key])
-    })
+    if (sessionStorage.getItem('companyId')) Schema.equalTo('company', sessionStorage.getItem('companyId'))
     Schema.descending("createdAt")
     return (await Schema.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
@@ -152,7 +150,7 @@ const setDefaultFields = async ({ className, type, fieldName, fieldOption }) => 
     await UpdateSchema(className, type, fieldName, fieldOption)
 }
 
-const UpdateSchema = async (className, type, fieldName, fieldOption) => {
+export const UpdateSchema = async (className, type, fieldName, fieldOption) => {
     let Schema = new Parse.Query('Schema');
     Schema.equalTo('name', className);
     const schema = await Schema.first();

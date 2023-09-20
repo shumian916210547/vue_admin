@@ -1,6 +1,6 @@
 <template>
   <CommonTable
-    v-model:queryVal="queryState.name"
+    v-model:queryVal="queryState.where"
     :tableColumns="tableColumns"
     :tableData="tableData"
     :queryState="queryState"
@@ -72,7 +72,7 @@ const props = defineProps({
 const queryState = reactive({
   pageSize: 10,
   pageNum: 1,
-  name: "",
+  where: {},
   total: 0,
   className: props.className,
   position: ["bottomRight"],

@@ -1,17 +1,41 @@
 <template>
   <!-- 筛选 -->
-  <a-form style="height: 56px">
+  <a-form style="min-height: 56px">
     <a-row>
-      <a-col :span="8">
-        <a-form-item
-          label="名称"
-          v-permission="['permission:query', permissions]"
-        >
-          <a-input placeholder="请输入名称" v-model:value="name" />
-        </a-form-item>
+      <a-col :span="16" style="display: flex; align-items: center">
+        <template v-for="(field_name, index) in getFilterField()" :key="index">
+          <a-form-item
+            :label="fields[field_name].chineseName"
+            style="margin-right: 10px"
+            v-permission="['permission:query', permissions]"
+          >
+            <template v-if="fields[field_name].editComponent == 'ASelect'">
+              <component
+                v-model:value="queryParams[field_name]"
+                :placeholder="'请选择' + fields[field_name].chineseName"
+                :allowClear="true"
+                :is="fields[field_name].editComponent"
+                :fieldNames="{
+                  label: fields[field_name].componentOption.labelKey,
+                  value: fields[field_name].componentOption.valueKey,
+                }"
+                :options="
+                  selectoptions[fields[field_name].componentOption.selectTable]
+                "
+              >
+              </component>
+            </template>
+            <template v-else>
+              <component
+                v-model:value="queryParams[field_name]"
+                :allowClear="true"
+                :placeholder="'请输入' + fields[field_name].chineseName"
+                :is="fields[field_name].editComponent"
+              ></component>
+            </template>
+          </a-form-item>
+        </template>
       </a-col>
-
-      <a-col :span="8" :offset="1"> </a-col>
       <a-col
         :span="2"
         :offset="1"
@@ -140,6 +164,7 @@
 import { watch, reactive, ref } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins";
+import { findAll } from "@/service/base.service";
 const props = defineProps({
   tableColumns: {
     type: Array,
@@ -156,7 +181,11 @@ const props = defineProps({
     defult: () => {},
     required: false,
   },
-  queryVal: String,
+  queryVal: {
+    type: Object,
+    defult: () => {},
+    required: false,
+  },
   innerContainer: {
     type: Boolean,
     default: false,
@@ -170,7 +199,7 @@ const props = defineProps({
     type: Object,
   },
 });
-const name = ref(props.queryVal);
+const queryParams = reactive(props.queryVal);
 const { queryPermission } = Mixins();
 const emit = defineEmits([
   "onChange",
@@ -183,9 +212,9 @@ const emit = defineEmits([
   "onAdd",
 ]);
 watch(
-  name,
+  queryParams,
   (n) => {
-    emit("update:queryVal", n);
+    emit("update:queryVal", Object.assign({}, props.queryVal, n));
   },
   { deep: true }
 );
@@ -193,13 +222,33 @@ watch(
 watch(
   () => props.queryVal,
   (n) => {
-    name.value = n;
+    Object.keys(n).forEach((key) => {
+      queryParams[key] = n[key];
+    });
   }
 );
 
 function handleResizeColumn(w, col) {
   col.width = w;
 }
+
+const selectoptions = reactive({});
+const loadSelectOptions = async (className) => {
+  if (!className) return [];
+  selectoptions[className] = [];
+  selectoptions[className] = await findAll(className);
+};
+
+const getFilterField = () => {
+  return Object.keys(props.fields).filter((field) => {
+    return props.fields[field].isFilter && props.fields[field].editComponent;
+  });
+};
+
+getFilterField().forEach((field) => {
+  if (props.fields[field].editComponent == "ASelect")
+    loadSelectOptions(props.fields[field].componentOption.selectTable);
+});
 
 const permissions = await queryPermission();
 </script>

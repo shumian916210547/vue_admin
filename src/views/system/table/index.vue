@@ -36,7 +36,7 @@
       <a-col :span="2" :offset="2">
         <a-button
           type="primary"
-          @click="tableModal.show = true"
+          @click="(tableModal.show = true), (tableModal.type = 'add')"
           v-permission="['permission:insert', permissions]"
           >新建</a-button
         >
@@ -62,6 +62,13 @@
             v-permission="['permission:insertField', permissions]"
           >
             新建字段
+          </a-button>
+          <a-divider type="vertical" />
+          <a-button
+            @click="(tableModal.type = 'edit'), (tableModal.show = true)"
+            v-permission="['permission:edit', permissions]"
+          >
+            编辑表格数据筛选
           </a-button>
           <a-divider type="vertical" />
           <a-popconfirm
@@ -131,6 +138,7 @@
     :type="fieldModal.type"
   ></IndexField>
 
+  <!-- 更新表格，新增表格 -->
   <InsertTable
     v-if="tableModal.show"
     v-model:modalVisible="tableModal.show"
@@ -145,6 +153,7 @@ import {
   addField,
   createSchema,
   loadSchemas,
+  UpdateSchema,
   removeField,
   updateField,
   removeSchema,
@@ -176,6 +185,7 @@ const queryState = reactive({
 
 const tableModal = reactive({
   show: false,
+  type: "add",
 });
 
 const fieldModal = reactive({
@@ -206,6 +216,7 @@ const getSchemaList = async (query) => {
             chineseName: item.fields[fieldName].chineseName,
             defaultValue: item.fields[fieldName].defaultValue,
             editComponent: item.fields[fieldName].editComponent,
+            isFilter: item.fields[fieldName].isFilter,
           },
           componentOption: item.fields[fieldName].componentOption,
         };
@@ -260,7 +271,7 @@ const handleSubmitField = async (arg) => {
     );
   }
   if (fieldModal.type == "edit") {
-    const result = await updateField(
+    const result = await UpdateSchema(
       className,
       arg.fieldType,
       arg.fieldName,

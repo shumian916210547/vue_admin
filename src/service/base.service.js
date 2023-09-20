@@ -19,18 +19,17 @@ export const findAll = async (className, where = { company: sessionStorage.getIt
 }
 
 /* 查询列表 */
-export const findList = async (query, where = { company: sessionStorage.getItem('companyId') }) => {
-    const { className, pageSize, pageNum, name } = query;
+export const findList = async (query, where = {}) => {
+    const { className, pageSize, pageNum, } = query;
+    where = Object.assign({}, where, query.where)
     if (!className) return
     const table = new Parse.Query(className == '_User' ? Parse.User : className)
     table.includeAll()
-    if (name) {
-        table.contains('name', name)
+    if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session') {
+        table.equalTo('company', sessionStorage.getItem('companyId'))
     }
     Object.keys(where).forEach(key => {
-        if (className != 'AntdIcon' && className != 'UserLogs' && className != '_Session') {
-            if (where[key]) table.equalTo(key, where[key])
-        }
+        if (where[key]) table.equalTo(key, where[key])
     })
     table.limit(pageSize || 200)
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
