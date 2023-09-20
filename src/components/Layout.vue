@@ -44,7 +44,6 @@
           :src="systemOptions.logoURL"
           alt=""
           style="height: 100%; width: 100%; object-fit: contain"
-          @click="toPage('/')"
         />
       </div>
       <a-menu
@@ -57,35 +56,39 @@
       >
         <template v-for="item in modules">
           <template v-if="item.children">
-            <a-sub-menu :key="'sub' + item.objectId">
+            <a-sub-menu :key="'sub' + item.objectId" :hidden="!item.menu">
               <template #title>
                 <span>
                   <component :is="AntdIcon[item.meta.icon]"></component>
                   <span>{{ item.name }}</span>
                 </span>
               </template>
-
-              <a-menu-item
+              <template
                 v-for="chil in item.children"
                 :key="'chil' + chil.objectId"
-                @click="
-                  toPage(
-                    '/' + item.path + '/' + chil.path,
-                    'chil' + chil.objectId,
-                    chil.name
-                  )
-                "
               >
-                {{ chil.name }}
-              </a-menu-item>
+                <a-menu-item
+                  :hidden="!chil.menu"
+                  @click="
+                    toPage(
+                      '/' + item.path + '/' + chil.path,
+                      'chil' + chil.objectId,
+                      chil.name
+                    )
+                  "
+                >
+                  {{ chil.name }}
+                </a-menu-item>
+              </template>
             </a-sub-menu>
           </template>
           <template v-else>
             <a-menu-item
               :key="item.objectId"
               @click="toPage('/' + item.path, item.objectId, item.name)"
+              :hidden="!item.menu"
             >
-              <component :is="AntdIcon[item.meta.icon]"></component>
+              <component :is="AntdIcon[item?.meta?.icon]"></component>
               <span>{{ item.name }}</span>
             </a-menu-item>
           </template>
@@ -148,6 +151,12 @@
         <a-popover placement="bottomRight">
           <template #content>
             <div style="display: flex; flex-direction: column">
+              <a-button
+                @click="toPage('/personalCenter', 'personalCenter', '个人中心')"
+                style="margin-top: 10px"
+              >
+                个人中心
+              </a-button>
               <a-button @click="loginOut" style="margin-top: 10px">
                 退出登录
               </a-button>

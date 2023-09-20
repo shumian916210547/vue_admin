@@ -86,6 +86,13 @@
         ></component>
 
         <component
+          v-else-if="fields[key].editComponent == 'ASwitch'"
+          v-model:checked="formState[key]"
+          :disabled="fields[key].componentOption.disabled"
+          :is="fields[key].editComponent"
+        ></component>
+
+        <component
           v-else
           v-model:value="formState[key]"
           :placeholder="fields[key].componentOption.placeholder"

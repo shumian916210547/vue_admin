@@ -42,13 +42,15 @@ export const loadRoutes = async () => {
             }
             module.meta = {
                 targetClass: module.targetClass,
-                icon: module.icon
+                icon: module.icon,
+                menu: module.menu
             }
             if (module.routes) {
                 module.children = module.routes.map(route => {
                     route.meta = {
                         targetClass: route.targetClass,
-                        id: route.objectId
+                        id: route.objectId,
+                        menu: route.menu
                     }
                     try {
                         require('@/views' + route.pageComponent)
