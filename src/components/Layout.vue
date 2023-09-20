@@ -51,7 +51,11 @@
         v-model:selectedKeys="selectedKeys"
         :theme="systemOptions.theme"
         :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'inline'"
-        :style="{ width: systemOptions.layout == 'TopLayout' ? '70%' : 'auto' }"
+        :style="
+          systemOptions.layout == 'TopLayout'
+            ? { width: '70%' }
+            : { with: 'auto' }
+        "
         @openChange="openChange"
       >
         <template v-for="item in modules">
@@ -86,7 +90,7 @@
             <a-menu-item
               :key="item.objectId"
               @click="toPage('/' + item.path, item.objectId, item.name)"
-              :hidden="!item.menu"
+              v-if="item.menu"
             >
               <component :is="AntdIcon[item?.meta?.icon]"></component>
               <span>{{ item.name }}</span>
@@ -197,14 +201,14 @@
         class="tags-view"
         :style="{
           padding:
-            systemOptions.layout == 'TopLayout'
-              ? '4px 0 4px 200px'
-              : '4px 10px',
+            systemOptions.layout == 'TopLayout' ? '4px 0 4px 0px' : '4px 10px',
+          marginLeft: systemOptions.layout == 'TopLayout' ? '200px' : '0',
         }"
       >
         <template v-for="(item, index) in historyPage" :key="item.pageKey">
           <a-tag
             :color="item.pageKey == selectedKeys[0] ? '#108ee9' : '#87d068'"
+            :id="item.pageKey"
             @click="handleTag(item)"
             closable
             @close="removeHistoryRoute(index)"
@@ -466,7 +470,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   /* height: 80px; */
-  padding: 4px 0;
+  overflow-x: auto;
+  width: 70%;
+  transition: 0.3s ease-in-out;
 
   .ant-tag {
     height: 30px;

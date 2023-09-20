@@ -42,6 +42,7 @@ export function Mixins() {
         if (pageKey) sessionStorage.setItem('pageKey', pageKey)
         if (pageName) sessionStorage.setItem('pageName', pageName)
         if (!hasRoute(pageKey)) historyPage.value.push({ path, pageKey, pageName }), sessionStorage.setItem("historyPage", JSON.stringify(historyPage.value))
+        document.getElementById(pageKey)?.scrollIntoView(true)
     };
 
     return {

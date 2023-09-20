@@ -23,7 +23,7 @@
           name="username"
           :rules="[{ required: true, message: '请输入你的昵称' }]"
         >
-          <a-input v-model:value="userInfo.username" />
+          <a-input v-model:value="userInfo.username" disabled />
         </a-form-item>
 
         <a-form-item
