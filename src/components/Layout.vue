@@ -156,7 +156,10 @@
           <template #content>
             <div style="display: flex; flex-direction: column">
               <a-button
-                @click="toPage('/personalCenter', 'personalCenter', '个人中心')"
+                @click="
+                  toPage('/personalCenter', 'personalCenter', '个人中心'),
+                    recoverMenuStatus()
+                "
                 style="margin-top: 10px"
               >
                 个人中心

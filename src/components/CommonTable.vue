@@ -100,8 +100,9 @@
           <a-button
             @click="emit('onEdit', record)"
             v-permission="['permission:edit', permissions]"
-            >修改</a-button
           >
+            修改
+          </a-button>
           <a-divider type="vertical" />
           <a-popconfirm
             title="Are you sure delete this task?"
@@ -250,12 +251,6 @@ const loadSelectOptions = async (className) => {
   selectoptions[className] = [];
   selectoptions[className] = await findAll(className);
 };
-
-/* const getFilterField = () => {
-  return Object.keys(props.fields).filter((field) => {
-    return props.fields[field].isFilter && props.fields[field].editComponent;
-  });
-}; */
 
 getFilterField(props.fields).forEach((field) => {
   if (props.fields[field].editComponent == "ASelect")

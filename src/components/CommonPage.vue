@@ -50,7 +50,7 @@ import {
   UpdateById,
 } from "@/service/base.service";
 import { reactive, ref } from "vue";
-import { deepClone } from "@/utils/utils";
+import { debounce, deepClone } from "@/utils/utils";
 import moment from "moment";
 import { visibleType } from "@/config/table.config";
 import { defaultFields } from "@/service/schema.service";
@@ -179,7 +179,7 @@ const handleDelete = async (arg) => {
 };
 
 /* 点击ok按钮 */
-const handleOk = async (arg) => {
+const handleOk = debounce(async (arg) => {
   switch (formModal.type) {
     case "add":
       await InsertRow({
@@ -198,10 +198,9 @@ const handleOk = async (arg) => {
     default:
       break;
   }
-
   formModal.show = false;
   loadData(queryState);
-};
+}, 300);
 
 /* 点击编辑 */
 const editState = reactive({});
