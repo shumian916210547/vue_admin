@@ -54,6 +54,7 @@ import { deepClone } from "@/utils/utils";
 import moment from "moment";
 import { visibleType } from "@/config/table.config";
 import { defaultFields } from "@/service/schema.service";
+import { Mixins } from "@/mixins";
 const emit = defineEmits(["add"]);
 const props = defineProps({
   className: {
@@ -69,6 +70,8 @@ const props = defineProps({
     default: "新增",
   },
 });
+const { getFilterField } = Mixins();
+let fields = reactive({});
 const queryState = reactive({
   pageSize: 10,
   pageNum: 1,
@@ -84,6 +87,7 @@ const queryState = reactive({
     queryState.pageSize = size;
     loadData(queryState);
   },
+  filterFilds: {},
 });
 
 const formModal = reactive({
@@ -93,7 +97,6 @@ const formModal = reactive({
 
 const systemFields = defaultFields.map((item) => item.fieldName);
 
-let fields = reactive({});
 const tableColumns = ref([]);
 
 const formFields = reactive({});
@@ -110,7 +113,9 @@ const loadFields = async (query) => {
       formFields[key] = result.get("fields")[key];
     }
   });
-
+  getFilterField(fields).forEach((key) => {
+    queryState.filterFilds[key] = fields[key];
+  });
   loadColumns(fields);
 };
 
@@ -157,7 +162,7 @@ const loadData = async (query) => {
 
 /* 重置表格筛选数据 */
 const handleReset = () => {
-  queryState.name = "";
+  queryState.where = {};
   loadData(queryState);
 };
 

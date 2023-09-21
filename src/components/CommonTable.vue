@@ -1,17 +1,24 @@
 <template>
   <!-- 筛选 -->
-  <a-form style="min-height: 56px">
+  <a-form style="min-height: 56px" :model="where" ref="form">
     <a-row>
-      <a-col :span="16" style="display: flex; align-items: center">
-        <template v-for="(field_name, index) in getFilterField()" :key="index">
+      <a-col
+        :span="16"
+        style="display: flex; align-items: center; flex-wrap: wrap"
+      >
+        <template
+          v-for="(field_name, index) in getFilterField(props.fields)"
+          :key="index"
+        >
           <a-form-item
             :label="fields[field_name].chineseName"
             style="margin-right: 10px"
+            :name="field_name"
             v-permission="['permission:query', permissions]"
           >
             <template v-if="fields[field_name].editComponent == 'ASelect'">
               <component
-                v-model:value="queryParams[field_name]"
+                v-model:value="where[field_name]"
                 :placeholder="'请选择' + fields[field_name].chineseName"
                 :allowClear="true"
                 :is="fields[field_name].editComponent"
@@ -19,15 +26,18 @@
                   label: fields[field_name].componentOption.labelKey,
                   value: fields[field_name].componentOption.valueKey,
                 }"
+                :mode="fields[field_name].componentOption.mode"
                 :options="
                   selectoptions[fields[field_name].componentOption.selectTable]
                 "
+                style="width: 150px"
               >
               </component>
             </template>
             <template v-else>
               <component
-                v-model:value="queryParams[field_name]"
+                style="width: 150px"
+                v-model:value="where[field_name]"
                 :allowClear="true"
                 :placeholder="'请输入' + fields[field_name].chineseName"
                 :is="fields[field_name].editComponent"
@@ -49,7 +59,7 @@
           >查询</a-button
         >
         <a-button
-          @click="emit('onQueryReset')"
+          @click="handleReset"
           v-permission="['permission:reset', permissions]"
           >重置</a-button
         >
@@ -199,8 +209,8 @@ const props = defineProps({
     type: Object,
   },
 });
-const queryParams = reactive(props.queryVal);
-const { queryPermission } = Mixins();
+const where = reactive(props.queryVal);
+const { queryPermission, getFilterField } = Mixins();
 const emit = defineEmits([
   "onChange",
   "onQueryReset",
@@ -212,7 +222,7 @@ const emit = defineEmits([
   "onAdd",
 ]);
 watch(
-  queryParams,
+  where,
   (n) => {
     emit("update:queryVal", Object.assign({}, props.queryVal, n));
   },
@@ -223,10 +233,12 @@ watch(
   () => props.queryVal,
   (n) => {
     Object.keys(n).forEach((key) => {
-      queryParams[key] = n[key];
+      where[key] = n[key];
     });
   }
 );
+
+const form = ref();
 
 function handleResizeColumn(w, col) {
   col.width = w;
@@ -239,16 +251,21 @@ const loadSelectOptions = async (className) => {
   selectoptions[className] = await findAll(className);
 };
 
-const getFilterField = () => {
+/* const getFilterField = () => {
   return Object.keys(props.fields).filter((field) => {
     return props.fields[field].isFilter && props.fields[field].editComponent;
   });
-};
+}; */
 
-getFilterField().forEach((field) => {
+getFilterField(props.fields).forEach((field) => {
   if (props.fields[field].editComponent == "ASelect")
     loadSelectOptions(props.fields[field].componentOption.selectTable);
 });
+
+const handleReset = () => {
+  emit("onQueryReset");
+  form.value.resetFields();
+};
 
 const permissions = await queryPermission();
 </script>

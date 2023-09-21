@@ -45,10 +45,18 @@ export function Mixins() {
         document.getElementById(pageKey)?.scrollIntoView(true)
     };
 
+    //获取筛选字段
+    const getFilterField = (fields) => {
+        return Object.keys(fields).filter((field) => {
+            return fields[field].isFilter && fields[field].editComponent;
+        });
+    };
+
     return {
         toPage,
         queryPermission,
         historyPage,
-        removeHistoryRoute
+        removeHistoryRoute,
+        getFilterField
     }
 }

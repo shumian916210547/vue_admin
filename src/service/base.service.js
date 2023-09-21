@@ -2,6 +2,19 @@ import Parse from 'parse'
 import { Capture, FindList, handleParseError } from '@/service/service.config'
 import { notification } from 'ant-design-vue';
 
+
+/* 搜索数据的方法 */
+const machMethod = (field) => {
+    const method = {
+        'Pointer': 'equalTo',
+        'Array': 'containedIn',
+        'String': 'contains',
+        'Boolean': 'equalTo'
+    }
+    return method[field.type]
+}
+
+
 /* 查询所有数据 */
 export const findAll = async (className, where = { company: sessionStorage.getItem('companyId') }) => {
     const table = new Parse.Query(className == '_User' ? Parse.User : className);
@@ -29,7 +42,7 @@ export const findList = async (query, where = {}) => {
         table.equalTo('company', sessionStorage.getItem('companyId'))
     }
     Object.keys(where).forEach(key => {
-        if (where[key]) table.equalTo(key, where[key])
+        if (where[key]) table[machMethod(query.filterFilds[key])](key, where[key])
     })
     table.limit(pageSize || 200)
     table.skip((pageSize || 200) * (pageNum ? (pageNum - 1) : 0))
