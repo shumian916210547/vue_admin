@@ -397,13 +397,6 @@ const modalType = {
   add: "新增字段",
 };
 
-watch(
-  () => props.modalVisible,
-  (n) => {
-    visible.value = n;
-  }
-);
-
 const schemas = computed(() => {
   return store.getters["GET_TABLES"];
 });
@@ -411,6 +404,16 @@ const schemas = computed(() => {
 const form1 = ref();
 const form2 = ref();
 const form3 = ref();
+watch(
+  () => props.modalVisible,
+  (n) => {
+    visible.value = n;
+    if (!n)
+      form1.value.resetFields(),
+        form2.value.resetFields(),
+        form3.value.resetFields();
+  }
+);
 const handleOk = () => {
   Promise.all([
     form1.value.validate(),

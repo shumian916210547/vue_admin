@@ -64,13 +64,6 @@
             新建字段
           </a-button>
           <a-divider type="vertical" />
-          <a-button
-            @click="(tableModal.type = 'edit'), (tableModal.show = true)"
-            v-permission="['permission:edit', permissions]"
-          >
-            编辑表格数据筛选
-          </a-button>
-          <a-divider type="vertical" />
           <a-popconfirm
             title="Are you sure delete this task?"
             ok-text="Yes"
