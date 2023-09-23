@@ -50,9 +50,7 @@ import {
   UpdateById,
 } from "@/service/base.service";
 import { reactive, ref } from "vue";
-import { debounce, deepClone } from "@/utils/utils";
-import moment from "moment";
-import { visibleType } from "@/config/table.config";
+import { deepClone } from "@/utils/utils";
 import { defaultFields } from "@/service/schema.service";
 import { Mixins } from "@/mixins";
 const emit = defineEmits(["add"]);
@@ -123,9 +121,7 @@ const loadFields = async (query) => {
 const loadColumns = async (arg) => {
   tableColumns.value = Object.keys(arg)
     .filter((key) => {
-      return (
-        visibleType.includes(arg[key]["type"]) && !systemFields.includes(key)
-      );
+      return arg[key].isTable;
     })
     .map((key) => ({
       title: arg[key].chineseName,
@@ -150,14 +146,7 @@ const tableData = ref([]);
 const loadData = async (query) => {
   const result = await findList(query);
   queryState.total = result.count;
-  tableData.value = result.data?.map((item) => {
-    Object.keys(item).forEach((key) => {
-      if (["updatedAt", "createdAt"].includes(key)) {
-        item[key] = moment(item[key]).format("YYYY-MM-DD HH:mm:ss");
-      }
-    });
-    return item;
-  });
+  tableData.value = result.data;
 };
 
 /* 重置表格筛选数据 */
@@ -179,7 +168,7 @@ const handleDelete = async (arg) => {
 };
 
 /* 点击ok按钮 */
-const handleOk = debounce(async (arg) => {
+const handleOk = async (arg) => {
   switch (formModal.type) {
     case "add":
       await InsertRow({
@@ -200,7 +189,7 @@ const handleOk = debounce(async (arg) => {
   }
   formModal.show = false;
   loadData(queryState);
-}, 300);
+};
 
 /* 点击编辑 */
 const editState = reactive({});

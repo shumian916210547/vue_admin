@@ -210,6 +210,7 @@ const getSchemaList = async (query) => {
             defaultValue: item.fields[fieldName].defaultValue,
             editComponent: item.fields[fieldName].editComponent,
             isFilter: item.fields[fieldName].isFilter,
+            isTable: item.fields[fieldName].isTable,
           },
           componentOption: item.fields[fieldName].componentOption,
         };

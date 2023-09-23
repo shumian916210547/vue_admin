@@ -8,8 +8,9 @@ export const defaultFields = [
         "type": "String",
         "fieldOption": {
             "required": false,
-            "chineseName": "objectId",
+            "chineseName": "对象ID",
             "editComponent": "AInput",
+            "isTable": false,
             "componentOption": {
                 "disabled": true,
                 "allowClear": false,
@@ -22,8 +23,9 @@ export const defaultFields = [
         "type": "Date",
         "fieldOption": {
             "required": false,
-            "chineseName": "createdAt",
+            "chineseName": "创建时间",
             "editComponent": "AInput",
+            "isTable": false,
             "componentOption": {
                 "disabled": true,
                 "allowClear": false,
@@ -36,8 +38,9 @@ export const defaultFields = [
         "type": "Date",
         "fieldOption": {
             "required": false,
-            "chineseName": "updatedAt",
+            "chineseName": "修改时间",
             "editComponent": "AInput",
+            "isTable": false,
             "componentOption": {
                 "disabled": true,
                 "allowClear": false,
@@ -74,6 +77,7 @@ export const loadSchemas = async (query) => {
 /* 新建schema */
 export const createSchema = async (className) => {
     const table = new Parse.Schema(className)
+    table.addPointer('company', 'Company')
     await Capture(table.save())
     return await InsertSchema(className)
 }

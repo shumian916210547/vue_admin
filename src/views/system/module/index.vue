@@ -97,7 +97,6 @@ import {
 } from "@/service/module.service";
 import CommonForm from "@/components/CommonForm.vue";
 import { findAll, findSchema } from "@/service/base.service";
-import { visibleType } from "@/config/table.config";
 import { defaultFields } from "@/service/schema.service";
 
 import { Mixins } from "@/mixins";
@@ -196,7 +195,7 @@ const loadFields = async () => {
     if (!systemFields.includes(key)) {
       formFields[key] = result.get("fields")[key];
     }
-    if (!systemFields.includes(key) && visibleType.includes(fields[key].type)) {
+    if (fields[key].isTable) {
       columns.push({
         title: fields[key].chineseName,
         dataIndex: key,

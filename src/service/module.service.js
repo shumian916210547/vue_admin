@@ -2,12 +2,13 @@ import Parse from "parse";
 import { Capture } from "./service.config";
 
 /* 新增路由 */
-export const InsertRoute = async ({ name, path, pageComponent, targetClass, rank }) => {
+export const InsertRoute = async ({ name, path, pageComponent, targetClass, rank, menu }) => {
     const Table = Parse.Object.extend('Route')
     const table = new Table()
     table.set('name', name)
     table.set('path', path)
     table.set('rank', rank)
+    table.set('menu', menu)
     table.set('pageComponent', pageComponent)
     table.set('targetClass', targetClass)
     if (sessionStorage.getItem('companyId')) {
@@ -21,13 +22,14 @@ export const InsertRoute = async ({ name, path, pageComponent, targetClass, rank
 }
 
 /* 修改路由 */
-export const UpdateRoute = async ({ objectId, name, path, pageComponent, targetClass, rank }) => {
+export const UpdateRoute = async ({ objectId, name, path, pageComponent, targetClass, rank, menu }) => {
     const Table = new Parse.Query('Route');
     Table.equalTo('objectId', objectId)
     const table = await Table.first()
     table.set('name', name);
     table.set('path', path)
     table.set('rank', rank)
+    table.set('menu', menu)
     table.set('pageComponent', pageComponent)
     table.set('targetClass', targetClass)
     return await Capture(table.save())

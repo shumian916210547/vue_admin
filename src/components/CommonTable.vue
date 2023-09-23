@@ -86,6 +86,7 @@
     @resizeColumn="handleResizeColumn"
   >
     <template #bodyCell="{ column, record }">
+      <!-- 根据数据类型展示数据 -->
       <template v-if="column.key === 'operation'">
         <div style="max-width: 230px; display: flex; align-items: center">
           <template v-if="innerContainerTitle">
@@ -120,40 +121,56 @@
           </a-popconfirm>
         </div>
       </template>
-      <template v-else-if="column.key == 'icon'">
+      <template
+        v-else-if="column.key == 'icon' && fields[column.key].type == 'String'"
+      >
         <div style="display: flex; align-items: center">
           <component :is="AntdIcon[record[column.key]]"></component>
           <p>&nbsp;{{ record[column.key] }}</p>
         </div>
       </template>
-      <template v-else-if="column.key == 'avatar' || column.key == 'image'">
+      <template
+        v-else-if="
+          (column.key == 'avatar' || column.key == 'image') &&
+          fields[column.key].type == 'String'
+        "
+      >
         <div style="display: flex; align-items: center">
           <a-image :width="80" :src="record[column.key]" />
         </div>
       </template>
       <template
-        v-else-if="[column.key] == 'updatedAt' || [column.key] == 'createdAt'"
+        v-else-if="
+          fields[column.key].type == 'String' ||
+          fields[column.key].type == 'Number'
+        "
       >
         <p>{{ record[column.key] }}</p>
       </template>
-      <template v-else>
+      <template
+        v-else-if="
+          fields[column.key].type == 'Object' ||
+          fields[column.key].type == 'Array'
+        "
+      >
         <a-tooltip placement="top" arrowPointAtCenter>
           <template #title>
-            <p>{{ record[column.key]?.name || record[column.key] }}</p>
+            <p>
+              {{ JSON.stringify(record[column.key]) }}
+            </p>
           </template>
-          <p
-            :style="{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              textAlign: 'center',
-              maxWidth: column.key == 'avatar' ? '120px' : '',
-              width: 'auto',
-            }"
-          >
-            {{ record[column.key]?.name || record[column.key] }}
-          </p>
+          <p>{{ JSON.stringify(record[column.key]) }}</p>
         </a-tooltip>
+      </template>
+      <template v-else-if="fields[column.key].type == 'Date'">
+        <p>
+          {{ moment(record[column.key]).format("YYYY-MM-DD HH:mm:ss") }}
+        </p>
+      </template>
+      <template v-else-if="fields[column.key].type == 'Pointer'">
+        <p>
+          {{ record[column.key].name || record[column.key] }}
+        </p>
       </template>
     </template>
     <template
@@ -176,6 +193,7 @@ import { watch, reactive, ref } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins";
 import { findAll } from "@/service/base.service";
+import moment from "moment";
 const props = defineProps({
   tableColumns: {
     type: Array,
@@ -267,7 +285,10 @@ const permissions = await queryPermission();
 
 <style lang="scss" scoped>
 :deep(p) {
-  max-width: auto !important;
+  max-width: 200px !important;
   margin-bottom: 0 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

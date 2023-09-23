@@ -144,14 +144,14 @@
       </a-form-item>
 
       <a-form-item
-        label="字段默认"
+        label="默认值"
         name="defaultValue"
         :rules="[{ required: false, message: 'Please input your 字段默认值!' }]"
       >
         <a-input
           v-model:value="optionState.defaultValue"
           allowClear
-          :disabled="props.type"
+          :disabled="props.type == 'edit'"
           placeholder="请输入字段默认值"
         />
       </a-form-item>
@@ -199,6 +199,14 @@
       <a-form-item label="筛选字段" name="isFilter" style="min-width: 200px">
         <a-switch
           v-model:checked="optionState.isFilter"
+          checked-children="是"
+          un-checked-children="否"
+        />
+      </a-form-item>
+
+      <a-form-item label="表格展示" name="isTable" style="min-width: 200px">
+        <a-switch
+          v-model:checked="optionState.isTable"
           checked-children="是"
           un-checked-children="否"
         />
@@ -429,6 +437,7 @@ const handleOk = () => {
         editComponent,
         targetClass,
         isFilter,
+        isTable,
       } = success[1];
       const {
         placeholder,
@@ -451,6 +460,7 @@ const handleOk = () => {
           defaultValue: eval("(" + deepClone(defaultValue) + ")"),
           editComponent,
           isFilter,
+          isTable,
           componentOption: {
             placeholder,
             disabled,
@@ -499,6 +509,7 @@ const state = {
     editComponent: undefined,
     targetClass: undefined,
     isFilter: false,
+    isTable: false,
   },
   componentOption: {
     placeholder: "",
@@ -524,6 +535,7 @@ let optionState = reactive({
   editComponent: undefined,
   targetClass: undefined,
   isFilter: false,
+  isTable: false,
 });
 let componentOption = reactive({
   placeholder: "",
