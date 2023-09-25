@@ -157,6 +157,7 @@ import Parse from "parse";
 import { reactive, ref } from "vue";
 import store from "@/store";
 import { Mixins } from "@/mixins";
+import { notification } from "ant-design-vue";
 
 const { queryPermission } = Mixins();
 
@@ -220,6 +221,11 @@ const getSchemaList = async (query) => {
     }),
   ];
   store.commit("SET_TABLES", [...tableList.value]);
+  notification.success({
+    message: sessionStorage.getItem("pageName"),
+    description: "数据获取成功",
+    duration: 0.5,
+  });
 };
 
 /* 新增table */

@@ -53,6 +53,7 @@ import { reactive, ref } from "vue";
 import { deepClone } from "@/utils/utils";
 import { defaultFields } from "@/service/schema.service";
 import { Mixins } from "@/mixins";
+import { notification } from "ant-design-vue";
 const emit = defineEmits(["add"]);
 const props = defineProps({
   className: {
@@ -147,6 +148,11 @@ const loadData = async (query) => {
   const result = await findList(query);
   queryState.total = result.count;
   tableData.value = result.data;
+  notification.success({
+    message: sessionStorage.getItem("pageName"),
+    description: "数据获取成功",
+    duration: 0.5,
+  });
 };
 
 /* 重置表格筛选数据 */
