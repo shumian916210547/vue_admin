@@ -219,7 +219,15 @@ const getSchemaList = async (query) => {
       item.fields_num = item.fields.length;
       return item;
     }),
-  ];
+  ].sort((a, b) => {
+    if (a.className < b.className) {
+      return -1;
+    }
+    if (a.className > b.className) {
+      return 1;
+    }
+    return 0;
+  });
   store.commit("SET_TABLES", [...tableList.value]);
   notification.success({
     message: sessionStorage.getItem("pageName"),

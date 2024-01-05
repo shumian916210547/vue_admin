@@ -358,6 +358,7 @@
 
       <a-form-item
         label="清除按钮"
+        v-if="optionState.editComponent != 'RichTextEditor'"
         name="allowClear"
         style="min-width: 200px"
         :rules="[
@@ -481,6 +482,7 @@ const handleOk = () => {
     });
 };
 let antdComponents = [
+  { value: "RichTextEditor", label: "RichTextEditor" },
   ...Object.keys(antd)
     .map((key) => {
       return {
@@ -495,7 +497,15 @@ let antdComponents = [
         item.label != "install"
       );
     }),
-];
+].sort((a, b) => {
+  if (a.label < b.label) {
+    return -1;
+  }
+  if (a.label > b.label) {
+    return 1;
+  }
+  return 0;
+});
 
 const state = {
   formState: {
@@ -512,7 +522,7 @@ const state = {
     isTable: false,
   },
   componentOption: {
-    placeholder: "",
+    placeholder: "请输入内容",
     disabled: false,
     allowClear: false,
     mode: "combobox",
@@ -538,7 +548,7 @@ let optionState = reactive({
   isTable: false,
 });
 let componentOption = reactive({
-  placeholder: "",
+  placeholder: "请输入内容",
   disabled: false,
   allowClear: false,
   mode: "combobox",

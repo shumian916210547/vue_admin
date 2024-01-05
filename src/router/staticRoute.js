@@ -19,4 +19,16 @@ export const routes = [
         name: '登录',
         component: () => import("@/views/login"),
     },
+    {
+        path: '/front',
+        name: "front",
+        //前台展示页面路由在此处添加
+        children: [
+            {
+                path: 'travel',
+                name: 'Travel',
+                component: () => import("@/views/front/travel")
+            }
+        ]
+    }
 ]

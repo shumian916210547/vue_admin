@@ -474,7 +474,7 @@ onUnmounted(() => {
   align-items: center;
   /* height: 80px; */
   overflow-x: auto;
-  width: 70%;
+  /* width: 70%; */
   transition: 0.3s ease-in-out;
 
   .ant-tag {

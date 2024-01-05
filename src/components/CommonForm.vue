@@ -2,7 +2,7 @@
   <a-modal
     v-model:visible="visible"
     @ok="handleOk"
-    width="600px"
+    :width="modalWidth"
     ref="modalRef"
   >
     <template #title>
@@ -11,104 +11,116 @@
       </div>
     </template>
 
-    <a-form
-      :model="formState"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 20 }"
-      autocomplete="off"
-      labelAlign="left"
-      ref="form1"
-    >
-      <a-form-item
-        v-for="(key, index) in Object.keys(fields).filter((key) => {
-          return fields[key].editComponent;
-        })"
-        :label="fields[key].chineseName"
-        :name="key"
-        :rules="[
-          {
-            required: fields[key].required,
-            message: fields[key].componentOption.placeholder,
-          },
-        ]"
-        :key="index"
+    <div style="position: relative; height: 100%; width: 100%">
+      <a-form
+        :model="formState"
+        :label-col="{ span: 4 }"
+        :wrapper-col="{ span: 20 }"
+        autocomplete="off"
+        labelAlign="left"
+        ref="form1"
+        v-if="visible"
       >
-        <component
-          v-if="fields[key].editComponent == 'ATreeSelect'"
-          v-model:value="formState[key]"
-          style="width: 100%"
-          :tree-data="selectoptions[fields[key].componentOption.selectTable]"
-          tree-checkable
-          :allowClear="fields[key].componentOption.allowClear"
-          :placeholder="fields[key].componentOption.placeholder"
-          tree-node-filter-prop="label"
-          :fieldNames="{
-            children: fields[key].componentOption.fieldNames,
-            label: 'name',
-            value: 'objectId',
-          }"
-          :is="fields[key].editComponent"
-        ></component>
-
-        <component
-          v-else-if="
-            fields[key].editComponent == 'ASelect' &&
-            fields[key].componentOption.selectTable == 'AntdIcon'
-          "
-          v-model:value="formState[key]"
-          :placeholder="fields[key].componentOption.placeholder"
-          :disabled="fields[key].componentOption.disabled"
-          :allowClear="fields[key].componentOption.allowClear"
-          :mode="fields[key].componentOption.mode"
-          :is="fields[key].editComponent"
+        <a-form-item
+          v-for="(key, index) in Object.keys(fields).filter((key) => {
+            return fields[key].editComponent;
+          })"
+          :label="fields[key].chineseName"
+          :name="key"
+          :rules="[
+            {
+              required: fields[key].required,
+              message: fields[key].componentOption.placeholder,
+            },
+          ]"
+          :key="index"
         >
-          <a-select-option
-            v-for="(item, index) in selectoptions[
-              fields[key].componentOption.selectTable
-            ]"
-            :key="index"
-            :label="item.name"
-            :value="item.name"
+          <component
+            v-if="fields[key].editComponent == 'ATreeSelect'"
+            v-model:value="formState[key]"
+            style="width: 100%"
+            :tree-data="selectoptions[fields[key].componentOption.selectTable]"
+            tree-checkable
+            :allowClear="fields[key].componentOption.allowClear"
+            :placeholder="fields[key].componentOption.placeholder"
+            tree-node-filter-prop="label"
+            :fieldNames="{
+              children: fields[key].componentOption.fieldNames,
+              label: 'name',
+              value: 'objectId',
+            }"
+            :is="fields[key].editComponent"
+          ></component>
+
+          <component
+            v-else-if="
+              fields[key].editComponent == 'ASelect' &&
+              fields[key].componentOption.selectTable == 'AntdIcon'
+            "
+            v-model:value="formState[key]"
+            :placeholder="fields[key].componentOption.placeholder"
+            :disabled="fields[key].componentOption.disabled"
+            :allowClear="fields[key].componentOption.allowClear"
+            :mode="fields[key].componentOption.mode"
+            :is="fields[key].editComponent"
           >
-            <component
-              :is="AntdIcon[item[fields[key].componentOption.labelKey]]"
-            ></component>
-            {{ item[fields[key].componentOption.labelKey] }}
-          </a-select-option>
-        </component>
+            <a-select-option
+              v-for="(item, index) in selectoptions[
+                fields[key].componentOption.selectTable
+              ]"
+              :key="index"
+              :label="item.name"
+              :value="item.name"
+            >
+              <component
+                :is="AntdIcon[item[fields[key].componentOption.labelKey]]"
+              ></component>
+              {{ item[fields[key].componentOption.labelKey] }}
+            </a-select-option>
+          </component>
 
-        <component
-          v-else-if="fields[key].editComponent == 'AUpload'"
-          v-model:files="formState[key]"
-          :maxLength="fields[key].componentOption.maxLength"
-          :disabled="fields[key].componentOption.disabled"
-          :is="Upload"
-        ></component>
+          <component
+            v-else-if="fields[key].editComponent == 'AUpload'"
+            v-model:files="formState[key]"
+            :maxLength="fields[key].componentOption.maxLength"
+            :disabled="fields[key].componentOption.disabled"
+            :is="Upload"
+          ></component>
 
-        <component
-          v-else-if="fields[key].editComponent == 'ASwitch'"
-          v-model:checked="formState[key]"
-          :disabled="fields[key].componentOption.disabled"
-          :is="fields[key].editComponent"
-        ></component>
+          <component
+            v-else-if="fields[key].editComponent == 'ASwitch'"
+            v-model:checked="formState[key]"
+            :disabled="fields[key].componentOption.disabled"
+            :is="fields[key].editComponent"
+          ></component>
 
-        <component
-          v-else
-          v-model:value="formState[key]"
-          :placeholder="fields[key].componentOption.placeholder"
-          :disabled="fields[key].componentOption.disabled"
-          :allowClear="fields[key].componentOption.allowClear"
-          :mode="fields[key].componentOption.mode"
-          :fieldNames="{
-            label: fields[key].componentOption.labelKey,
-            value: fields[key].componentOption.valueKey,
-          }"
-          :options="selectoptions[fields[key].componentOption.selectTable]"
-          :is="fields[key].editComponent"
-        >
-        </component>
-      </a-form-item>
-    </a-form>
+          <component
+            v-else-if="fields[key].editComponent == 'RichTextEditor'"
+            v-model:value="formState[key]"
+            :disabled="fields[key].componentOption.disabled"
+            :placeholder="fields[key].componentOption.placeholder"
+            :is="RichTextEditor"
+          ></component>
+
+          <component
+            v-else
+            v-model:value="formState[key]"
+            :placeholder="fields[key].componentOption.placeholder"
+            :disabled="fields[key].componentOption.disabled"
+            :allowClear="fields[key].componentOption.allowClear"
+            :mode="fields[key].componentOption.mode"
+            :fieldNames="{
+              label: fields[key].componentOption.labelKey,
+              value: fields[key].componentOption.valueKey,
+            }"
+            :options="selectoptions[fields[key].componentOption.selectTable]"
+            :is="fields[key].editComponent"
+          >
+          </component>
+        </a-form-item>
+      </a-form>
+      <div class="bar" @mousedown="down($event)" ref="bar"></div>
+    </div>
 
     <template #modalRender="{ originVNode }">
       <div :style="transformStyle">
@@ -125,6 +137,7 @@ import * as AntdIcon from "@ant-design/icons-vue";
 import Upload from "./Upload.vue";
 import { deepClone } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
+import RichTextEditor from "./RichTextEditor.vue";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
 const props = defineProps({
   className: {
@@ -286,4 +299,35 @@ const transformStyle = computed(() => {
     transform: `translate(${transformX.value}px, ${transformY.value}px)`,
   };
 });
+
+const modalWidth = ref("600px");
+const down = (e) => {
+  const startX = e.clientX;
+  const offsetX = e.target.offsetLeft; //元素左边到窗口左边的距离
+  e.target.setCaptrue; //设置鼠标捕获(之后的事件捕获会作用在当前元素上)
+  document.onmousemove = (e) => {
+    const endX = e.clientX;
+    const width = offsetX - (startX - endX);
+    if (width > 600) modalWidth.value = width + "px";
+  };
+  document.onmouseup = (e) => {
+    document.onmousemove = null;
+    document.onmouseup = null;
+    e.target.releaseCaptrue; //释放鼠标捕获
+  };
+};
 </script>
+
+<style lang="scss" scoped>
+.bar {
+  cursor: col-resize;
+  width: 24px;
+  display: inline-block;
+  line-height: 200px;
+  vertical-align: middle;
+  position: absolute;
+  right: -24px;
+  top: 0;
+  height: 100%;
+}
+</style>

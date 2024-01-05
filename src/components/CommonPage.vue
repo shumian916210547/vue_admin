@@ -147,7 +147,13 @@ const tableData = ref([]);
 const loadData = async (query) => {
   const result = await findList(query);
   queryState.total = result.count;
-  tableData.value = result.data;
+  tableData.value = result.data.sort((a, b) => {
+    if (a.rank || b.rank) {
+      return a.rank - b.rank;
+    }else{
+      return a.createdAt - b.createdAt;
+    }
+  });
   notification.success({
     message: sessionStorage.getItem("pageName"),
     description: "数据获取成功",

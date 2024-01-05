@@ -81,6 +81,7 @@
     :data-source="tableData"
     :pagination="queryState"
     rowKey="objectId"
+    :defaultExpandedRowKeys="expandedRowKeys"
     @change="emit('onChange', $event)"
     bordered
     @resizeColumn="handleResizeColumn"
@@ -185,12 +186,31 @@
         :expanded="expanded"
       ></slot>
     </template>
+    <template #expandIcon="{ record }">
+      <div v-if="record.routes && record.routes.length">
+        <button
+          type="button"
+          class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed"
+          aria-label="Expand row"
+          v-show="expandedRowKeys.indexOf(record.objectId) === -1"
+          @click="expand(record.objectId)"
+        ></button>
+        <button
+          type="button"
+          class="ant-table-row-expand-icon ant-table-row-expand-icon-expanded"
+          aria-label="Collapse row"
+          v-show="expandedRowKeys.indexOf(record.objectId) !== -1"
+          @click="expand('')"
+        ></button>
+      </div>
+    </template>
   </a-table>
 </template>
 
 <script setup>
 import { watch, reactive, ref } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
+import { PlusSquareOutlined, MinusSquareOutlined } from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins";
 import { findAll } from "@/service/base.service";
 import moment from "moment";
@@ -281,6 +301,12 @@ const handleReset = () => {
 };
 
 const permissions = await queryPermission();
+
+const expandedRowKeys = reactive([]);
+
+const expand = (objectId) => {
+  Object.assign(expandedRowKeys, [objectId]);
+};
 </script>
 
 <style lang="scss" scoped>
