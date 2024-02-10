@@ -27,7 +27,35 @@ export const routes = [
             {
                 path: 'travel',
                 name: 'Travel',
-                component: () => import("@/views/front/travel")
+                component: () => import("@/views/front/travel"),
+                children: [
+                    {
+                        path: 'home',
+                        name: 'Home',
+                        component:()=>import("@/views/front/travel/home")
+                    },
+                    {
+                        path: 'note',
+                        name: 'Note',
+                        component:()=>import("@/views/front/travel/note")
+                    },
+                    {
+                        path: 'strategy',
+                        name: 'Strategy',
+                        component:()=>import("@/views/front/travel/strategy")
+                    },
+                    {
+                        path: 'login',
+                        name: 'Login' ,
+                        component:()=>import("@/views/front/travel/login")
+                    }
+                    ,
+                    {
+                        path: 'register',
+                        name: 'Register' ,
+                        component:()=>import("@/views/front/travel/register")
+                    }
+                ]
             }
         ]
     }
