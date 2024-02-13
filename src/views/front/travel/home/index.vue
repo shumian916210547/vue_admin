@@ -15,48 +15,44 @@
     <div><h3>3</h3></div>
     <div><h3>4</h3></div>
   </a-carousel>
-  <h1 style="margin-top: 10px;">热门攻略推荐</h1>
+  <h1 style="margin-top: 10px">热门攻略推荐</h1>
   <section class="rec">
-    <a-card class="rec-card" hoverable>
-      <template #cover>
-        <img
-          alt="example"
-          src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-        />
+    <a-list
+      item-layout="vertical"
+      size="large"
+      :data-source="listData"
+      style="width: 100%"
+    >
+      <template #renderItem="{ item }">
+        <a-list-item
+          :key="item.objectId"
+          style="max-height: 334px; cursor: pointer"
+          @click="toPage('strategy/' + item.objectId)"
+        >
+          <template #actions>
+            <span>
+              <component :is="EyeOutlined" style="margin-right: 8px" />
+              {{ item.watchNum }}
+            </span>
+          </template>
+          <template #extra>
+            <img
+              width="272"
+              style="height: 100%; object-fit: contain"
+              v-if="item.cover"
+              :src="item.cover"
+            />
+          </template>
+          <a-list-item-meta :description="item.name">
+            <template #title>
+              <a :href="item.href">{{ item.user.name }}</a>
+            </template>
+            <template #avatar><a-avatar :src="item.user.avatar" /></template>
+          </a-list-item-meta>
+          <div class="line_8" v-html="item.content"></div>
+        </a-list-item>
       </template>
-      <a-card-meta title="Card title" description="This is the description">
-      </a-card-meta>
-    </a-card>
-    <a-card class="rec-card" hoverable>
-      <template #cover>
-        <img
-          alt="example"
-          src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-        />
-      </template>
-      <a-card-meta title="Card title" description="This is the description">
-      </a-card-meta>
-    </a-card>
-    <a-card class="rec-card" hoverable>
-      <template #cover>
-        <img
-          alt="example"
-          src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-        />
-      </template>
-      <a-card-meta title="Card title" description="This is the description">
-      </a-card-meta>
-    </a-card>
-    <a-card class="rec-card" hoverable>
-      <template #cover>
-        <img
-          alt="example"
-          src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-        />
-      </template>
-      <a-card-meta title="Card title" description="This is the description">
-      </a-card-meta>
-    </a-card>
+    </a-list>
   </section>
 </template>
 
@@ -67,11 +63,24 @@ import {
   SettingOutlined,
   EditOutlined,
   EllipsisOutlined,
+  StarOutlined,
+  LikeOutlined,
+  MessageOutlined,
+  EyeOutlined,
 } from "@ant-design/icons-vue";
+
+import { getHotStrategy } from "../apis";
+import { ref } from "vue";
+import { Mixins } from "@/mixins/index";
+const { toPage } = Mixins();
+const listData = ref([]);
+getHotStrategy().then((data) => {
+  listData.value = data;
+});
 </script>
 
 <style scoped lang="scss">
-/* For demo */
+@import url("@/assets/scss/global.scss");
 .ant-carousel :deep(.slick-slide) {
   text-align: center;
   height: 200px;

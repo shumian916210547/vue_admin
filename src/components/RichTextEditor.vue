@@ -7,12 +7,11 @@
       :mode="mode"
     />
     <Editor
-      style="
-        height: 500px;
-        overflow-y: hidden;
-        min-height: 200px;
-        height: 200px;
-      "
+      :style="{
+        overflowY: 'hidden',
+        minHeight: minHeight,
+        maxHeight: maxHeight,
+      }"
       v-model="valueHtml"
       :defaultConfig="editorConfig"
       :mode="mode"
@@ -24,7 +23,6 @@
 
 <script setup>
 import "@wangeditor/editor/dist/css/style.css"; // 引入 css
-
 import {
   onBeforeUnmount,
   ref,
@@ -35,6 +33,7 @@ import {
   onUnmounted,
 } from "vue";
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import axios from "axios";
 
 const props = defineProps({
   value: {
@@ -48,6 +47,14 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false,
+  },
+  maxHeight: {
+    type: String,
+    default: "300px",
+  },
+  minHeight: {
+    type: String,
+    default: "300px",
   },
 });
 
@@ -65,7 +72,40 @@ const handleChange = (editor) => {
 };
 
 const toolbarConfig = {};
-const editorConfig = reactive({ placeholder: props.placeholder });
+const editorConfig = reactive({
+  placeholder: props.placeholder,
+  MENU_CONF: {
+    uploadImage: {
+      /* server: process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", */
+      // 用户自定义上传图片
+      customUpload(file, insertFn) {
+        let data = new FormData();
+        data.append("file", file); //file为上传文件返回的所有file
+        let config = {
+          method: "post",
+          url: process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", //上传图片的地址
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          data: data,
+        };
+
+        let that = this;
+        axios(config)
+          .then((res) => {
+            if (res && res.data.code === 500) {
+              alert(res.data.msg);
+            }
+            let url = process.env.VUE_APP_PARSE_SERVER_HOST + res.data.path; //服务器上的图片路径
+            insertFn(url, "图片", url); //插入图片（使用的wangEditor插件）
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      },
+    },
+  },
+});
 
 onMounted(() => {});
 
@@ -79,5 +119,7 @@ onBeforeUnmount(() => {
 const handleCreated = (editor) => {
   props.disabled ? editor.disable() : editor.enable();
   editorRef.value = editor; // 记录 editor 实例，重要！
+
+  console.log(editorRef.value.getConfig());
 };
 </script>    

@@ -12,7 +12,7 @@ let oneEnter = true;
 const isSkip = (arg) => {
   let t = false
   process.env.VUE_APP_SKIP_VERIFY_ROUTE.split(";").forEach(key => {
-    if (arg.path.includes(key)) { t = true; localStorage.clear(); sessionStorage.clear() }
+    if (arg.path.includes(key)) { t = true; }
   })
   return t
 }

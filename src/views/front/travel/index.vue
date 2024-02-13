@@ -10,16 +10,37 @@
       </div>
       <div class="mid">
         <a-menu v-model:selectedKeys="current" mode="horizontal">
-          <a-menu-item key="Home" @click="toPage('home')"> 首页 </a-menu-item>
-          <a-menu-item key="Strategy" @click="toPage('strategy')">
-            攻略
+          <a-menu-item key="Home" @click="toPage('/front/travel/home')">
+            首页
           </a-menu-item>
-          <a-menu-item key="Note" @click="toPage('note')"> 社区 </a-menu-item>
+          <a-menu-item key="Strategy" @click="toPage('/front/travel/strategy')">
+            旅游攻略
+          </a-menu-item>
+          <a-menu-item key="Note" @click="toPage('/front/travel/note')">
+            旅游手记
+          </a-menu-item>
         </a-menu>
       </div>
       <div class="right">
-        <span @click="toPage('login')">登录</span>
-        <span @click="toPage('register')">注册</span>
+        <template v-if="userInfo">
+          <img
+            :src="userInfo.avatar"
+            style="
+              height: 34px;
+              width: 34px;
+              object-fit: cover;
+              border-radius: 50%;
+              overflow: hidden;
+              margin: 0 10px;
+            "
+            alt=""
+          />
+          <span style="color: black">{{ userInfo.name }}</span>
+        </template>
+        <template v-else>
+          <span @click="toPage('/front/travel/login')">登录</span>
+          <span @click="toPage('/front/travel/register')">注册</span>
+        </template>
       </div>
     </header>
     <section>
@@ -29,16 +50,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { Mixins } from "@/mixins/index";
 import { useRoute } from "vue-router";
 const route = useRoute();
 const { toPage } = Mixins();
 document.title = "基于Vue.js的旅游信息分享网站";
 const current = ref([route.name]);
+const userInfo = ref();
+watch(route, () => {
+  document.title = "基于Vue.js的旅游信息分享网站";
+  userInfo.value = JSON.parse(sessionStorage.getItem("userInfo"));
+});
+onMounted(() => {
+  userInfo.value = JSON.parse(sessionStorage.getItem("userInfo"));
+});
 </script>
 
 <style lang="scss" scoped>
+.travel {
+  padding: 46px 0 0 0;
+  position: relative;
+}
 section,
 header {
   width: 920px;
@@ -49,6 +82,13 @@ header {
   align-items: center;
   justify-content: space-around;
   height: 46px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: white;
   .mid {
     flex: 1;
     display: flex;

@@ -32,28 +32,48 @@ export const routes = [
                     {
                         path: 'home',
                         name: 'Home',
-                        component:()=>import("@/views/front/travel/home")
+                        component: () => import("@/views/front/travel/home")
                     },
                     {
                         path: 'note',
                         name: 'Note',
-                        component:()=>import("@/views/front/travel/note")
+                        component: () => import("@/views/front/travel/note")
+                    },
+                    {
+                        path: 'note/:objectId',
+                        name: 'noteDetail',
+                        component: () => import("@/views/front/travel/note/noteDetail")
+                    },
+                    {
+                        path: 'noteIssue',
+                        name: 'noteIssue',
+                        component: () => import("@/views/front/travel/note/issue")
                     },
                     {
                         path: 'strategy',
                         name: 'Strategy',
-                        component:()=>import("@/views/front/travel/strategy")
+                        component: () => import("@/views/front/travel/strategy"),
+                    },
+                    {
+                        path: 'issue',
+                        name: 'StrategyIssue',
+                        component: () => import("@/views/front/travel/strategy/issue")
+                    },
+                    {
+                        path: 'strategy/:objectId',
+                        name: 'StrategyDetail',
+                        component: () => import("@/views/front/travel/strategy/strategyDetail")
                     },
                     {
                         path: 'login',
-                        name: 'Login' ,
-                        component:()=>import("@/views/front/travel/login")
+                        name: 'Login',
+                        component: () => import("@/views/front/travel/login")
                     }
                     ,
                     {
                         path: 'register',
-                        name: 'Register' ,
-                        component:()=>import("@/views/front/travel/register")
+                        name: 'Register',
+                        component: () => import("@/views/front/travel/register")
                     }
                 ]
             }
