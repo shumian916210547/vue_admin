@@ -93,8 +93,8 @@ watch(route, () => {
   userInfo.value = JSON.parse(sessionStorage.getItem("userInfo"));
 });
 const loginOut = async () => {
-  await Parse.User.logOut();
   toPage("/front/travel/home");
+  await Parse.User.logOut();
   location.reload();
   sessionStorage.clear();
   localStorage.clear();
