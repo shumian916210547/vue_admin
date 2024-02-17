@@ -10,10 +10,34 @@
         <right-circle-outlined />
       </div>
     </template>
-    <div><h3>1</h3></div>
-    <div><h3>2</h3></div>
-    <div><h3>3</h3></div>
-    <div><h3>4</h3></div>
+    <div>
+      <img
+        src="https://image.maigoo.com/upload/images/20191113/15011889836_1200x800.jpg"
+        alt=""
+        srcset=""
+      />
+    </div>
+    <div>
+      <img
+        src="https://image.maigoo.com/upload/images/20191113/15011889836_1200x800.jpg"
+        alt=""
+        srcset=""
+      />
+    </div>
+    <div>
+      <img
+        src="https://image.maigoo.com/upload/images/20191113/15011889836_1200x800.jpg"
+        alt=""
+        srcset=""
+      />
+    </div>
+    <div>
+      <img
+        src="https://image.maigoo.com/upload/images/20191113/15011889836_1200x800.jpg"
+        alt=""
+        srcset=""
+      />
+    </div>
   </a-carousel>
   <h1 style="margin-top: 10px">热门攻略推荐</h1>
   <section class="rec">

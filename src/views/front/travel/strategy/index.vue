@@ -1,9 +1,23 @@
 <template>
   <h1 style="margin-top: 10px">看看大家的行程攻略</h1>
-  <a-radio-group v-model:value="pagination.sortValue" @change="radioChange">
-    <a-radio-button value="createdAt">最新发布</a-radio-button>
-    <a-radio-button value="watchNum">浏览最多</a-radio-button>
-  </a-radio-group>
+  <a-row>
+    <a-col :span="8">
+      <a-radio-group v-model:value="pagination.sortValue" @change="radioChange">
+        <a-radio-button value="createdAt">最新发布</a-radio-button>
+        <a-radio-button value="watchNum">浏览最多</a-radio-button>
+      </a-radio-group>
+    </a-col>
+    <a-col :span="8">
+      <a-input-search
+        v-model:value="pagination.searchKey"
+        placeholder="请输入搜索关键词"
+        enter-button
+        @search="loadData(pagination)"
+      />
+    </a-col>
+    <a-col :span="8"></a-col>
+  </a-row>
+
   <a-list
     item-layout="vertical"
     size="large"
@@ -81,6 +95,7 @@ const pagination = reactive({
   pageNum: 1,
   total: 0,
   sortValue: "createdAt",
+  searchKey: "",
   onChange: (page) => {
     pagination.pageNum = page;
     loadData(pagination);

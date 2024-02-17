@@ -20,7 +20,10 @@
           <template #avatar><a-avatar :src="item.user.avatar" /></template>
         </a-list-item-meta>
         <div v-html="item.content"></div>
-        <div style="display: flex; justify-content: center">
+        <div
+          v-if="userInfo.objectId"
+          style="display: flex; justify-content: center"
+        >
           <HeartFilled
             v-if="item.isStar"
             style="font-size: 80px; color: red; cursor: pointer"
@@ -37,7 +40,7 @@
     </template>
   </a-list>
   <h3>评论</h3>
-  <a-input-group compact>
+  <a-input-group compact v-if="userInfo.objectId">
     <a-input
       v-model:value="commentValue"
       placeholder="请输入你的评论"
@@ -68,8 +71,18 @@
         <a-button @click="onLoadMore">loading more</a-button>
       </div>
     </template>
-    <template #renderItem="{ item }">
+    <template #renderItem="{ item, index }">
       <a-list-item :key="item.objectId">
+        <template #actions>
+          <a
+            key="list-loadmore-edit"
+            style="color: red"
+            v-if="item.user.objectId == userInfo.objectId"
+            @click="handleRemove(item, index)"
+          >
+            删除
+          </a>
+        </template>
         <a-skeleton avatar :title="false" :loading="!!item.loading" active>
           <a-list-item-meta :description="item.content">
             <template #title>
@@ -95,15 +108,17 @@ import {
   removeStar,
   getCommentlist,
   updateComment,
+  removeComment,
 } from "../apis";
 import { EyeOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons-vue";
 const route = useRoute();
 const listData = ref();
+const userInfo = JSON.parse(sessionStorage.getItem("userInfo")) || {};
 
 const loadData = async () => {
   let result = await queryNoteById(route.params.objectId);
   for (const item of [result]) {
-    item.isStar = await getIsStar(item.objectId);
+    if (userInfo.objectId) item.isStar = await getIsStar(item.objectId);
   }
   listData.value = [result];
 };
@@ -147,6 +162,14 @@ const sendComment = async () => {
     });
   }
   commentValue.value = "";
+};
+
+/* 删除评论 */
+const handleRemove = async ({ objectId }, index) => {
+  const result = await removeComment(objectId);
+  if (result.id) {
+    commentList.value.splice(index, 1);
+  }
 };
 
 loadData();

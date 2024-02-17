@@ -23,9 +23,14 @@ export const getHotStrategy = async () => {
 
 /* 获取旅游攻略列表 */
 export const getStrategyList = async (params) => {
-  const { pageSize, pageNum, sortValue } = params
-  const query = new Parse.Query("TravelStrategy")
-  query.equalTo('company', company)
+  const { pageSize, pageNum, sortValue, searchKey } = params
+  const query1 = new Parse.Query("TravelStrategy")
+  query1.equalTo('company', company)
+  query1.contains('name', searchKey)
+  const query2 = new Parse.Query("TravelStrategy")
+  query2.equalTo('company', company)
+  query2.contains('content', searchKey)
+  const query = Parse.Query.or(query1, query2)
   query.limit(pageSize)
   query.skip(pageSize * (pageNum - 1))
   query.descending(sortValue)
@@ -205,7 +210,7 @@ export const updateComment = async (id, content) => {
 export const removeComment = async (id) => {
   const comment = new Parse.Query('TravelComment')
   comment.equalTo('objectId', id)
-  const obj = comment.first()
+  const obj = await comment.first()
   return await obj.destroy()
 }
 
@@ -221,7 +226,7 @@ export const getCommentlist = async (params) => {
   return (await comment.find()).map(item => item.toJSON())
 }
 
-
+/* 注册 */
 export const userSignUp = async (params) => {
   const { name, username, email, password, avatar } = params
   const user = new Parse.User();
@@ -251,5 +256,19 @@ export const userSignUp = async (params) => {
 
     alert("Error: " + error.code + " " + error.message);
   }
+}
 
+/* 我发布的手记/攻略 */
+export const getMyList = async (params) => {
+  const { pageSize, pageNum, className } = params
+  const query = new Parse.Query(className)
+  query.equalTo('company', company)
+  query.equalTo('user', JSON.parse(sessionStorage.getItem('userInfo')).objectId)
+  query.limit(pageSize)
+  query.skip(pageSize * (pageNum - 1))
+  query.descending('createdAt')
+  query.includeAll();
+  return new FindList((await query.find()).map(item => {
+    return strContent(item)
+  }), await query.count())
 }

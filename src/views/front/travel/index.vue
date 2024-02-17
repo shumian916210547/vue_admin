@@ -25,6 +25,12 @@
         <template v-if="userInfo">
           <a-popover placement="bottomRight">
             <template #content>
+              <a-button
+                @click="toPage('/front/travel/my')"
+                style="margin-top: 10px"
+              >
+                个人中心
+              </a-button>
               <div style="display: flex; flex-direction: column">
                 <a-button @click="loginOut" style="margin-top: 10px">
                   退出登录
@@ -88,6 +94,7 @@ watch(route, () => {
 });
 const loginOut = async () => {
   await Parse.User.logOut();
+  toPage("/front/travel/home");
   location.reload();
   sessionStorage.clear();
   localStorage.clear();

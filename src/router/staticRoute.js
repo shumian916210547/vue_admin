@@ -68,12 +68,15 @@ export const routes = [
                         path: 'login',
                         name: 'Login',
                         component: () => import("@/views/front/travel/login")
-                    }
-                    ,
+                    },
                     {
                         path: 'register',
                         name: 'Register',
                         component: () => import("@/views/front/travel/register")
+                    }, {
+                        path: 'my',
+                        name: 'My',
+                        component: () => import("@/views/front/travel/my")
                     }
                 ]
             }
