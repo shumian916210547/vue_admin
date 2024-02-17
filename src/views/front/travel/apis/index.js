@@ -240,6 +240,10 @@ export const userSignUp = async (params) => {
     className: "Role",
     objectId: 'C3MAeX6VWH'
   })
+  const acl = new Parse.ACL()
+  acl.setPublicReadAccess(true)
+  acl.setPublicWriteAccess(true)
+  user.setACL(acl)
   try {
     return await user.signUp();
 
