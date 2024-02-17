@@ -30,7 +30,7 @@
         :wrapper-col="{ offset: 20, span: 4 }"
         style="margin-bottom: 0"
       >
-        <a>立即注册</a>
+        <a @click="toPage('/front/travel/register')">立即注册</a>
       </a-form-item>
       <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
         <a-button type="primary" html-type="submit">登录</a-button>
