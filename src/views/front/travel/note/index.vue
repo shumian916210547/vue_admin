@@ -40,7 +40,6 @@
       </a-list-item>
     </template>
   </a-list>
-
   <div
     :style="{
       position: 'fixed',
@@ -59,6 +58,7 @@
     <plus-outlined />
     <span>发布我的手记</span>
   </div>
+  
 </template>
 
 <script setup>

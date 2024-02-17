@@ -36,12 +36,67 @@
       </a-list-item>
     </template>
   </a-list>
+  <h3>评论</h3>
+  <a-input-group compact>
+    <a-input
+      v-model:value="commentValue"
+      placeholder="请输入你的评论"
+      required
+      allowClear
+      :maxlength="200"
+      showCount
+      style="width: calc(100% - 200px)"
+    />
+    <a-button type="primary" @click="sendComment">发送</a-button>
+  </a-input-group>
+  <a-list
+    class="demo-loadmore-list"
+    :loading="initLoading"
+    item-layout="horizontal"
+    :data-source="commentList"
+  >
+    <template #loadMore>
+      <div
+        v-if="!initLoading && !loading"
+        :style="{
+          textAlign: 'center',
+          marginTop: '12px',
+          height: '32px',
+          lineHeight: '32px',
+        }"
+      >
+        <a-button @click="onLoadMore">loading more</a-button>
+      </div>
+    </template>
+    <template #renderItem="{ item }">
+      <a-list-item :key="item.objectId">
+        <a-skeleton avatar :title="false" :loading="!!item.loading" active>
+          <a-list-item-meta :description="item.content">
+            <template #title>
+              {{ item.user.name }}
+            </template>
+            <template #avatar>
+              <a-avatar :src="item.user.avatar" />
+            </template>
+          </a-list-item-meta>
+        </a-skeleton>
+      </a-list-item>
+    </template>
+  </a-list>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
-import { queryNoteById, getIsStar, updateStar, removeStar } from "../apis";
+import {
+  queryNoteById,
+  getIsStar,
+  updateStar,
+  removeStar,
+  getCommentlist,
+  updateComment,
+} from "../apis";
+import { EyeOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons-vue";
 const route = useRoute();
 const listData = ref();
 
@@ -60,6 +115,42 @@ const cancelStar = async (item) => {
   item.isStar = (await removeStar(item.objectId)).id ? false : true;
 };
 
+const commentList = ref([]);
+const initLoading = ref(true);
+const loading = ref(false);
+const queryParams = reactive({
+  pageSize: 10,
+  pageNum: 1,
+  id: route.params.objectId,
+});
+/* 获取评论列表 */
+const loadCommentList = async (params) => {
+  loading.value = true;
+  commentList.value = [...commentList.value, ...(await getCommentlist(params))];
+  loading.value = false;
+};
+const onLoadMore = () => {
+  queryParams.pageNum = 2;
+  loadCommentList(queryParams);
+};
+
+const commentValue = ref("");
+/* 发送评论 */
+const sendComment = async () => {
+  if (!commentValue.value.length) return;
+  const result = await updateComment(route.params.objectId, commentValue.value);
+  if (result.id) {
+    commentList.value.unshift({
+      content: commentValue.value,
+      user: JSON.parse(sessionStorage.getItem("userInfo")),
+      objectId: result.id,
+    });
+  }
+  commentValue.value = "";
+};
+
 loadData();
-import { EyeOutlined, HeartFilled, HeartOutlined } from "@ant-design/icons-vue";
+onMounted(() => {
+  loadCommentList(queryParams), (initLoading.value = false);
+});
 </script>

@@ -177,3 +177,75 @@ export const removeStar = async (id) => {
   const obj = await query.first()
   return (await obj.destroy())
 }
+
+/* 发送评论 */
+export const updateComment = async (id, content) => {
+  const Comment = Parse.Object.extend('TravelComment')
+  const comment = new Comment();
+  comment.set('user', {
+    __type: "Pointer",
+    className: "_User",
+    objectId: JSON.parse(sessionStorage.getItem('userInfo')).objectId
+  })
+  comment.set('company', {
+    __type: "Pointer",
+    className: "Company",
+    objectId: company
+  })
+  comment.set('travelNote', {
+    __type: "Pointer",
+    className: "TravelNotes",
+    objectId: id
+  })
+  comment.set('content', content)
+  return await comment.save()
+}
+
+/* 删除评论 */
+export const removeComment = async (id) => {
+  const comment = new Parse.Query('TravelComment')
+  comment.equalTo('objectId', id)
+  const obj = comment.first()
+  return await obj.destroy()
+}
+
+/* 评论列表 */
+export const getCommentlist = async (params) => {
+  const { id, pageSize, pageNum } = params
+  const comment = new Parse.Query('TravelComment')
+  comment.equalTo('travelNote', id)
+  comment.limit(pageSize)
+  comment.skip(pageSize * (pageNum - 1))
+  comment.descending('createdAt')
+  comment.includeAll();
+  return (await comment.find()).map(item => item.toJSON())
+}
+
+
+export const userSignUp = async (params) => {
+  const { name, username, email, password, avatar } = params
+  const user = new Parse.User();
+  user.set("username", username);
+  user.set("password", password);
+  user.set("email", email);
+  user.set("name", name);
+  user.set("avatar", avatar);
+  user.set('company', {
+    __type: "Pointer",
+    className: "Company",
+    objectId: company
+  })
+  user.set('role', {
+    __type: "Pointer",
+    className: "Role",
+    objectId: 'C3MAeX6VWH'
+  })
+  try {
+    return await user.signUp();
+
+  } catch (error) {
+
+    alert("Error: " + error.code + " " + error.message);
+  }
+
+}

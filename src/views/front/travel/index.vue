@@ -23,19 +23,41 @@
       </div>
       <div class="right">
         <template v-if="userInfo">
-          <img
-            :src="userInfo.avatar"
-            style="
-              height: 34px;
-              width: 34px;
-              object-fit: cover;
-              border-radius: 50%;
-              overflow: hidden;
-              margin: 0 10px;
-            "
-            alt=""
-          />
-          <span style="color: black">{{ userInfo.name }}</span>
+          <a-popover placement="bottomRight">
+            <template #content>
+              <div style="display: flex; flex-direction: column">
+                <a-button @click="loginOut" style="margin-top: 10px">
+                  退出登录
+                </a-button>
+              </div>
+            </template>
+            <div class="header-right">
+              <img
+                v-if="userInfo.avatar"
+                :src="userInfo.avatar"
+                style="
+                  height: 34px;
+                  width: 34px;
+                  object-fit: cover;
+                  border-radius: 50%;
+                  overflow: hidden;
+                  margin: 0 10px;
+                "
+                alt=""
+              />
+              <component
+                v-else
+                :is="AntdIcon['UserOutlined']"
+                style="font-size: 24px; margin: 0 24px"
+              ></component>
+              <span>{{ userInfo.name }}</span>
+              <component
+                :is="AntdIcon['DownOutlined']"
+                class="mini_btn"
+                style="margin-left: 10px"
+              ></component>
+            </div>
+          </a-popover>
         </template>
         <template v-else>
           <span @click="toPage('/front/travel/login')">登录</span>
@@ -51,8 +73,10 @@
 
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import * as AntdIcon from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins/index";
 import { useRoute } from "vue-router";
+import Parse from "parse";
 const route = useRoute();
 const { toPage } = Mixins();
 document.title = "基于Vue.js的旅游信息分享网站";
@@ -62,6 +86,12 @@ watch(route, () => {
   document.title = "基于Vue.js的旅游信息分享网站";
   userInfo.value = JSON.parse(sessionStorage.getItem("userInfo"));
 });
+const loginOut = async () => {
+  await Parse.User.logOut();
+  location.reload();
+  sessionStorage.clear();
+  localStorage.clear();
+};
 onMounted(() => {
   userInfo.value = JSON.parse(sessionStorage.getItem("userInfo"));
 });
