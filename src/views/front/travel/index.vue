@@ -19,6 +19,12 @@
           <a-menu-item key="Note" @click="toPage('/front/travel/note')">
             旅游手记
           </a-menu-item>
+          <a-menu-item key="Hotel" @click="toPage('/front/travel/hotel')">
+            酒店民宿
+          </a-menu-item>
+          <a-menu-item key="City" @click="toPage('/front/travel/city')">
+            旅游城市
+          </a-menu-item>
         </a-menu>
       </div>
       <div class="right">

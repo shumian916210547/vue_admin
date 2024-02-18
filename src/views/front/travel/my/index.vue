@@ -155,7 +155,7 @@ const actions = [
 ];
 
 const { toPage } = Mixins();
-const userInfo = reactive(sessionStorage.getItem("userInfo"));
+const userInfo = reactive(JSON.parse(sessionStorage.getItem("userInfo")));
 
 const onFinish = (values) => {
   updateUserInfo(values);

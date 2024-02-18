@@ -77,7 +77,23 @@ export const routes = [
                         path: 'my',
                         name: 'My',
                         component: () => import("@/views/front/travel/my")
-                    }
+                    }, {
+                        path: 'city',
+                        name: 'City',
+                        component: () => import("@/views/front/travel/city")
+                    }, {
+                        path: 'hotel',
+                        name: 'Hotel',
+                        component: () => import("@/views/front/travel/hotel")
+                    }, {
+                        path: 'hotel/:objectId',
+                        name: 'HotelDetail',
+                        component: () => import("@/views/front/travel/hotel/hotelDetail")
+                    }, {
+                        path: 'city/:objectId',
+                        name: 'CityDetail',
+                        component: () => import("@/views/front/travel/city/cityDetail")
+                    },
                 ]
             }
         ]

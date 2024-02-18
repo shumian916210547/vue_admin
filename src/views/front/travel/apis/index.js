@@ -272,3 +272,59 @@ export const getMyList = async (params) => {
     return strContent(item)
   }), await query.count())
 }
+
+/* 获取酒店列表 */
+export const getHotelList = async (params) => {
+  const { pageSize, pageNum, sortValue, searchKey } = params
+  const query1 = new Parse.Query("TravelHotel")
+  query1.equalTo('company', company)
+  query1.contains('name', searchKey)
+  const query2 = new Parse.Query("TravelHotel")
+  query2.equalTo('company', company)
+  query2.contains('content', searchKey)
+  const query = Parse.Query.or(query1, query2)
+  query.limit(pageSize)
+  query.skip(pageSize * (pageNum - 1))
+  query.descending(sortValue)
+  query.includeAll();
+  return new FindList((await query.find()).map(item => {
+    return item.toJSON()
+  }), await query.count())
+}
+
+/* 查询酒店详情 */
+export const queryHotelById = async (id) => {
+  const query = new Parse.Query("TravelHotel")
+  query.equalTo('objectId', id)
+  query.includeAll();
+  const result = await query.first()
+  return result.toJSON()
+}
+
+/* 获取城市列表 */
+export const getCityList = async (params) => {
+  const { pageSize, pageNum, sortValue, searchKey } = params
+  const query1 = new Parse.Query("TravelCity")
+  query1.equalTo('company', company)
+  query1.contains('name', searchKey)
+  const query2 = new Parse.Query("TravelCity")
+  query2.equalTo('company', company)
+  query2.contains('content', searchKey)
+  const query = Parse.Query.or(query1, query2)
+  query.limit(pageSize)
+  query.skip(pageSize * (pageNum - 1))
+  query.descending(sortValue)
+  query.includeAll();
+  return new FindList((await query.find()).map(item => {
+    return item.toJSON()
+  }), await query.count())
+}
+
+/* 查询城市详情 */
+export const queryCityById = async (id) => {
+  const query = new Parse.Query("TravelCity")
+  query.equalTo('objectId', id)
+  query.includeAll();
+  const result = await query.first()
+  return result.toJSON()
+}

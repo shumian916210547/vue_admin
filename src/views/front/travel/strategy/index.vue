@@ -12,6 +12,7 @@
         v-model:value="pagination.searchKey"
         placeholder="请输入搜索关键词"
         enter-button
+        allowClear
         @search="loadData(pagination)"
       />
     </a-col>
