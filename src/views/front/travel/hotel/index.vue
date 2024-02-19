@@ -23,7 +23,17 @@
         :key="item.objectId"
         @click="toPage('hotel/' + item.objectId)"
       >
-        <a-card :title="item.name + '_' + item.address">
+        <a-card>
+          <template #title>
+            <h3 style="text-overflow: ellipsis; overflow: hidden">
+              {{ item.name }}
+            </h3>
+            <p
+              style="font-size: 12px; text-overflow: ellipsis; overflow: hidden"
+            >
+              {{ item.address }}
+            </p>
+          </template>
           <img :src="item.avatar" style="width: 168px" alt="" />
         </a-card>
       </a-list-item>

@@ -29,7 +29,7 @@
     <template #renderItem="{ item }">
       <a-list-item
         :key="item.objectId"
-        style="max-height: 334px; cursor: pointer"
+        style="max-height: 400px; cursor: pointer"
         @click="toPage('strategy/' + item.objectId)"
       >
         <template #actions>
