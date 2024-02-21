@@ -1,79 +1,83 @@
 <template>
   <!-- 筛选 -->
-  <a-form style="min-height: 56px" :model="where" ref="form">
-    <a-row>
-      <a-col
-        :span="16"
-        style="display: flex; align-items: center; flex-wrap: wrap"
-      >
-        <template
-          v-for="(field_name, index) in getFilterField(props.fields)"
-          :key="index"
+  <slot name="top">
+    <a-form style="min-height: 56px" :model="where" ref="form">
+      <a-row>
+        <a-col
+          :span="16"
+          style="display: flex; align-items: center; flex-wrap: wrap"
         >
-          <a-form-item
-            :label="fields[field_name].chineseName"
-            style="margin-right: 10px"
-            :name="field_name"
-            v-permission="['permission:query', permissions]"
+          <template
+            v-for="(field_name, index) in getFilterField(props.fields)"
+            :key="index"
           >
-            <template v-if="fields[field_name].editComponent == 'ASelect'">
-              <component
-                v-model:value="where[field_name]"
-                :placeholder="'请选择' + fields[field_name].chineseName"
-                :allowClear="true"
-                :is="fields[field_name].editComponent"
-                :fieldNames="{
-                  label: fields[field_name].componentOption.labelKey,
-                  value: fields[field_name].componentOption.valueKey,
-                }"
-                :mode="fields[field_name].componentOption.mode"
-                :options="
-                  selectoptions[fields[field_name].componentOption.selectTable]
-                "
-                style="width: 150px"
-              >
-              </component>
-            </template>
-            <template v-else>
-              <component
-                style="width: 150px"
-                v-model:value="where[field_name]"
-                :allowClear="true"
-                :placeholder="'请输入' + fields[field_name].chineseName"
-                :is="fields[field_name].editComponent"
-              ></component>
-            </template>
-          </a-form-item>
-        </template>
-      </a-col>
-      <a-col
-        :span="2"
-        :offset="1"
-        style="justify-content: space-evenly; display: flex"
-      >
-        <a-button
-          type="primary"
-          @click="emit('onQuery')"
-          style="margin: 0 10px 0 0"
-          v-permission="['permission:query', permissions]"
-          >查询</a-button
+            <a-form-item
+              :label="fields[field_name].chineseName"
+              style="margin-right: 10px"
+              :name="field_name"
+              v-permission="['permission:query', permissions]"
+            >
+              <template v-if="fields[field_name].editComponent == 'ASelect'">
+                <component
+                  v-model:value="where[field_name]"
+                  :placeholder="'请选择' + fields[field_name].chineseName"
+                  :allowClear="true"
+                  :is="fields[field_name].editComponent"
+                  :fieldNames="{
+                    label: fields[field_name].componentOption.labelKey,
+                    value: fields[field_name].componentOption.valueKey,
+                  }"
+                  :mode="fields[field_name].componentOption.mode"
+                  :options="
+                    selectoptions[
+                      fields[field_name].componentOption.selectTable
+                    ]
+                  "
+                  style="width: 150px"
+                >
+                </component>
+              </template>
+              <template v-else>
+                <component
+                  style="width: 150px"
+                  v-model:value="where[field_name]"
+                  :allowClear="true"
+                  :placeholder="'请输入' + fields[field_name].chineseName"
+                  :is="fields[field_name].editComponent"
+                ></component>
+              </template>
+            </a-form-item>
+          </template>
+        </a-col>
+        <a-col
+          :span="2"
+          :offset="1"
+          style="justify-content: space-evenly; display: flex"
         >
-        <a-button
-          @click="handleReset"
-          v-permission="['permission:reset', permissions]"
-          >重置</a-button
-        >
-      </a-col>
-      <a-col :span="2" :offset="2">
-        <a-button
-          type="primary"
-          @click="emit('onInsert')"
-          v-permission="['permission:insert', permissions]"
-          >新建</a-button
-        >
-      </a-col>
-    </a-row>
-  </a-form>
+          <a-button
+            type="primary"
+            @click="emit('onQuery')"
+            style="margin: 0 10px 0 0"
+            v-permission="['permission:query', permissions]"
+            >查询</a-button
+          >
+          <a-button
+            @click="handleReset"
+            v-permission="['permission:reset', permissions]"
+            >重置</a-button
+          >
+        </a-col>
+        <a-col :span="2" :offset="2">
+          <a-button
+            type="primary"
+            @click="emit('onInsert')"
+            v-permission="['permission:insert', permissions]"
+            >新建</a-button
+          >
+        </a-col>
+      </a-row>
+    </a-form>
+  </slot>
 
   <!-- 表格 -->
   <a-table

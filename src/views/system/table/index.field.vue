@@ -308,22 +308,38 @@
       </a-form-item>
 
       <!-- Upload 组件配置 -->
-      <a-form-item
-        v-if="optionState.editComponent == 'AUpload'"
-        label="图片数量"
-        name="maxLength"
-        :rules="[
-          { required: true, message: 'Please input your 请输入图片数量' },
-        ]"
-      >
-        <a-input-number
-          placeholder="请输入图片数量"
-          allowClear
-          id="inputNumber"
-          v-model:value="componentOption.maxLength"
-          :min="1"
-        />
-      </a-form-item>
+      <template v-if="optionState.editComponent == 'AUpload'">
+        <a-form-item
+          label="文件数量"
+          name="maxLength"
+          :rules="[
+            { required: true, message: 'Please input your 请输入文件数量' },
+          ]"
+        >
+          <a-input-number
+            placeholder="请输入图片数量"
+            allowClear
+            id="inputNumber"
+            v-model:value="componentOption.maxLength"
+            :min="1"
+          />
+        </a-form-item>
+        <a-form-item
+          label="格式限制"
+          name="fileType"
+          :rules="[{ required: false, message: 'Please input your fileType' }]"
+        >
+          <a-radio-group
+            v-model:value="componentOption.fileType"
+            size="default"
+          >
+            <a-radio-button value="*">无</a-radio-button>
+            <a-radio-button value="image/*">图片文件</a-radio-button>
+            <a-radio-button value="audio/*">音频文件</a-radio-button>
+            <a-radio-button value="video/*">视频文件</a-radio-button>
+          </a-radio-group>
+        </a-form-item>
+      </template>
 
       <a-form-item
         label="提示文案"
@@ -450,6 +466,7 @@ const handleOk = () => {
         valueKey,
         labelKey,
         maxLength,
+        fileType,
       } = success[2];
       const params = {
         fieldType,
@@ -472,6 +489,7 @@ const handleOk = () => {
             valueKey,
             labelKey,
             maxLength,
+            fileType,
           },
         },
       };
@@ -531,6 +549,7 @@ const state = {
     labelKey: "name",
     selectTable: undefined,
     maxLength: 8,
+    fileType: "*",
   },
 };
 
@@ -557,6 +576,7 @@ let componentOption = reactive({
   valueKey: "objectId",
   labelKey: "name",
   maxLength: 8,
+  fileType: "*",
 });
 
 const visible = ref(props.modalVisible);

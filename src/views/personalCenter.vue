@@ -14,6 +14,7 @@
           <component
             v-model:files="userInfo.avatar"
             :maxLength="1"
+            fileType="image/*"
             :is="Upload"
           ></component>
         </a-form-item>

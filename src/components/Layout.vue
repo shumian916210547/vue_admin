@@ -274,6 +274,7 @@
           v-model:files="systemOptions.logoURL"
           :maxLength="1"
           @change="onChange"
+          fileType="image/*"
           :is="Upload"
         ></component>
       </a-form-item>

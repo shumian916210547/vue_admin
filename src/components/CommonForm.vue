@@ -84,6 +84,7 @@
             v-model:files="formState[key]"
             :maxLength="fields[key].componentOption.maxLength"
             :disabled="fields[key].componentOption.disabled"
+            :fileType="fields[key].componentOption.fileType"
             :is="Upload"
           ></component>
 
@@ -181,7 +182,7 @@ watch(
           formState[key] = [
             {
               uid: new Date().getMilliseconds(),
-              name: key,
+              name: props.editState[key].match(/\upload\/(.*)/)[1],
               status: "done",
               url: props.editState[key],
             },
