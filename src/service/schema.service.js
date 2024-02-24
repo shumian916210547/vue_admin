@@ -75,11 +75,11 @@ export const loadSchemas = async (query) => {
 }
 
 /* 新建schema */
-export const createSchema = async (className) => {
+export const createSchema = async ({ className, nickName }) => {
     const table = new Parse.Schema(className)
     table.addPointer('company', 'Company')
     await Capture(table.save())
-    return await InsertSchema(className)
+    return await InsertSchema(className, nickName)
 }
 
 /* 新增字段 */
@@ -126,10 +126,11 @@ const GetSchemaList = async (query) => {
     return (await Schema.find().catch(err => { handleParseError(err) }))?.map(item => item.toJSON())
 }
 
-const InsertSchema = async (className) => {
+const InsertSchema = async (className, nickName) => {
     const Schema = Parse.Object.extend("Schema")
     const schema = new Schema()
     schema.set('name', className);
+    schema.set('nickName', nickName);
     schema.set('fields', {});
     if (sessionStorage.getItem('companyId')) {
         schema.set('company', {
@@ -138,15 +139,14 @@ const InsertSchema = async (className) => {
             objectId: sessionStorage.getItem('companyId')
         })
     }
-    return await Capture(schema.save()).then(success => {
-        notification.success({
-            message: sessionStorage.getItem('pageName'),
-            description: (success.get('name') || success.get('objectId')) + '添加成功',
-        });
-        defaultFields.forEach(item => {
-            setDefaultFields({ className, ...item })
-        })
-    })
+    const success = await Capture(schema.save()).catch(err => { removeSchema(className) })
+    for (const item of defaultFields) {
+        await setDefaultFields({ className, ...item });
+    }
+    notification.success({
+        message: sessionStorage.getItem('pageName'),
+        description: (success.get('name') || success.get('objectId')) + '添加成功',
+    });
 }
 
 /* 设置默认字段 */

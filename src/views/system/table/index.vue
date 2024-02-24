@@ -238,7 +238,7 @@ const getSchemaList = async (query) => {
 
 /* 新增table */
 const handleInsertTable = async (arg) => {
-  const result = await createSchema(arg.name);
+  const result = await createSchema(arg);
   tableModal.show = false;
   getSchemaList(queryState);
 };

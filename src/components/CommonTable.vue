@@ -164,7 +164,7 @@
               {{ JSON.stringify(record[column.key]) }}
             </p>
           </template>
-          <p>{{ JSON.stringify(record[column.key]) }}</p>
+          <p>{{ JSON.stringify(record[column.key], null, 2) }}</p>
         </a-tooltip>
       </template>
       <template v-else-if="fields[column.key].type == 'Date'">

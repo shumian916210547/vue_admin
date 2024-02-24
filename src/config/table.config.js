@@ -5,6 +5,11 @@ export const columns = [
         key: "className",
     },
     {
+        title: "表格别名",
+        dataIndex: "nickName",
+        key: "nickName",
+    },
+    {
         title: "字段数量",
         dataIndex: "fields_num",
         key: "fields_num",

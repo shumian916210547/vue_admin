@@ -15,13 +15,24 @@
     >
       <a-form-item
         label="表格名称"
-        name="name"
+        name="className"
         :rules="[{ required: true, message: 'Please input your 表格名称!' }]"
       >
         <a-input
-          v-model:value="tableState.name"
+          v-model:value="tableState.className"
           allowClear
           placeholder="请输入表格名称"
+        />
+      </a-form-item>
+      <a-form-item
+        label="表格别名"
+        name="nickName"
+        :rules="[{ required: true, message: 'Please input your 表格别名!' }]"
+      >
+        <a-input
+          v-model:value="tableState.nickName"
+          allowClear
+          placeholder="请输入表格别名"
         />
       </a-form-item>
     </a-form>
@@ -50,7 +61,8 @@ watch(visible, (n) => {
 });
 
 const tableState = reactive({
-  name: null,
+  className: null,
+  nickName: null,
 });
 
 const form1 = ref();
