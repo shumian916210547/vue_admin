@@ -88,6 +88,7 @@ export const InsertRow = async ({ className, fields, params }) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: (success.get('name') || success.get('objectId')) + '新增成功',
+            duration: 0.5
         });
         /*  UpdateTablePermission(className, success) */
     })
@@ -123,6 +124,7 @@ export const UpdateById = async ({ className, fields, params }) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: (success.get('name') || success.get('objectId')) + '修改成功',
+            duration: 0.5
         });
     })
 }
@@ -136,6 +138,7 @@ export const removeById = async ({ className, objectId }) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: (success.get('name') || success.get('objectId')) + '删除成功',
+            duration: 0.5
         });
     })
 }

@@ -53,6 +53,8 @@
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
         <div style="max-width: 230px; display: flex; align-items: center">
+          <a-button @click="generateAPI(record, index)"> 生成接口 </a-button>
+          <a-divider type="vertical" />
           <a-button
             @click="
               (fieldModal.type = 'add'),
@@ -137,6 +139,29 @@
     v-model:modalVisible="tableModal.show"
     @onSubmit="handleInsertTable"
   ></InsertTable>
+
+  <a-modal
+    v-model:visible="apiModalVisible"
+    title="接口详情"
+    width="500"
+    @ok="
+      () => {
+        apiModalVisible = false;
+      }
+    "
+  >
+    <div style="height: 500px; overflow-y: scroll">
+      <a-row justify="space-around" style="position: fixed">
+        <a-col :span="4">
+          <a-button @click="handleCopy(apiString)">复制</a-button>
+        </a-col>
+        <a-col :span="4"> </a-col>
+        <a-col :span="4"> </a-col>
+        <a-col :span="4"> </a-col>
+      </a-row>
+      <pre>{{ apiString }}</pre>
+    </div>
+  </a-modal>
 </template>
 
 <script setup>
@@ -152,6 +177,7 @@ import {
   removeSchema,
 } from "@/service/schema.service";
 import { columns, innerColumns } from "@/config/table.config";
+import { getAPI } from "@/service/functionToString";
 
 import Parse from "parse";
 import { reactive, ref } from "vue";
@@ -292,6 +318,27 @@ const handleSubmitField = async (arg) => {
 const queryReset = () => {
   queryState.name = "";
   getSchemaList(queryState);
+};
+
+/* 生成接口 */
+const apiString = ref("");
+const apiModalVisible = ref(false);
+const generateAPI = (info, index) => {
+  const { className, fields } = info;
+  apiString.value = getAPI({ className, fields });
+  apiModalVisible.value = true;
+};
+
+/* 复制文本到粘贴板 */
+const handleCopy = (str) => {
+  navigator.clipboard.writeText(str).catch(function (err) {
+    console.error("Unable to copy text to clipboard", err);
+  });
+  notification.success({
+    message: "提示",
+    description: "复制成功",
+    duration: 0.5,
+  });
 };
 
 await getSchemaList(queryState);

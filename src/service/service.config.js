@@ -12,6 +12,7 @@ export const handleParseError = (err) => {
             notification.error({
                 message: err.code,
                 description: String(err),
+                duration: 0.5
             });
             break;
     }
@@ -25,6 +26,7 @@ export const Capture = (func) => {
             notification.error({
                 message: sessionStorage.getItem('pageName') || 'error',
                 description: error.toString(),
+                duration: 0.5
             });
             handleParseError(error)
             /*   reject(error) */
