@@ -150,7 +150,7 @@
       }
     "
   >
-    <div style="height: 500px; overflow-y: scroll">
+    <div style="height: 450px; overflow-y: scroll">
       <a-row justify="space-around" style="position: fixed">
         <a-col :span="4">
           <a-button @click="handleCopy(apiString)">复制</a-button>

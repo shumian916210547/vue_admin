@@ -490,4 +490,18 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-end;
 }
+
+.ant-menu-inline {
+  overflow-y: scroll;
+  flex: 1;
+}
+
+.ant-menu-inline::-webkit-scrollbar {
+  width: 0;
+}
+
+.ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+}
 </style>

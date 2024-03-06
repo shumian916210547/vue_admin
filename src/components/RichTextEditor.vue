@@ -1,5 +1,5 @@
 <template>
-  <div style="border: 1px solid #ccc">
+  <div style="border: 1px solid #ccc; height: auto">
     <Toolbar
       style="border-bottom: 1px solid #ccc"
       :editor="editorRef"
@@ -11,6 +11,7 @@
         overflowY: 'hidden',
         minHeight: minHeight,
         maxHeight: maxHeight,
+        height: minHeight,
       }"
       v-model="valueHtml"
       :defaultConfig="editorConfig"

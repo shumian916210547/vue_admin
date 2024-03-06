@@ -19,6 +19,27 @@ export const defaultFields = [
         }
     },
     {
+        "fieldName": "company",
+        "type": "Pointer",
+        "fieldOption": {
+            "isTable": false,
+            "isFilter": false,
+            "required": true,
+            "chineseName": "公司",
+            "targetClass": "Company",
+            "editComponent": "ASelect",
+            "componentOption": {
+                "mode": "combobox",
+                "disabled": false,
+                "labelKey": "name",
+                "valueKey": "objectId",
+                "allowClear": false,
+                "placeholder": "请输入内容",
+                "selectTable": "Company"
+            }
+        }
+    },
+    {
         "fieldName": "createdAt",
         "type": "Date",
         "fieldOption": {
@@ -140,12 +161,13 @@ const InsertSchema = async (className, nickName) => {
         })
     }
     const success = await Capture(schema.save()).catch(err => { removeSchema(className) })
-    for (const item of defaultFields) {
-        await setDefaultFields({ className, ...item });
-    }
+    await Promise.all(defaultFields.map(item => {
+        return setDefaultFields({ className, ...item })
+    }))
     notification.success({
         message: sessionStorage.getItem('pageName'),
         description: (success.get('name') || success.get('objectId')) + '添加成功',
+        duration: 0.5
     });
 }
 
@@ -168,6 +190,7 @@ export const UpdateSchema = async (className, type, fieldName, fieldOption) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: (success.get('name') || success.get('objectId')) + '更新成功',
+            duration: 0.5
         });
     })
 }
@@ -183,6 +206,7 @@ const RemoveTableField = async (className, fieldName) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: '字段' + fieldName + '删除成功',
+            duration: 0.5
         });
     })
 }
@@ -195,6 +219,7 @@ const RemoveTable = async (className) => {
         notification.success({
             message: sessionStorage.getItem('pageName'),
             description: (success.get('name') || success.get('objectId')) + '删除成功',
+            duration: 0.5
         });
     })
 }

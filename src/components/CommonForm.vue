@@ -4,6 +4,7 @@
     @ok="handleOk"
     :width="modalWidth"
     ref="modalRef"
+    style="position: relative"
   >
     <template #title>
       <div ref="modalTitleRef" style="width: 100%; cursor: move">
@@ -11,15 +12,21 @@
       </div>
     </template>
 
-    <div style="position: relative; height: 100%; width: 100%">
+    <div
+      :style="{
+        position: 'relative',
+        height: '100%',
+        width: formWidth,
+        height: formHeight,
+      }"
+    >
       <a-form
         :model="formState"
-        :label-col="{ span: 4 }"
-        :wrapper-col="{ span: 20 }"
         autocomplete="off"
         labelAlign="left"
         ref="form1"
         v-if="visible"
+        style="position: relative"
       >
         <a-form-item
           v-for="(key, index) in Object.keys(fields).filter((key) => {
@@ -33,7 +40,27 @@
               message: fields[key].componentOption.placeholder,
             },
           ]"
+          :style="
+            fields[key].editComponent == 'RichTextEditor'
+              ? {
+                  position: 'absolute',
+                  left: '420px',
+                  width: '1000px',
+                  top: 0,
+                }
+              : {}
+          "
           :key="index"
+          :labelCol="
+            fields[key].editComponent == 'RichTextEditor'
+              ? { span: 2 }
+              : { span: 6 }
+          "
+          :wrapperCol="
+            fields[key].editComponent == 'RichTextEditor'
+              ? { span: 22 }
+              : { span: 18 }
+          "
         >
           <component
             v-if="fields[key].editComponent == 'ATreeSelect'"
@@ -97,9 +124,11 @@
 
           <component
             v-else-if="fields[key].editComponent == 'RichTextEditor'"
+            ref="richTextRef"
             v-model:value="formState[key]"
             :disabled="fields[key].componentOption.disabled"
             :placeholder="fields[key].componentOption.placeholder"
+            minHeight="320px"
             :is="RichTextEditor"
           ></component>
 
@@ -120,9 +149,8 @@
           </component>
         </a-form-item>
       </a-form>
-      <div class="bar" @mousedown="down($event)" ref="bar"></div>
     </div>
-
+    <div class="bar" @mousedown="down($event)" ref="bar"></div>
     <template #modalRender="{ originVNode }">
       <div :style="transformStyle">
         <component :is="originVNode" />
@@ -166,6 +194,10 @@ const modalType = {
   add: "Create A",
   edit: "Editing",
 };
+const modalWidth = ref("600px");
+const formWidth = ref("100%");
+const formHeight = ref("auto");
+const richTextRef = ref();
 const form1 = ref();
 watch(
   () => props.modalVisible,
@@ -220,6 +252,12 @@ watch(
         /* 获取下拉组件数据 */
         if (props.fields[key].componentOption.selectTable) {
           loadSelectOptions(props.fields[key].componentOption.selectTable);
+        }
+
+        if (props.fields[key].editComponent == "RichTextEditor") {
+          modalWidth.value = "1480px";
+          formWidth.value = "400px";
+          formHeight.value = 420 + "px";
         }
       });
     }
@@ -301,7 +339,6 @@ const transformStyle = computed(() => {
   };
 });
 
-const modalWidth = ref("600px");
 const down = (e) => {
   const startX = e.clientX;
   const offsetX = e.target.offsetLeft; //元素左边到窗口左边的距离
@@ -327,7 +364,7 @@ const down = (e) => {
   line-height: 200px;
   vertical-align: middle;
   position: absolute;
-  right: -24px;
+  right: 0px;
   top: 0;
   height: 100%;
 }
