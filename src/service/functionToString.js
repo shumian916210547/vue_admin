@@ -81,7 +81,7 @@ export const getAPI = ({ className, fields }) => {
 
   /* 新增 */
   const insert${className} = async ({${getParams(fields)}})=>{
-    const Table = Parse.Object.extend(${className});
+    const Table = Parse.Object.extend('${className}');
     const table = new Table();
     ${getWriteField(fields, 'insert')}
     return (await table.save()).toJSON();
