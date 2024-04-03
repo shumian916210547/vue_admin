@@ -63,7 +63,10 @@
           "
         >
           <component
-            v-if="fields[key].editComponent == 'ATreeSelect'"
+            v-if="
+              fields[key].editComponent == 'ATreeSelect' &&
+              fields[key].isPointer
+            "
             v-model:value="formState[key]"
             style="width: 100%"
             :tree-data="selectoptions[fields[key].componentOption.selectTable]"
@@ -71,6 +74,39 @@
             :allowClear="fields[key].componentOption.allowClear"
             :placeholder="fields[key].componentOption.placeholder"
             tree-node-filter-prop="label"
+            :disabled="fields[key].componentOption.disabled"
+            :fieldNames="{
+              children: fields[key].componentOption.fieldNames,
+              label: 'name',
+              value: 'objectId',
+            }"
+            :is="fields[key].editComponent"
+            @change="
+              treeSelectChange(
+                formState[key],
+                fields[key],
+                selectoptions[fields[key].componentOption.selectTable],
+                {
+                  children: fields[key].componentOption.fieldNames,
+                  label: fields[key].componentOption.labelKey,
+                  value: fields[key].componentOption.valueKey,
+                  key,
+                }
+              )
+            "
+            @select="treeSelect"
+          ></component>
+
+          <component
+            v-else-if="fields[key].editComponent == 'ATreeSelect'"
+            v-model:value="formState[key]"
+            style="width: 100%"
+            :tree-data="selectoptions[fields[key].componentOption.selectTable]"
+            tree-checkable
+            :allowClear="fields[key].componentOption.allowClear"
+            :placeholder="fields[key].componentOption.placeholder"
+            tree-node-filter-prop="label"
+            :disabled="fields[key].componentOption.disabled"
             :fieldNames="{
               children: fields[key].componentOption.fieldNames,
               label: 'name',
@@ -105,6 +141,23 @@
               {{ item[fields[key].componentOption.labelKey] }}
             </a-select-option>
           </component>
+
+          <component
+            v-else-if="
+              fields[key].editComponent == 'ASelect' && fields[key].isPointer
+            "
+            v-model:value="formState[key]"
+            :placeholder="fields[key].componentOption.placeholder"
+            :disabled="fields[key].componentOption.disabled"
+            :allowClear="fields[key].componentOption.allowClear"
+            :mode="fields[key].componentOption.mode"
+            :fieldNames="{
+              label: fields[key].componentOption.labelKey,
+              value: fields[key].componentOption.valueKey,
+            }"
+            :options="selectoptions[fields[key].componentOption.selectTable]"
+            :is="fields[key].editComponent"
+          ></component>
 
           <component
             v-else-if="fields[key].editComponent == 'AUpload'"
@@ -161,12 +214,14 @@
 
 <script setup>
 import { findAll } from "@/service/base.service";
+import { isSelected } from "@/service/treeSelect.service";
 import { reactive, watch, ref, watchEffect, computed } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
 import Upload from "./Upload.vue";
 import { deepClone } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
 import RichTextEditor from "./RichTextEditor.vue";
+import { SHOW_CHILD } from "ant-design-vue/lib/vc-tree-select/utils/strategyUtil";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
 const props = defineProps({
   className: {
@@ -229,38 +284,62 @@ watch(
 const visible = ref(props.modalVisible);
 watch(visible, (n) => {
   if (!n) {
+    form1.value.resetFields();
     Object.keys(props.fields).forEach((key) => {
       formState[key] = props.fields[key].defaultValue || undefined;
+    });
+  } else {
+    Object.keys(props.fields).forEach((key) => {
+      /* 获取下拉组件数据 */
+      if (props.fields[key].isPointer) {
+        formState[key] = formState[key]?.map((item) => item.objectId);
+      }
+      if (props.fields[key].componentOption.selectTable) {
+        loadSelectOptions(props.fields[key].componentOption.selectTable);
+      }
     });
   }
   emit("update:modalVisible", n);
 });
 
 const selectoptions = reactive({});
+const selectoptions_copy = reactive({});
 const loadSelectOptions = async (className) => {
   if (!className) return [];
-  selectoptions[className] = [];
-  selectoptions[className] = await findAll(className);
+  selectoptions[className] =
+    selectoptions_copy[className] && selectoptions_copy[className].length
+      ? selectoptions_copy[className]
+      : await findAll(className);
+  selectoptions_copy[className] = deepClone(selectoptions[className]);
+  for (const key of Object.keys(props.fields)) {
+    if (!props.fields[key].isSole) continue;
+    if (props.fields[key].isPointer) {
+      treeSelectChange(
+        formState[key],
+        props.fields[key],
+        selectoptions[props.fields[key].componentOption.selectTable],
+        {
+          children: props.fields[key].componentOption.fieldNames,
+          skey: key,
+        }
+      );
+    }
+  }
 };
 const formState = reactive({});
 watch(
   () => props.fields,
   (n) => {
-    if (props.type == "add") {
-      Object.keys(props.fields).forEach((key) => {
+    Object.keys(props.fields).forEach((key) => {
+      if (props.type == "add") {
         formState[key] = props.fields[key].defaultValue || undefined;
-        /* 获取下拉组件数据 */
-        if (props.fields[key].componentOption.selectTable) {
-          loadSelectOptions(props.fields[key].componentOption.selectTable);
-        }
-
         if (props.fields[key].editComponent == "RichTextEditor") {
           modalWidth.value = "1480px";
           formWidth.value = "400px";
           formHeight.value = 420 + "px";
         }
-      });
-    }
+      }
+    });
   },
   { deep: true, immediate: true }
 );
@@ -286,6 +365,88 @@ const handleOk = () => {
     .catch((error) => {
       console.log(error);
     });
+};
+
+//treeSelect 事件；不可超出最大可选数字
+const treeSelectChange = (...args) => {
+  if (!args[0]) return;
+  let arr = [];
+  const className = args[1].componentOption.selectTable;
+  if (args[1].editComponent == "ASelect") {
+    selectoptions[className] = args[2]?.map((parent, pIndex) => {
+      if (args[0].includes(parent.objectId)) {
+        parent.disabled = false;
+      } else {
+        arr.push({
+          searchClassName: props.className,
+          className,
+          classField: args[3].skey,
+          selectId: {
+            __type: "Pointer",
+            className: args[1].targetClass,
+            objectId: parent.objectId,
+          },
+          parentIndex: pIndex,
+        });
+      }
+      return parent;
+    });
+  } else if (args[1].editComponent == "ATreeSelect") {
+    selectoptions[className] = args[2]?.map((parent, pIndex) => {
+      parent[args[3].children]?.map((children, cIndex) => {
+        if (args[0].length < args[1].componentOption.maxCount) {
+          if (args[0].includes(children.objectId)) {
+            children.disabled = false;
+          } else {
+            arr.push({
+              searchClassName: props.className,
+              className,
+              classField: args[3].children,
+              selectId: {
+                __type: "Pointer",
+                className: children.className,
+                objectId: children.objectId,
+              },
+              parentIndex: pIndex,
+              childIndex: cIndex,
+            });
+          }
+        } else {
+          if (args[0].includes(children.objectId)) {
+            children.disabled = false;
+          } else {
+            children.disabled = true;
+          }
+        }
+        return children;
+      });
+      if (args[1].isPointer && args[1].editComponent == "ATreeSelect") {
+        parent.disabled = true;
+      }
+      return parent;
+    });
+  }
+  disableSelect(arr);
+};
+
+//节点已选则禁用
+const disableSelect = async (arr) => {
+  for (const {
+    searchClassName,
+    className,
+    classField,
+    selectId,
+    parentIndex,
+    childIndex,
+  } of arr) {
+    const result = await isSelected(searchClassName, classField, selectId);
+    if (childIndex >= 0) {
+      selectoptions[className][parentIndex][classField][childIndex].disabled =
+        result ? true : false;
+    } else {
+      selectoptions[className][parentIndex].disabled = result ? true : false;
+    }
+  }
 };
 
 const modalTitleRef = ref();

@@ -238,6 +238,8 @@ const getSchemaList = async (query) => {
             editComponent: item.fields[fieldName].editComponent,
             isFilter: item.fields[fieldName].isFilter,
             isTable: item.fields[fieldName].isTable,
+            isPointer: item.fields[fieldName].isPointer,
+            isSole: item.fields[fieldName].isSole,
           },
           componentOption: item.fields[fieldName].componentOption,
         };
@@ -344,5 +346,4 @@ const handleCopy = (str) => {
 await getSchemaList(queryState);
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

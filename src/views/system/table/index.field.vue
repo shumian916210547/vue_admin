@@ -118,7 +118,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="formState.fieldType == 'Pointer'"
+        v-if="formState.fieldType == 'Pointer' || optionState.isPointer"
         label="指向表名"
         name="targetClass"
         :rules="[
@@ -176,6 +176,20 @@
         />
       </a-form-item>
 
+      <template v-if="formState.fieldType == 'Array'">
+        <a-form-item
+          label="isPointer"
+          name="isPointer"
+          style="min-width: 200px"
+        >
+          <a-switch
+            v-model:checked="optionState.isPointer"
+            checked-children="是"
+            un-checked-children="否"
+          />
+        </a-form-item>
+      </template>
+
       <a-form-item
         label="编辑组件"
         name="editComponent"
@@ -191,7 +205,7 @@
           v-model:value="optionState.editComponent"
           show-search
           allowClear
-          placeholder="情选择编辑组件!"
+          placeholder="请选择编辑组件!"
           :options="antdComponents"
         ></a-select>
       </a-form-item>
@@ -211,6 +225,16 @@
           un-checked-children="否"
         />
       </a-form-item>
+
+      <template v-if="formState.fieldType == 'Array' && optionState.isPointer">
+        <a-form-item label="不可重复" name="isSole" style="min-width: 200px">
+          <a-switch
+            v-model:checked="optionState.isSole"
+            checked-children="是"
+            un-checked-children="否"
+          />
+        </a-form-item>
+      </template>
     </a-form>
 
     <!-- 组件配置 -->
@@ -304,6 +328,23 @@
           v-model:value="componentOption.fieldNames"
           allowClear
           placeholder="请输入子数据集key"
+        />
+      </a-form-item>
+
+      <a-form-item
+        v-if="optionState.editComponent == 'ATreeSelect'"
+        label="最多可选择"
+        name="maxCount"
+        :rules="[
+          { required: true, message: 'Please input your 请输入最多可选择数' },
+        ]"
+      >
+        <a-input-number
+          placeholder="请输入最多可选择数"
+          allowClear
+          id="inputNumber"
+          v-model:value="componentOption.maxCount"
+          :min="1"
         />
       </a-form-item>
 
@@ -455,6 +496,8 @@ const handleOk = () => {
         targetClass,
         isFilter,
         isTable,
+        isPointer,
+        isSole,
       } = success[1];
       const {
         placeholder,
@@ -467,6 +510,7 @@ const handleOk = () => {
         labelKey,
         maxLength,
         fileType,
+        maxCount,
       } = success[2];
       const params = {
         fieldType,
@@ -479,6 +523,8 @@ const handleOk = () => {
           editComponent,
           isFilter,
           isTable,
+          isPointer,
+          isSole,
           componentOption: {
             placeholder,
             disabled,
@@ -490,6 +536,7 @@ const handleOk = () => {
             labelKey,
             maxLength,
             fileType,
+            maxCount,
           },
         },
       };
@@ -538,6 +585,8 @@ const state = {
     targetClass: undefined,
     isFilter: false,
     isTable: false,
+    isPointer: false,
+    isSole: false,
   },
   componentOption: {
     placeholder: "请输入内容",
@@ -550,6 +599,7 @@ const state = {
     selectTable: undefined,
     maxLength: 8,
     fileType: "*",
+    maxCount: 1,
   },
 };
 
@@ -565,6 +615,8 @@ let optionState = reactive({
   targetClass: undefined,
   isFilter: false,
   isTable: false,
+  isPointer: false,
+  isSole: false,
 });
 let componentOption = reactive({
   placeholder: "请输入内容",
@@ -577,6 +629,7 @@ let componentOption = reactive({
   labelKey: "name",
   maxLength: 8,
   fileType: "*",
+  maxCount: 1,
 });
 
 const visible = ref(props.modalVisible);
