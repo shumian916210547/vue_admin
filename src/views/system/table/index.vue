@@ -266,9 +266,49 @@ const getSchemaList = async (query) => {
   });
 };
 
+/* 生成默认路由 */
+const insertRoute = async ({
+  menu = undefined,
+  name = undefined,
+  path = undefined,
+  rank = undefined,
+  remark = undefined,
+  company = undefined,
+  targetClass = undefined,
+  pageComponent = undefined,
+}) => {
+  const Table = Parse.Object.extend("Route");
+  const table = new Table();
+  table.set("menu", menu);
+  table.set("name", name);
+  table.set("path", path);
+  table.set("rank", rank);
+  table.set("remark", remark);
+  table.set("company", {
+    __type: "Pointer",
+    className: "Company",
+    objectId: company,
+  });
+  table.set("targetClass", targetClass);
+  table.set("pageComponent", pageComponent);
+  return (await table.save()).toJSON();
+};
+
 /* 新增table */
 const handleInsertTable = async (arg) => {
+  if (!arg) return;
   const result = await createSchema(arg);
+  console.log(result);
+  if (arg.generate && result) {
+    insertRoute({
+      menu: true,
+      name: arg.nickName,
+      path: arg.className,
+      company: result.get("company").id,
+      targetClass: arg.className,
+      pageComponent: "/Wrapper",
+    });
+  }
   tableModal.show = false;
   getSchemaList(queryState);
 };

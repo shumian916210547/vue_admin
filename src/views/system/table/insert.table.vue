@@ -35,6 +35,13 @@
           placeholder="请输入表格别名"
         />
       </a-form-item>
+      <a-form-item label="生成路由" name="generate">
+        <a-switch
+          v-model:checked="tableState.generate"
+          checked-children="是"
+          un-checked-children="否"
+        />
+      </a-form-item>
     </a-form>
   </a-modal>
 </template>
@@ -63,6 +70,7 @@ watch(visible, (n) => {
 const tableState = reactive({
   className: null,
   nickName: null,
+  generate: false,
 });
 
 const form1 = ref();

@@ -218,6 +218,7 @@ const InsertSchema = async (className, nickName) => {
     description: (success.get("name") || success.get("objectId")) + "添加成功",
     duration: 0.5,
   });
+  return success;
 };
 
 /* 设置默认字段 */

@@ -239,7 +239,7 @@ import { isSelected } from "@/service/treeSelect.service";
 import { reactive, watch, ref, watchEffect, computed } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
 import Upload from "./Upload.vue";
-import { deepClone } from "@/utils/utils";
+import { deepClone, arraysContentAreEqual } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
 import RichTextEditor from "./RichTextEditor.vue";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
@@ -277,7 +277,6 @@ const form1 = ref();
 watch(
   () => props.modalVisible,
   (n) => {
-    visible.value = n;
     if (n && props.type == "edit") {
       Object.keys(props.editState).forEach((key) => {
         if (
@@ -299,10 +298,11 @@ watch(
         }
       });
     }
+    visible.value = n;
   }
 );
 const visible = ref(props.modalVisible);
-watch(visible, (n) => {
+watch(visible, (n, o) => {
   if (!n) {
     form1.value.resetFields();
     Object.keys(props.fields).forEach((key) => {
@@ -310,10 +310,10 @@ watch(visible, (n) => {
     });
   } else {
     Object.keys(props.fields).forEach((key) => {
-      /* 获取下拉组件数据 */
-      if (props.fields[key].isPointer) {
+      /*  if (props.fields[key].isPointer) {
         formState[key] = formState[key]?.map((item) => item.objectId) || [];
-      }
+      } */
+      /* 获取下拉组件数据 */
       if (props.fields[key].componentOption.selectTable) {
         loadSelectOptions(props.fields[key].componentOption.selectTable);
       }
@@ -324,16 +324,20 @@ watch(visible, (n) => {
 
 const selectoptions = reactive({});
 const selectoptions_copy = reactive({});
+
 const loadSelectOptions = async (className) => {
   if (!className) return [];
   selectoptions[className] =
-    selectoptions_copy[className] && selectoptions_copy[className].length
-      ? selectoptions_copy[className]
-      : await findAll(className);
+    deepClone(selectoptions_copy[className]) || (await findAll(className));
   selectoptions_copy[className] = deepClone(selectoptions[className]);
   for (const key of Object.keys(props.fields)) {
-    if (!props.fields[key].isSole) continue;
     if (props.fields[key].isPointer) {
+      formState[key] =
+        formState[key]?.map((item) =>
+          typeof item == "object" ? item.objectId : item
+        ) || [];
+    }
+    if (props.fields[key].isSole && props.fields[key].isPointer) {
       treeSelectChange(
         formState[key],
         props.fields[key],
@@ -388,7 +392,7 @@ const handleOk = () => {
 };
 
 //treeSelect 事件；不可超出最大可选数字
-const treeSelectChange = (...args) => {
+const treeSelectChange = async (...args) => {
   if (!args[0]) return;
   let arr = [];
   const className = args[1].componentOption.selectTable;
@@ -447,6 +451,7 @@ const treeSelectChange = (...args) => {
     });
   }
   disableSelect(arr);
+  arr = [];
 };
 
 //节点已选则禁用
