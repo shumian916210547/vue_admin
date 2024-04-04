@@ -143,6 +143,20 @@ export const updateField = async (
   table.deleteField(fieldName);
   await table.update();
   const table2 = new Parse.Schema(className);
+  switch (fieldType) {
+    case "Pointer":
+      fieldOption.defaultValue = {
+        __type: fieldType,
+        className: fieldOption.targetClass,
+        objectId: fieldOption.defaultValue,
+      };
+      break;
+    case Object:
+    case Array:
+      fieldOption.defaultValue = eval(fieldOption.defaultValue);
+    default:
+      break;
+  }
   table2.addField(fieldName, fieldType, fieldOption);
   return await Capture(table2.update()).then((success) => {
     UpdateSchema(className, fieldType, fieldName, fieldOption);

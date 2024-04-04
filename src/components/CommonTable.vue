@@ -155,6 +155,15 @@
       </template>
       <template
         v-else-if="
+          fields[column.key].type == 'Array' && fields[column.key].isPointer
+        "
+      >
+        <p v-for="(item, index) in record[column.key]" :key="index">
+          {{ item.name || item.objectId }}
+        </p>
+      </template>
+      <template
+        v-else-if="
           fields[column.key].type == 'Object' ||
           fields[column.key].type == 'Array'
         "

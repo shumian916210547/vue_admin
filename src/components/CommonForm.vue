@@ -291,7 +291,7 @@ watch(visible, (n) => {
     Object.keys(props.fields).forEach((key) => {
       /* 获取下拉组件数据 */
       if (props.fields[key].isPointer) {
-        formState[key] = formState[key]?.map((item) => item.objectId);
+        formState[key] = formState[key]?.map((item) => item.objectId) || [];
       }
       if (props.fields[key].componentOption.selectTable) {
         loadSelectOptions(props.fields[key].componentOption.selectTable);

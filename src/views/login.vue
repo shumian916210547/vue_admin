@@ -84,7 +84,13 @@ const toLogin = async (arg) => {
 
 const getSystemTitle = async (uid) => {
   const query = new Parse.Query("Company");
-  query.containedIn("admin", [uid]);
+  query.containedIn("admin", [
+    {
+      __type: "Pointer",
+      className: "_User",
+      objectId: uid,
+    },
+  ]);
   query.select(["name"]);
   const result = await query.first();
   if (result && result.id) {
@@ -99,7 +105,7 @@ const getSystemTitle = async (uid) => {
 
 const onFinishFailed = () => {};
 </script>
-  
+
 <style lang="scss" scoped>
 .login {
   height: 100vh;
@@ -116,4 +122,3 @@ const onFinishFailed = () => {};
   }
 }
 </style>
-  
