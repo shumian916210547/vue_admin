@@ -11,7 +11,7 @@ let map = reactive();
 /* 初始化地图 */
 const initMap = async () => {
   AMap = await AMapLoader.load({
-    key: "c23fdefb2ef6285cb1084f7a80278c6c", // 申请好的Web端开发者Key，首次调用 load 时必填
+    key: process.env.VUE_APP_MAP_KEY, // 申请好的Web端开发者Key，首次调用 load 时必填
     version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
     plugins: [], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
   });
