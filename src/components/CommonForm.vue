@@ -101,7 +101,11 @@
             v-else-if="fields[key].editComponent == 'ATreeSelect'"
             v-model:value="formState[key]"
             style="width: 100%"
-            :tree-data="selectoptions[fields[key].componentOption.selectTable]"
+            :tree-data="
+              treeSelectLabel(
+                selectoptions[fields[key].componentOption.selectTable]
+              )
+            "
             tree-checkable
             :allowClear="fields[key].componentOption.allowClear"
             :placeholder="fields[key].componentOption.placeholder"
@@ -113,7 +117,8 @@
               value: 'objectId',
             }"
             :is="fields[key].editComponent"
-          ></component>
+          >
+          </component>
 
           <component
             v-else-if="
@@ -155,7 +160,15 @@
               label: fields[key].componentOption.labelKey,
               value: fields[key].componentOption.valueKey,
             }"
-            :options="selectoptions[fields[key].componentOption.selectTable]"
+            :options="
+              treeSelectLabel(
+                selectoptions[fields[key].componentOption.selectTable],
+                {
+                  label: fields[key].componentOption.labelKey,
+                  value: fields[key].componentOption.valueKey,
+                }
+              )
+            "
             :is="fields[key].editComponent"
           ></component>
 
@@ -196,7 +209,15 @@
               label: fields[key].componentOption.labelKey,
               value: fields[key].componentOption.valueKey,
             }"
-            :options="selectoptions[fields[key].componentOption.selectTable]"
+            :options="
+              treeSelectLabel(
+                selectoptions[fields[key].componentOption.selectTable],
+                {
+                  label: fields[key].componentOption.labelKey,
+                  value: fields[key].componentOption.valueKey,
+                }
+              )
+            "
             :is="fields[key].editComponent"
           >
           </component>
@@ -446,6 +467,20 @@ const disableSelect = async (arr) => {
       selectoptions[className][parentIndex].disabled = result ? true : false;
     }
   }
+};
+
+//格式化treeSelect
+const treeSelectLabel = (origin, option) => {
+  if (!origin) return [];
+  return deepClone(origin).map((item) => {
+    let remark = item.remark ? "(" + item.remark + ")" : "";
+    if (option) {
+      item[option.label] = item[option.label] + remark;
+    } else {
+      item.name = item.name + remark;
+    }
+    return item;
+  });
 };
 
 const modalTitleRef = ref();

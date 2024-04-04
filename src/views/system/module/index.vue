@@ -180,7 +180,7 @@ const handleSubmit = async (arg) => {
       break;
   }
   modalState.show = false;
-  await commonPage.value.loadData(commonPage.value.queryState);
+  await commonPage.value?.loadData(commonPage.value.queryState);
 };
 let fields = reactive({});
 const columns = reactive([]);
