@@ -221,7 +221,6 @@ import Upload from "./Upload.vue";
 import { deepClone } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
 import RichTextEditor from "./RichTextEditor.vue";
-import { SHOW_CHILD } from "ant-design-vue/lib/vc-tree-select/utils/strategyUtil";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
 const props = defineProps({
   className: {

@@ -234,7 +234,9 @@ const getSchemaList = async (query) => {
             required: item.fields[fieldName].required,
             targetClass: item.fields[fieldName].targetClass,
             chineseName: item.fields[fieldName].chineseName,
-            defaultValue: item.fields[fieldName].defaultValue,
+            defaultValue:
+              item.fields[fieldName].defaultValue?.objectId ||
+              item.fields[fieldName].defaultValue,
             editComponent: item.fields[fieldName].editComponent,
             isFilter: item.fields[fieldName].isFilter,
             isTable: item.fields[fieldName].isTable,

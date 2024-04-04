@@ -1,7 +1,7 @@
 <template>
   <div id="container"></div>
 </template>
-  
+
 <script setup>
 import { onMounted, reactive } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
@@ -59,16 +59,19 @@ const initMap = async () => {
       });
     }
   );
+
+  map.on("click", function (ev) {
+    console.log(ev);
+  });
 };
 
 onMounted(() => {
   initMap();
 });
 </script>
-  
-  <style lang="scss" scoped>
+
+<style lang="scss" scoped>
 #container {
   height: 100%;
 }
 </style>
-  

@@ -140,6 +140,7 @@
             value: 'name',
           }"
           :options="schemas"
+          @change="targetClassChange"
         ></a-select>
       </a-form-item>
 
@@ -148,12 +149,28 @@
         name="defaultValue"
         :rules="[{ required: false, message: 'Please input your 字段默认值!' }]"
       >
-        <a-input
-          v-model:value="optionState.defaultValue"
-          allowClear
-          :disabled="props.type == 'edit'"
-          placeholder="请输入字段默认值"
-        />
+        <template v-if="optionState.targetClass">
+          <a-select
+            v-model:value="optionState.defaultValue"
+            show-search
+            placeholder="情选择默认值"
+            allowClear
+            :disabled="props.type == 'edit'"
+            :fieldNames="{
+              label: 'name',
+              value: 'objectId',
+            }"
+            :options="defaultValueList"
+          ></a-select>
+        </template>
+        <template v-else>
+          <a-input
+            v-model:value="optionState.defaultValue"
+            allowClear
+            :disabled="props.type == 'edit'"
+            placeholder="请输入字段默认值"
+          />
+        </template>
       </a-form-item>
 
       <a-form-item
@@ -439,6 +456,7 @@
 <script setup>
 import { deepClone } from "@/utils/utils";
 import { computed, reactive, ref, watch } from "vue";
+import { findAll } from "@/service/base.service";
 import * as antd from "ant-design-vue";
 import store from "@/store";
 const emit = defineEmits(["update:modalVisible", "onSubmit"]);
@@ -466,6 +484,13 @@ const modalType = {
 const schemas = computed(() => {
   return store.getters["GET_TABLES"];
 });
+
+const defaultValueList = ref([]);
+//targetClass 修改时/触发
+const targetClassChange = async (className) => {
+  if (!className) return;
+  defaultValueList.value = [...(await findAll(className))];
+};
 
 const form1 = ref();
 const form2 = ref();
@@ -519,7 +544,7 @@ const handleOk = () => {
           required,
           targetClass,
           chineseName,
-          defaultValue: eval("(" + deepClone(defaultValue) + ")"),
+          defaultValue,
           editComponent,
           isFilter,
           isTable,
@@ -638,6 +663,7 @@ watch(visible, (n) => {
   resetData(deepClone(state));
   if (props.type == "edit") {
     resetData(props.editState);
+    targetClassChange(optionState.targetClass);
   }
 });
 
