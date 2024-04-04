@@ -54,3 +54,16 @@ export const arraysContentAreEqual = (arr1, arr2) => {
   const sortedArr2 = arr2.slice().sort();
   return sortedArr1.every((value, index) => value === sortedArr2[index]);
 };
+
+/* 判断数据类型 */
+export const dataDefault = (payload) => {
+  console.log(payload);
+  switch (payload) {
+    case "Array":
+      return [];
+    case "Object":
+      return {};
+    default:
+      return undefined;
+  }
+};

@@ -69,7 +69,11 @@
             "
             v-model:value="formState[key]"
             style="width: 100%"
-            :tree-data="selectoptions[fields[key].componentOption.selectTable]"
+            :tree-data="
+              treeSelectLabel(
+                selectoptions[fields[key].componentOption.selectTable]
+              ) || []
+            "
             tree-checkable
             :allowClear="fields[key].componentOption.allowClear"
             :placeholder="fields[key].componentOption.placeholder"
@@ -91,6 +95,7 @@
                   label: fields[key].componentOption.labelKey,
                   value: fields[key].componentOption.valueKey,
                   key,
+                  page: true,
                 }
               )
             "
@@ -239,7 +244,7 @@ import { isSelected } from "@/service/treeSelect.service";
 import { reactive, watch, ref, watchEffect, computed } from "vue";
 import * as AntdIcon from "@ant-design/icons-vue";
 import Upload from "./Upload.vue";
-import { deepClone, arraysContentAreEqual } from "@/utils/utils";
+import { deepClone, dataDefault } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
 import RichTextEditor from "./RichTextEditor.vue";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
@@ -306,13 +311,11 @@ watch(visible, (n, o) => {
   if (!n) {
     form1.value.resetFields();
     Object.keys(props.fields).forEach((key) => {
-      formState[key] = props.fields[key].defaultValue || undefined;
+      formState[key] =
+        props.fields[key].defaultValue || dataDefault(props.fields[key].type);
     });
   } else {
     Object.keys(props.fields).forEach((key) => {
-      /*  if (props.fields[key].isPointer) {
-        formState[key] = formState[key]?.map((item) => item.objectId) || [];
-      } */
       /* 获取下拉组件数据 */
       if (props.fields[key].componentOption.selectTable) {
         loadSelectOptions(props.fields[key].componentOption.selectTable);
@@ -356,7 +359,8 @@ watch(
   (n) => {
     Object.keys(props.fields).forEach((key) => {
       if (props.type == "add") {
-        formState[key] = props.fields[key].defaultValue || undefined;
+        formState[key] =
+          props.fields[key].defaultValue || dataDefault(props.fields[key].type);
         if (props.fields[key].editComponent == "RichTextEditor") {
           modalWidth.value = "1480px";
           formWidth.value = "400px";
@@ -444,14 +448,17 @@ const treeSelectChange = async (...args) => {
         }
         return children;
       });
-      if (args[1].isPointer && args[1].editComponent == "ATreeSelect") {
+      if (
+        args[1].isPointer &&
+        args[1].editComponent == "ATreeSelect" &&
+        args[1].isSole
+      ) {
         parent.disabled = true;
       }
       return parent;
     });
   }
-  disableSelect(arr);
-  arr = [];
+  if (!args[3].page) disableSelect(arr);
 };
 
 //节点已选则禁用
