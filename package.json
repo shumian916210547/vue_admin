@@ -4,7 +4,7 @@
   "private": true,
   "author": "shumian",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --port 4200",
     "build": "vue-cli-service build"
   },
   "dependencies": {

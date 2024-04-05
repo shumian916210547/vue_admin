@@ -114,13 +114,13 @@ export const addField = async (
 ) => {
   const table = new Parse.Schema(className);
   switch (fieldType) {
-    case "Pointer":
+    /* case "Pointer":
       fieldOption.defaultValue = {
         __type: fieldType,
         className: fieldOption.targetClass,
         objectId: fieldOption.defaultValue,
       };
-      break;
+      break; */
     case Object:
     case Array:
       fieldOption.defaultValue = eval(fieldOption.defaultValue);

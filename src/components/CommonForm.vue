@@ -271,8 +271,8 @@ const props = defineProps({
   },
 });
 const modalType = {
-  add: "Create A",
-  edit: "Editing",
+  add: "add",
+  edit: "edit",
 };
 const modalWidth = ref("600px");
 const formWidth = ref("100%");

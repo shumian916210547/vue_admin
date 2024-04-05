@@ -92,7 +92,7 @@ export const InsertRow = async ({ className, fields, params }) => {
   const Table = Parse.Object.extend(className);
   const table = new Table();
   Object.keys(params).forEach((key) => {
-    if (fields[key].type == "Pointer") {
+    if (fields[key].type == "Pointer" && params[key]) {
       table.set(key, {
         __type: fields[key].type,
         className: fields[key].targetClass,
@@ -142,7 +142,7 @@ export const UpdateById = async ({ className, fields, params }) => {
   const table = await Table.first();
   Object.keys(params).forEach((key) => {
     if (key !== "objectId") {
-      if (fields[key].type == "Pointer") {
+      if (fields[key].type == "Pointer" && params[key]) {
         table.set(key, {
           __type: fields[key].type,
           className: fields[key].targetClass,
