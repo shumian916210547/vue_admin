@@ -57,7 +57,6 @@ export const arraysContentAreEqual = (arr1, arr2) => {
 
 /* 判断数据类型 */
 export const dataDefault = (payload) => {
-  console.log(payload);
   switch (payload) {
     case "Array":
       return [];

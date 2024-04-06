@@ -298,7 +298,6 @@ const insertRoute = async ({
 const handleInsertTable = async (arg) => {
   if (!arg) return;
   const result = await createSchema(arg);
-  console.log(result);
   if (arg.generate && result) {
     insertRoute({
       menu: true,

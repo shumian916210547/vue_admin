@@ -51,7 +51,6 @@ const initMap = async () => {
       });
       map.addControl(geolocation);
       geolocation.getCurrentPosition((status, result) => {
-        console.log(result);
         //获取用户当前的精确位置
         if (status == "complete") {
           console.log("result", result);
@@ -60,9 +59,9 @@ const initMap = async () => {
     }
   );
 
-  map.on("click", function (ev) {
+  /* map.on("click", function (ev) {
     console.log(ev);
-  });
+  }); */
 };
 
 onMounted(() => {
