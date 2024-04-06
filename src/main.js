@@ -10,7 +10,6 @@ import Parse from "parse";
 
 Parse.initialize(
   window.process.env.VUE_APP_PARSE_SERVER_APPLICATION_ID,
-  "shumian100329",
   window.process.env.VUE_APP_PARSE_SERVER_MASTER_KEY
 );
 Parse.serverURL = window.process.env.VUE_APP_PARSE_SERVER_HOST + "/parse";

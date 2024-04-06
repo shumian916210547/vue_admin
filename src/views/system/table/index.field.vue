@@ -41,7 +41,7 @@
         <a-select
           v-model:value="formState.fieldType"
           show-search
-          placeholder="情选择字段类型"
+          placeholder="请选择字段类型"
           allowClear
           :disabled="props.type == 'edit'"
           :options="[
@@ -132,7 +132,7 @@
         <a-select
           v-model:value="optionState.targetClass"
           show-search
-          placeholder="情选择指向表名"
+          placeholder="请选择指向表名"
           allowClear
           :disabled="props.type == 'edit'"
           :fieldNames="{
@@ -153,7 +153,7 @@
           <a-select
             v-model:value="optionState.defaultValue"
             show-search
-            placeholder="情选择默认值"
+            placeholder="请选择默认值"
             allowClear
             :disabled="props.type == 'edit'"
             :fieldNames="{
@@ -322,7 +322,7 @@
         <a-select
           v-model:value="componentOption.selectTable"
           show-search
-          placeholder="情选择数据源"
+          placeholder="请选择数据源"
           allowClear
           :fieldNames="{
             label: 'className',
