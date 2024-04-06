@@ -94,7 +94,7 @@ const props = defineProps({
   },
   fileType: { type: String, default: "*" },
 });
-const uploadServer = process.env.VUE_APP_PARSE_SERVER_HOST + "/upload";
+const uploadServer = window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload";
 
 const emit = defineEmits(["update:files", "change"]);
 function getBase64(file) {
@@ -135,7 +135,7 @@ const handleChange = ({ file }) => {
         {
           name: file.name,
           status: "done",
-          url: process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
+          url: window.process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
           uid: file.uid,
         },
       ];
@@ -146,7 +146,7 @@ const handleChange = ({ file }) => {
             item = {
               name: file.name,
               status: "done",
-              url: process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
+              url: window.process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
               uid: file.uid,
             };
           }

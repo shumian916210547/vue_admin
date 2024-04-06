@@ -4,8 +4,8 @@
 
 <script setup>
 const url = `${
-  process.env.VUE_APP_PARSE_DASHBOARD_HOST ||
-  process.env.VUE_APP_PARSE_SERVER_HOST
+  window.process.env.VUE_APP_PARSE_DASHBOARD_HOST ||
+  window.process.env.VUE_APP_PARSE_SERVER_HOST
 }/dashboard/login`;
 </script>
 

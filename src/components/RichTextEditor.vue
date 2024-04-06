@@ -77,14 +77,14 @@ const editorConfig = reactive({
   placeholder: props.placeholder,
   MENU_CONF: {
     uploadImage: {
-      /* server: process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", */
+      /* server: window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", */
       // 用户自定义上传图片
       customUpload(file, insertFn) {
         let data = new FormData();
         data.append("file", file); //file为上传文件返回的所有file
         let config = {
           method: "post",
-          url: process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", //上传图片的地址
+          url: window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", //上传图片的地址
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -97,7 +97,7 @@ const editorConfig = reactive({
             if (res && res.data.code === 500) {
               alert(res.data.msg);
             }
-            let url = process.env.VUE_APP_PARSE_SERVER_HOST + res.data.path; //服务器上的图片路径
+            let url = window.process.env.VUE_APP_PARSE_SERVER_HOST + res.data.path; //服务器上的图片路径
             insertFn(url, "图片", url); //插入图片（使用的wangEditor插件）
           })
           .catch((error) => {

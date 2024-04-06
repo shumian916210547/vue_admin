@@ -9,12 +9,12 @@ import "ant-design-vue/dist/antd.css";
 import Parse from "parse";
 
 Parse.initialize(
-  process.env.VUE_APP_PARSE_SERVER_APPLICATION_ID,
+  window.process.env.VUE_APP_PARSE_SERVER_APPLICATION_ID,
   "shumian100329",
-  process.env.VUE_APP_PARSE_SERVER_MASTER_KEY
+  window.process.env.VUE_APP_PARSE_SERVER_MASTER_KEY
 );
-Parse.serverURL = process.env.VUE_APP_PARSE_SERVER_HOST + "/parse";
-Parse.masterKey = process.env.VUE_APP_PARSE_SERVER_MASTER_KEY;
+Parse.serverURL = window.process.env.VUE_APP_PARSE_SERVER_HOST + "/parse";
+Parse.masterKey = window.process.env.VUE_APP_PARSE_SERVER_MASTER_KEY;
 
 const hasPermission = (value, arr) => {
   return arr.includes(value);
