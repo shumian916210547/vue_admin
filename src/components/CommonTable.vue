@@ -325,7 +325,6 @@ const expand = (objectId) => {
 
 <style lang="scss" scoped>
 :deep(p) {
-  max-width: 200px !important;
   margin-bottom: 0 !important;
   white-space: nowrap;
   overflow: hidden;
