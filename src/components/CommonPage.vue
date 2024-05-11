@@ -2,7 +2,8 @@
     <CommonTable v-model:queryVal="queryState.where" :tableColumns="tableColumns" :tableData="tableData"
         :queryState="queryState" :innerContainer="innerContainer" :innerContainerTitle="innerContainerTitle"
         :fields="fields" @onQueryReset="handleReset()" @onQuery="loadData(queryState)" @onInsert="handleInsert()"
-        @onChange="queryState.onChange" @onDelete="handleDelete" @onEdit="handleEdit" @onAdd="emit('add', $event)">
+        @onChange="queryState.onChange" @onDelete="handleDelete" @onEdit="handleEdit" @onAdd="emit('add', $event)"
+        @onPreview="handlePreview">
         <template v-if="innerContainer" #expandedRowRender="{ record, index, indent, expanded }">
             <slot name="innerContainer" :record="record" :index="index" :indent="indent" :expanded="expanded">
             </slot>
@@ -10,11 +11,15 @@
     </CommonTable>
     <CommonForm :className="className" :fields="formFields" :editState="editState" :type="formModal.type"
         v-model:modalVisible="formModal.show" @onOk="handleOk"></CommonForm>
+    <CommonPreview :className="className" :fields="formFields" v-model:modalVisible="previewMap.show"
+        :dataMap="previewMap.data">
+    </CommonPreview>
 </template>
-  
+
 <script setup>
 import CommonTable from "@/components/CommonTable.vue";
 import CommonForm from "./CommonForm.vue";
+import CommonPreview from "./commonPreview.vue"
 import {
     findSchema,
     findList,
@@ -175,6 +180,17 @@ const handleOk = async (arg) => {
     formModal.show = false;
     loadData(queryState);
 };
+
+/* 预览 */
+const previewMap = reactive({
+    show: false,
+    data: {}
+})
+const handlePreview = (args) => {
+    previewMap.data = deepClone(args)
+    previewMap.show = true
+    console.log(args, formFields);
+}
 
 /* 点击编辑 */
 const editState = reactive({});

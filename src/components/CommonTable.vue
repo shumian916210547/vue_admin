@@ -94,7 +94,14 @@
     <template #bodyCell="{ column, record }">
       <!-- 根据数据类型展示数据 -->
       <template v-if="column.key === 'operation'">
-        <div style="max-width: 230px; display: flex; align-items: center">
+        <div style="display: flex; align-items: center; flex-wrap: wrap">
+          <a-button
+            @click="emit('onPreview', record)"
+            v-permission="['permission:preview', permissions]"
+          >
+            查看
+          </a-button>
+
           <template v-if="innerContainerTitle">
             <a-button
               @click="emit('onAdd', record)"
@@ -110,7 +117,7 @@
           >
             修改
           </a-button>
-          <a-divider type="vertical" />
+
           <a-popconfirm
             title="Are you sure delete this task?"
             ok-text="Yes"
@@ -162,12 +169,7 @@
           {{ item.name || item.objectId }}
         </p>
       </template>
-      <template
-        v-else-if="
-          fields[column.key].type == 'Object' ||
-          fields[column.key].type == 'Array'
-        "
-      >
+      <template v-else-if="fields[column.key].type == 'Object'">
         <a-tooltip placement="top" arrowPointAtCenter>
           <template #title>
             <p>
@@ -176,6 +178,11 @@
           </template>
           <p>{{ JSON.stringify(record[column.key], null, 2) }}</p>
         </a-tooltip>
+      </template>
+      <template v-else-if="fields[column.key].type == 'Array'">
+        <span v-for="(item, index) in record[column.key]" :key="index">
+          {{ item }}<br />
+        </span>
       </template>
       <template v-else-if="fields[column.key].type == 'Date'">
         <p>
@@ -273,6 +280,7 @@ const emit = defineEmits([
   "onDelete",
   "onEdit",
   "onAdd",
+  "onPreview",
 ]);
 watch(
   where,
@@ -329,5 +337,8 @@ const expand = (objectId) => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+.ant-table-cell button {
+  margin: 5px;
 }
 </style>
