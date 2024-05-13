@@ -61,6 +61,11 @@ export function Mixins() {
   };
 
   //获取筛选字段
+  /**
+   * 
+   * @param {*} fields 
+   * @returns 
+   */
   const getFilterField = (fields) => {
     return Object.keys(fields).filter((field) => {
       return fields[field].isFilter && fields[field].editComponent;

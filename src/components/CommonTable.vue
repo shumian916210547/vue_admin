@@ -4,7 +4,7 @@
     <a-form style="min-height: 56px" :model="where" ref="form">
       <a-row>
         <a-col
-          :span="16"
+          :span="12"
           style="display: flex; align-items: center; flex-wrap: wrap"
         >
           <template
@@ -51,14 +51,13 @@
           </template>
         </a-col>
         <a-col
-          :span="2"
+          :span="6"
           :offset="1"
           style="justify-content: space-evenly; display: flex"
         >
           <a-button
             type="primary"
             @click="emit('onQuery')"
-            style="margin: 0 10px 0 0"
             v-permission="['permission:query', permissions]"
             >查询</a-button
           >
@@ -67,6 +66,15 @@
             v-permission="['permission:reset', permissions]"
             >重置</a-button
           >
+          <a-button
+            @click="
+              () => {
+                exportMap.show = true;
+              }
+            "
+          >
+            导出
+          </a-button>
         </a-col>
         <a-col :span="2" :offset="2">
           <a-button
@@ -134,66 +142,11 @@
           </a-popconfirm>
         </div>
       </template>
-      <template
-        v-else-if="column.key == 'icon' && fields[column.key].type == 'String'"
-      >
-        <div style="display: flex; align-items: center">
-          <component :is="AntdIcon[record[column.key]]"></component>
-          <p>&nbsp;{{ record[column.key] }}</p>
-        </div>
-      </template>
-      <template
-        v-else-if="
-          (column.key == 'avatar' || column.key == 'image') &&
-          fields[column.key].type == 'String'
-        "
-      >
-        <div style="display: flex; align-items: center">
-          <a-image :width="80" :src="record[column.key]" />
-        </div>
-      </template>
-      <template
-        v-else-if="
-          fields[column.key].type == 'String' ||
-          fields[column.key].type == 'Number'
-        "
-      >
-        <p>{{ record[column.key] }}</p>
-      </template>
-      <template
-        v-else-if="
-          fields[column.key].type == 'Array' && fields[column.key].isPointer
-        "
-      >
-        <p v-for="(item, index) in record[column.key]" :key="index">
-          {{ item.name || item.objectId }}
-        </p>
-      </template>
-      <template v-else-if="fields[column.key].type == 'Object'">
-        <a-tooltip placement="top" arrowPointAtCenter>
-          <template #title>
-            <p>
-              {{ JSON.stringify(record[column.key]) }}
-            </p>
-          </template>
-          <p>{{ JSON.stringify(record[column.key], null, 2) }}</p>
-        </a-tooltip>
-      </template>
-      <template v-else-if="fields[column.key].type == 'Array'">
-        <span v-for="(item, index) in record[column.key]" :key="index">
-          {{ item }}<br />
-        </span>
-      </template>
-      <template v-else-if="fields[column.key].type == 'Date'">
-        <p>
-          {{ moment(record[column.key]).format("YYYY-MM-DD HH:mm:ss") }}
-        </p>
-      </template>
-      <template v-else-if="fields[column.key].type == 'Pointer'">
-        <p>
-          {{ record[column.key].name || record[column.key] }}
-        </p>
-      </template>
+      <CommonFields
+        :column="column"
+        :record="record"
+        :fields="fields"
+      ></CommonFields>
     </template>
     <template
       v-if="innerContainer"
@@ -226,6 +179,13 @@
       </div>
     </template>
   </a-table>
+
+  <CommonExport
+    v-model:modalVisible="exportMap.show"
+    :className="props.className"
+    :tableColumns="tableColumns"
+    :fields="props.fields"
+  ></CommonExport>
 </template>
 
 <script setup>
@@ -234,8 +194,14 @@ import * as AntdIcon from "@ant-design/icons-vue";
 import { PlusSquareOutlined, MinusSquareOutlined } from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins";
 import { findAll } from "@/service/base.service";
+import CommonExport from "./CommonExport.vue";
 import moment from "moment";
+import CommonFields from "./CommonFields.vue";
 const props = defineProps({
+  className: {
+    required: true,
+    type: String,
+  },
   tableColumns: {
     type: Array,
     defult: () => new Array(),
@@ -289,6 +255,10 @@ watch(
   },
   { deep: true }
 );
+
+const exportMap = reactive({
+  show: false,
+});
 
 watch(
   () => props.queryVal,

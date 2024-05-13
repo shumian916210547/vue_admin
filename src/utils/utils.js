@@ -1,4 +1,10 @@
 /* 深拷贝 */
+/**
+ * 
+ * @param {*} payload 
+ * @param {*} map 
+ * @returns 
+ */
 export const deepClone = (payload, map = new Map()) => {
   if (map.has(payload)) return map.get(payload);
   if (typeof payload === "function") return eval(payload.toString());
@@ -22,6 +28,12 @@ export const deepClone = (payload, map = new Map()) => {
   return res;
 };
 
+/**
+ * 
+ * @param {*} fn 
+ * @param {*} wait 
+ * @returns 
+ */
 /* 防抖 */
 export const debounce = (fn, wait) => {
   let timer = null;
@@ -33,6 +45,12 @@ export const debounce = (fn, wait) => {
   };
 };
 
+/**
+ * 
+ * @param {*} arr 
+ * @param {*} key 
+ * @returns 
+ */
 /* 处理图片数组转string */
 export const arrayImgsToString = (arr, key) => {
   let urls = "";
@@ -45,6 +63,12 @@ export const arrayImgsToString = (arr, key) => {
   return urls;
 };
 
+/**
+ * 
+ * @param {*} arr1 
+ * @param {*} arr2 
+ * @returns 
+ */
 /* 判断数组相同 */
 export const arraysContentAreEqual = (arr1, arr2) => {
   if (arr1.length !== arr2.length) {
