@@ -1,82 +1,10 @@
 <template>
-  <!-- 筛选 -->
-  <slot name="top">
-    <a-form style="min-height: 56px" :model="where" ref="form">
-      <a-row>
-        <a-col
-          :span="12"
-          style="display: flex; align-items: center; flex-wrap: wrap"
-        >
-          <template
-            v-for="(field_name, index) in getFilterField(props.fields)"
-            :key="index"
-          >
-            <a-form-item
-              :label="fields[field_name].chineseName"
-              style="margin-right: 10px"
-              :name="field_name"
-              v-permission="['permission:query', permissions]"
-            >
-              <template v-if="fields[field_name].editComponent == 'ASelect'">
-                <component
-                  v-model:value="where[field_name]"
-                  :placeholder="'请选择' + fields[field_name].chineseName"
-                  :allowClear="true"
-                  :is="fields[field_name].editComponent"
-                  :fieldNames="{
-                    label: fields[field_name].componentOption.labelKey,
-                    value: fields[field_name].componentOption.valueKey,
-                  }"
-                  :mode="fields[field_name].componentOption.mode"
-                  :options="
-                    selectoptions[
-                      fields[field_name].componentOption.selectTable
-                    ]
-                  "
-                  style="width: 150px"
-                >
-                </component>
-              </template>
-              <template v-else>
-                <component
-                  style="width: 150px"
-                  v-model:value="where[field_name]"
-                  :allowClear="true"
-                  :placeholder="'请输入' + fields[field_name].chineseName"
-                  :is="fields[field_name].editComponent"
-                >
-                </component>
-              </template>
-            </a-form-item>
-          </template>
-        </a-col>
-        <a-col
-          :span="6"
-          :offset="1"
-          style="justify-content: space-evenly; display: flex"
-        >
-          <a-button
-            type="primary"
-            @click="emit('onQuery')"
-            v-permission="['permission:query', permissions]"
-            >查询</a-button
-          >
-          <a-button
-            @click="handleReset"
-            v-permission="['permission:reset', permissions]"
-            >重置</a-button
-          >
-          <a-button
-            @click="
-              () => {
-                exportMap.show = true;
-              }
-            "
-          >
-            导出
-          </a-button>
-        </a-col>
-        <a-col :span="2" :offset="2">
+  <section class="common-table">
+    <!-- 筛选 -->
+    <slot name="top">
+      <a-form class="common-table__filters" :model="where" ref="form">
+      <a-row :gutter="[16, 12]">
+        <a-col :xs="24" :lg="5" class="common-table__create-action">
           <a-button
             type="primary"
             @click="emit('onInsert')"
@@ -84,25 +12,92 @@
             >新建</a-button
           >
         </a-col>
+        <a-col :xs="24" :lg="19" class="common-table__query-area">
+          <div class="common-table__filter-fields">
+            <template
+              v-for="(field_name, index) in getFilterField(props.fields)"
+              :key="index"
+            >
+              <a-form-item
+                :label="fields[field_name].chineseName"
+                class="common-table__filter-item"
+                :name="field_name"
+                v-permission="['permission:query', permissions]"
+              >
+                <template v-if="fields[field_name].editComponent == 'ASelect'">
+                  <component
+                    class="common-table__filter-control"
+                    v-model:value="where[field_name]"
+                    :placeholder="'请选择' + fields[field_name].chineseName"
+                    :allowClear="true"
+                    :is="fields[field_name].editComponent"
+                    :fieldNames="{
+                      label: fields[field_name].componentOption.labelKey,
+                      value: fields[field_name].componentOption.valueKey,
+                    }"
+                    :mode="fields[field_name].componentOption.mode"
+                    :options="
+                      selectoptions[
+                        fields[field_name].componentOption.selectTable
+                      ]
+                    "
+                  >
+                  </component>
+                </template>
+                <template v-else>
+                  <component
+                    class="common-table__filter-control"
+                    v-model:value="where[field_name]"
+                    :allowClear="true"
+                    :placeholder="'请输入' + fields[field_name].chineseName"
+                    :is="fields[field_name].editComponent"
+                  >
+                  </component>
+                </template>
+              </a-form-item>
+            </template>
+          </div>
+          <div class="common-table__toolbar-actions">
+            <a-button
+              type="primary"
+              @click="emit('onQuery')"
+              v-permission="['permission:query', permissions]"
+              >查询</a-button
+            >
+            <a-button
+              @click="handleReset"
+              v-permission="['permission:reset', permissions]"
+              >重置</a-button
+            >
+            <a-button
+              @click="openExport"
+            >
+              导出
+            </a-button>
+          </div>
+        </a-col>
       </a-row>
-    </a-form>
-  </slot>
+      </a-form>
+    </slot>
 
   <!-- 表格 -->
   <a-table
+    class="common-table__data"
     :columns="tableColumns"
     :data-source="tableData"
     :pagination="queryState"
+    :loading="tableLoading"
     rowKey="objectId"
+    :scroll="{ x: 720 }"
     :defaultExpandedRowKeys="expandedRowKeys"
-    @change="emit('onChange', $event)"
+    @change="handleTableChange"
     bordered
     @resizeColumn="handleResizeColumn"
   >
     <template #bodyCell="{ column, record }">
       <!-- 根据数据类型展示数据 -->
       <template v-if="column.key === 'operation'">
-        <div style="display: flex; align-items: center; flex-wrap: wrap">
+        <div class="common-table__row-actions">
           <a-button
             @click="emit('onPreview', record)"
             v-permission="['permission:preview', permissions]"
@@ -127,11 +122,10 @@
           </a-button>
 
           <a-popconfirm
-            title="Are you sure delete this task?"
-            ok-text="Yes"
-            cancel-text="No"
+            title="删除后不可恢复，确定要继续吗？"
+            ok-text="删除"
+            cancel-text="取消"
             @confirm="emit('onDelete', record)"
-            @cancel="() => {}"
           >
             <a-button
               type="danger"
@@ -165,14 +159,14 @@
         <button
           type="button"
           class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed"
-          aria-label="Expand row"
+          aria-label="展开行"
           v-show="expandedRowKeys.indexOf(record.objectId) === -1"
           @click="expand(record.objectId)"
         ></button>
         <button
           type="button"
           class="ant-table-row-expand-icon ant-table-row-expand-icon-expanded"
-          aria-label="Collapse row"
+          aria-label="收起行"
           v-show="expandedRowKeys.indexOf(record.objectId) !== -1"
           @click="expand('')"
         ></button>
@@ -186,16 +180,14 @@
     :tableColumns="tableColumns"
     :fields="props.fields"
   ></CommonExport>
+  </section>
 </template>
 
 <script setup>
 import { watch, reactive, ref } from "vue";
-import * as AntdIcon from "@ant-design/icons-vue";
-import { PlusSquareOutlined, MinusSquareOutlined } from "@ant-design/icons-vue";
 import { Mixins } from "@/mixins";
 import { findAll } from "@/service/base.service";
 import CommonExport from "./CommonExport.vue";
-import moment from "moment";
 import CommonFields from "./CommonFields.vue";
 const props = defineProps({
   className: {
@@ -204,22 +196,22 @@ const props = defineProps({
   },
   tableColumns: {
     type: Array,
-    defult: () => new Array(),
+    default: () => [],
     required: true,
   },
   tableData: {
     type: Array,
-    defult: () => new Array(),
+    default: () => [],
     required: true,
   },
   queryState: {
     type: Object,
-    defult: () => {},
+    default: () => ({}),
     required: false,
   },
   queryVal: {
     type: Object,
-    defult: () => {},
+    default: () => ({}),
     required: false,
   },
   innerContainer: {
@@ -233,6 +225,10 @@ const props = defineProps({
   fields: {
     required: true,
     type: Object,
+  },
+  tableLoading: {
+    type: Boolean,
+    default: false,
   },
 });
 const where = reactive(props.queryVal);
@@ -271,11 +267,37 @@ watch(
 
 const form = ref();
 
-function handleResizeColumn(w, col) {
-  col.width = w;
+/**
+ * 保存用户拖动后的表格列宽。
+ * @param {number} width 新列宽，单位为像素。
+ * @param {Record<string, unknown>} column Ant Design Vue 传入的列配置对象。
+ * @returns {void} 直接更新列对象的 width，供当前渲染周期使用。
+ */
+function handleResizeColumn(width, column) {
+  column.width = width;
 }
 
+/**
+ * 将 Ant Design Vue 表格的分页对象转换为父页面需要的页码和每页数量。不能直接透传 `$event`，
+ * 否则父级会把对象误写入 pageNum，导致翻页、排序或刷新后查询状态损坏。
+ * @param {{current?: number, pageSize?: number}} pagination 表格 change 事件返回的分页信息。
+ * @returns {void} 向父级发出规范化后的 onChange 页码和每页数量参数。
+ */
+const handleTableChange = (pagination) => {
+  const current = Number.isInteger(pagination?.current) && pagination.current > 0 ? pagination.current : 1;
+  const pageSize =
+    Number.isInteger(pagination?.pageSize) && pagination.pageSize > 0
+      ? pagination.pageSize
+      : props.queryState?.pageSize || 10;
+  emit("onChange", current, pageSize);
+};
+
 const selectoptions = reactive({});
+/**
+ * 加载筛选区下拉框关联数据源，失败时由统一请求层向上抛出而不伪造选项。
+ * @param {string} className 关联数据表的 Parse 类名；为空时不执行请求。
+ * @returns {Promise<Array<Record<string, unknown>>>} 查询到的关联记录数组。
+ */
 const loadSelectOptions = async (className) => {
   if (!className) return [];
   selectoptions[className] = [];
@@ -287,21 +309,117 @@ getFilterField(props.fields).forEach((field) => {
     loadSelectOptions(props.fields[field].componentOption.selectTable);
 });
 
+/**
+ * 清空筛选表单并通知父组件恢复其统一维护的 queryState。
+ * @returns {void} 先发出 onQueryReset，再调用 Ant Design Vue 表单重置方法。
+ */
 const handleReset = () => {
   emit("onQueryReset");
-  form.value.resetFields();
+  form.value?.resetFields?.();
 };
 
 const permissions = await queryPermission();
 
 const expandedRowKeys = reactive([]);
 
+/**
+ * 切换当前展开行；传入空值时清空数组，修复原实现把空字符串保留为伪展开项的问题。
+ * @param {string} objectId 需要展开的记录 objectId；空字符串表示收起全部。
+ * @returns {void} 就地更新 expandedRowKeys，保持 Vue 对数组变更的追踪。
+ */
 const expand = (objectId) => {
-  Object.assign(expandedRowKeys, [objectId]);
+  expandedRowKeys.splice(0, expandedRowKeys.length, ...(objectId ? [objectId] : []));
+};
+
+/**
+ * 打开 CSV 导出记录选择弹窗。
+ * @returns {void} 将 exportMap.show 设为 true，由 CommonExport 负责加载导出数据。
+ */
+const openExport = () => {
+  exportMap.show = true;
 };
 </script>
 
 <style lang="scss" scoped>
+.common-table {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  gap: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.common-table__filters {
+  min-height: 64px;
+  margin-bottom: 18px;
+  padding: 14px 16px 2px;
+  background: rgba(var(--app-primary-rgb), 0.04);
+  border: 1px solid var(--app-glass-border);
+  border-radius: 12px;
+}
+
+.common-table__query-area,
+.common-table__filter-fields,
+.common-table__toolbar-actions,
+.common-table__create-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.common-table__query-area {
+  gap: 8px 12px;
+  justify-content: flex-end;
+}
+
+.common-table__filter-fields {
+  gap: 0 12px;
+  justify-content: flex-end;
+}
+
+.common-table__filter-item {
+  margin-bottom: 12px;
+}
+
+.common-table__filter-control {
+  width: 156px;
+}
+
+.common-table__toolbar-actions {
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.common-table__create-action {
+  justify-content: flex-start;
+}
+
+.common-table__row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.common-table__data {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border: 1px solid var(--app-glass-border);
+  border-radius: 12px;
+  background: var(--app-glass-surface);
+  box-shadow: var(--app-shadow-soft);
+}
+
+:deep(.common-table__data .ant-table-container) {
+  border: 0;
+}
+
+:deep(.common-table__data .ant-spin-nested-loading),
+:deep(.common-table__data .ant-spin-container) {
+  min-height: 0;
+}
+
 :deep(p) {
   margin-bottom: 0 !important;
   white-space: nowrap;
@@ -309,6 +427,25 @@ const expand = (objectId) => {
   text-overflow: ellipsis;
 }
 .ant-table-cell button {
-  margin: 5px;
+  margin: 3px;
+}
+
+@media (max-width: 991px) {
+  .common-table__query-area,
+  .common-table__filter-fields,
+  .common-table__toolbar-actions,
+  .common-table__create-action {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  .common-table__filters {
+    padding: 12px 12px 0;
+  }
+
+  .common-table__filter-control {
+    width: min(100%, 230px);
+  }
 }
 </style>

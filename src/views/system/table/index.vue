@@ -1,7 +1,17 @@
 <template>
-  <a-form style="height: 56px">
-    <a-row>
-      <a-col :span="8">
+  <section class="schema-page">
+    <header class="schema-page__heading">
+      <div>
+        <span class="schema-page__eyebrow">LOW-CODE DATA MODELING</span>
+        <h1>数据表管理</h1>
+        <p>创建数据表、配置字段，并按需生成可直接使用的数据管理页面。</p>
+      </div>
+      <span class="schema-page__count">{{ tableList.length }} 张数据表</span>
+    </header>
+
+  <a-form class="schema-page__filters">
+    <a-row :gutter="[16, 12]">
+      <a-col :xs="24" :md="10">
         <a-form-item
           label="表格名称"
           v-permission="['permission:query', permissions]"
@@ -13,16 +23,10 @@
         </a-form-item>
       </a-col>
 
-      <a-col :span="8" :offset="1"> </a-col>
-      <a-col
-        :span="2"
-        :offset="1"
-        style="justify-content: space-evenly; display: flex"
-      >
+      <a-col :xs="24" :md="10" class="schema-page__actions">
         <a-button
           type="primary"
           @click="getSchemaList(queryState)"
-          style="margin: 0 10px 0 0"
           v-permission="['permission:query', permissions]"
         >
           查询
@@ -33,7 +37,7 @@
           >重置</a-button
         >
       </a-col>
-      <a-col :span="2" :offset="2">
+      <a-col :xs="24" :md="4" class="schema-page__create-action">
         <a-button
           type="primary"
           @click="(tableModal.show = true), (tableModal.type = 'add')"
@@ -47,13 +51,14 @@
     :columns="columns"
     :data-source="tableList"
     :pagination="false"
-    class="components-table-demo-nested"
+    class="schema-page__table"
     rowKey="objectId"
+    :scroll="{ x: 760 }"
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'operation'">
-        <div style="max-width: 230px; display: flex; align-items: center">
-          <a-button @click="generateAPI(record, index)"> 生成接口 </a-button>
+        <div class="schema-page__row-actions">
+          <a-button @click="generateAPI(record)">生成接口</a-button>
           <a-divider type="vertical" />
           <a-button
             @click="
@@ -67,9 +72,9 @@
           </a-button>
           <a-divider type="vertical" />
           <a-popconfirm
-            title="Are you sure delete this task?"
-            ok-text="Yes"
-            cancel-text="No"
+            title="删除数据表及其记录后不可恢复，确定继续吗？"
+            ok-text="删除"
+            cancel-text="取消"
             @confirm="handelDeleteSchema(record)"
             @cancel="() => {}"
           >
@@ -85,6 +90,7 @@
     </template>
     <template #expandedRowRender="{ record }">
       <a-table
+        class="schema-page__field-table"
         :columns="innerColumns"
         :data-source="record.fields"
         :pagination="false"
@@ -100,9 +106,9 @@
               </a-button>
               <a-divider type="vertical" />
               <a-popconfirm
-                title="Are you sure delete this task?"
-                ok-text="Yes"
-                cancel-text="No"
+                title="删除字段后不可恢复，确定继续吗？"
+                ok-text="删除"
+                cancel-text="取消"
                 @confirm="handleRemoveField(record, index)"
                 @cancel="() => {}"
               >
@@ -150,18 +156,14 @@
       }
     "
   >
-    <div style="height: 450px; overflow-y: scroll">
-      <a-row justify="space-around" style="position: fixed">
-        <a-col :span="4">
-          <a-button @click="handleCopy(apiString)">复制</a-button>
-        </a-col>
-        <a-col :span="4"> </a-col>
-        <a-col :span="4"> </a-col>
-        <a-col :span="4"> </a-col>
-      </a-row>
+    <div class="schema-page__api-preview">
+      <div class="schema-page__api-toolbar">
+        <a-button type="primary" @click="handleCopy(apiString)">复制代码</a-button>
+      </div>
       <pre>{{ apiString }}</pre>
     </div>
   </a-modal>
+  </section>
 </template>
 
 <script setup>
@@ -173,13 +175,12 @@ import {
   loadSchemas,
   UpdateSchema,
   removeField,
-  updateField,
   removeSchema,
 } from "@/service/schema.service";
 import { columns, innerColumns } from "@/config/table.config";
 import { getAPI } from "@/service/functionToString";
 
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 import { reactive, ref } from "vue";
 import store from "@/store";
 import { Mixins } from "@/mixins";
@@ -187,12 +188,16 @@ import { notification } from "ant-design-vue";
 
 const { queryPermission } = Mixins();
 
-/* 查询路由id */
+/**
+ * 查询“数据表管理”页面对应的 Route 元数据标识。
+ * @returns {Promise<string | undefined>} 找到时返回 Route 的 objectId；元数据尚未初始化时返回 undefined。
+ * @throws {Error} BFF 请求失败时向页面 Suspense 边界抛出异常。
+ */
 const querySchemaId = async () => {
   const query = new Parse.Query("Route");
   query.equalTo("targetClass", "Schema");
   const result = await query.first();
-  return result.id;
+  return result?.id;
 };
 const schemaId = await querySchemaId();
 const permissions = await queryPermission(schemaId);
@@ -294,12 +299,17 @@ const insertRoute = async ({
   return (await table.save()).toJSON();
 };
 
-/* 新增table */
+/**
+ * 创建数据表，并在用户选择“生成页面”时同步写入其默认 Route 元数据。
+ * @param {Record<string, unknown> | undefined} arg 建表表单数据；缺失时不执行任何写操作。
+ * @returns {Promise<void>} 表结构及可选路由均写入完成、列表刷新完成后兑现。
+ * @throws {Error} 建表或写入默认路由失败时保留弹窗状态并向调用方抛出异常。
+ */
 const handleInsertTable = async (arg) => {
   if (!arg) return;
   const result = await createSchema(arg);
   if (arg.generate && result) {
-    insertRoute({
+    await insertRoute({
       menu: true,
       name: arg.nickName,
       path: arg.className,
@@ -309,7 +319,7 @@ const handleInsertTable = async (arg) => {
     });
   }
   tableModal.show = false;
-  getSchemaList(queryState);
+  await getSchemaList(queryState);
 };
 
 /* 删除Schema */
@@ -366,25 +376,177 @@ const queryReset = () => {
 /* 生成接口 */
 const apiString = ref("");
 const apiModalVisible = ref(false);
-const generateAPI = (info, index) => {
+const generateAPI = (info) => {
   const { className, fields } = info;
   apiString.value = getAPI({ className, fields });
   apiModalVisible.value = true;
 };
 
-/* 复制文本到粘贴板 */
-const handleCopy = (str) => {
-  navigator.clipboard.writeText(str).catch(function (err) {
-    console.error("Unable to copy text to clipboard", err);
-  });
-  notification.success({
-    message: "提示",
-    description: "复制成功",
-    duration: 0.5,
-  });
+/**
+ * 在不支持 navigator.clipboard 的受限浏览器中使用隐藏文本域完成复制。
+ * @param {string} value 需要复制的纯文本内容。
+ * @returns {boolean} 浏览器确认执行复制命令时返回 true，否则返回 false。
+ */
+const copyTextWithFallback = (value) => {
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  return copied;
+};
+
+/**
+ * 复制生成的接口示例，并且只在复制实际成功后显示成功提示。
+ * @param {string} value 需要放入系统剪贴板的接口代码文本。
+ * @returns {Promise<void>} 复制完成或失败提示显示后结束。
+ */
+const handleCopy = async (value) => {
+  if (!value) return;
+  try {
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(value);
+    else if (!copyTextWithFallback(value)) throw new Error("COPY_FAILED");
+    notification.success({
+      message: "提示",
+      description: "复制成功",
+      duration: 0.5,
+    });
+  } catch {
+    notification.error({
+      message: "复制失败",
+      description: "浏览器未授予剪贴板权限，请手动选择代码后复制。",
+    });
+  }
 };
 
 await getSchemaList(queryState);
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.schema-page {
+  min-width: 0;
+}
+
+.schema-page__heading {
+  display: flex;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--app-border);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.schema-page__eyebrow {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.schema-page__heading h1 {
+  margin: 6px 0 7px;
+  color: var(--app-ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.schema-page__heading p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.schema-page__count {
+  flex: 0 0 auto;
+  margin-top: 8px;
+  padding: 6px 10px;
+  color: var(--app-primary);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--app-primary-soft);
+  border-radius: 999px;
+}
+
+.schema-page__filters {
+  margin-bottom: 18px;
+  padding: 14px 16px 2px;
+  background: rgba(var(--app-primary-rgb), 0.04);
+  border: 1px solid var(--app-glass-border);
+  border-radius: 12px;
+}
+
+.schema-page__actions,
+.schema-page__create-action {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.schema-page__table {
+  overflow: hidden;
+  border: 1px solid var(--app-glass-border);
+  background: var(--app-glass-surface);
+  border-radius: 12px;
+}
+
+.schema-page__row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.schema-page__field-table {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.schema-page__api-preview {
+  height: 430px;
+  overflow: auto;
+  background: var(--app-ink);
+  border-radius: 10px;
+}
+
+.schema-page__api-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  padding: 12px;
+  background: rgba(var(--app-surface-rgb), 0.94);
+  justify-content: flex-end;
+}
+
+.schema-page__api-preview pre {
+  margin: 0;
+  padding: 8px 16px 18px;
+  color: var(--app-surface);
+  font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 767px) {
+  .schema-page__heading {
+    display: block;
+  }
+
+  .schema-page__count {
+    display: inline-block;
+  }
+
+  .schema-page__actions,
+  .schema-page__create-action {
+    justify-content: flex-start;
+  }
+}
+</style>

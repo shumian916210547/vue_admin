@@ -1,126 +1,32 @@
 <template>
-  <div style="border: 1px solid #ccc; height: auto">
-    <Toolbar
-      style="border-bottom: 1px solid #ccc"
-      :editor="editorRef"
-      :defaultConfig="toolbarConfig"
-      :mode="mode"
-    />
-    <Editor
-      :style="{
-        overflowY: 'hidden',
-        minHeight: minHeight,
-        maxHeight: maxHeight,
-        height: minHeight,
-      }"
-      v-model="valueHtml"
-      :defaultConfig="editorConfig"
-      :mode="mode"
-      @onCreated="handleCreated"
-      @onChange="handleChange"
-    ></Editor>
-  </div>
+  <a-textarea
+    v-model:value="modelValue"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    :auto-size="{ minRows, maxRows }"
+  />
 </template>
 
 <script setup>
-import "@wangeditor/editor/dist/css/style.css"; // 引入 css
-import {
-  onBeforeUnmount,
-  ref,
-  shallowRef,
-  onMounted,
-  watch,
-  reactive,
-  onUnmounted,
-} from "vue";
-import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
-import axios from "axios";
+import { computed } from "vue";
 
 const props = defineProps({
-  value: {
-    type: String,
-    default: "",
-  },
-  placeholder: {
-    type: String,
-    default: "请输入内容...",
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
-  },
-  maxHeight: {
-    type: String,
-    default: "300px",
-  },
-  minHeight: {
-    type: String,
-    default: "300px",
-  },
+  value: { type: String, default: "" },
+  placeholder: { type: String, default: "请输入内容..." },
+  disabled: { type: Boolean, default: false },
+  minHeight: { type: String, default: "300px" },
+  maxHeight: { type: String, default: "600px" },
 });
 
 const emit = defineEmits(["update:value"]);
-
-const mode = "default";
-
-// 编辑器实例，必须用 shallowRef
-const editorRef = shallowRef();
-
-// 内容 HTML
-const valueHtml = ref(props.value);
-const handleChange = (editor) => {
-  emit("update:value", valueHtml.value);
+const rowsFromHeight = (height, fallback) => {
+  const value = Number.parseInt(height, 10);
+  return Number.isFinite(value) ? Math.max(3, Math.round(value / 24)) : fallback;
 };
-
-const toolbarConfig = {};
-const editorConfig = reactive({
-  placeholder: props.placeholder,
-  MENU_CONF: {
-    uploadImage: {
-      /* server: window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", */
-      // 用户自定义上传图片
-      customUpload(file, insertFn) {
-        let data = new FormData();
-        data.append("file", file); //file为上传文件返回的所有file
-        let config = {
-          method: "post",
-          url: window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload", //上传图片的地址
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          data: data,
-        };
-
-        let that = this;
-        axios(config)
-          .then((res) => {
-            if (res && res.data.code === 500) {
-              alert(res.data.msg);
-            }
-            let url = window.process.env.VUE_APP_PARSE_SERVER_HOST + res.data.path; //服务器上的图片路径
-            insertFn(url, "图片", url); //插入图片（使用的wangEditor插件）
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      },
-    },
-  },
+const minRows = computed(() => rowsFromHeight(props.minHeight, 8));
+const maxRows = computed(() => rowsFromHeight(props.maxHeight, 24));
+const modelValue = computed({
+  get: () => props.value,
+  set: (value) => emit("update:value", value),
 });
-
-onMounted(() => {});
-
-// 组件销毁时，也及时销毁编辑器
-onBeforeUnmount(() => {
-  const editor = editorRef.value;
-  if (editor == null) return;
-  editor.destroy();
-});
-
-const handleCreated = (editor) => {
-  props.disabled ? editor.disable() : editor.enable();
-  editorRef.value = editor; // 记录 editor 实例，重要！
-
-  console.log(editorRef.value.getConfig());
-};
-</script>    
+</script>

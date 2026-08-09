@@ -1,17 +1,29 @@
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 import { Capture, FindList, handleParseError } from "@/service/service.config";
 import { notification } from "ant-design-vue";
 
 /* 搜索数据的方法 */
-const machMethod = (field) => {
+/**
+ * 根据 Schema 字段类型选择 Parse 查询方法；未知字段类型回退为精确匹配以避免筛选页抛出运行时异常。
+ * @param {{type?: string} | undefined} field 当前筛选字段的 Schema 配置，可为空。
+ * @returns {"equalTo" | "containedIn" | "contains"} Parse Query 可调用的方法名。
+ */
+const matchMethod = (field) => {
   const method = {
     Pointer: "equalTo",
     Array: "containedIn",
     String: "contains",
     Boolean: "equalTo",
   };
-  return method[field.type];
+  return method[field?.type] || "equalTo";
 };
+
+/**
+ * 判断筛选值是否应发送给 BFF；保留 false 与 0 这两类合法业务筛选值。
+ * @param {unknown} value 表单或查询状态中的筛选值。
+ * @returns {boolean} 值不是 undefined、null 或空字符串时返回 true。
+ */
+const hasFilterValue = (value) => value !== undefined && value !== null && value !== "";
 
 /* 查询所有数据 */
 export const findAll = async (
@@ -48,8 +60,8 @@ export const findAll = async (
 /* 查询列表 */
 export const findList = async (query, where = {}) => {
   const { className, pageSize, pageNum } = query;
-  where = Object.assign({}, where, query.where);
-  if (!className) return;
+  const filters = Object.assign({}, where, query.where);
+  if (!className) return new FindList();
   const table = new Parse.Query(className == "_User" ? Parse.User : className);
   if (
     className != "AntdIcon" &&
@@ -58,23 +70,22 @@ export const findList = async (query, where = {}) => {
   ) {
     table.equalTo("company", sessionStorage.getItem("companyId"));
   }
-  Object.keys(where).forEach((key) => {
-    if (where[key]) table[machMethod(query.filterFilds[key])](key, where[key]);
+  Object.keys(filters).forEach((key) => {
+    if (hasFilterValue(filters[key])) {
+      table[matchMethod(query.filterFilds?.[key])](key, filters[key]);
+    }
   });
   table.limit(pageSize || 200);
   table.skip((pageSize || 200) * (pageNum ? pageNum - 1 : 0));
   table.descending("createdAt");
   table.includeAll();
-  return new FindList(
-    (
-      await table.find().catch((err) => {
-        handleParseError(err);
-      })
-    )?.map((item) => item.toJSON()),
-    await table.count().catch((err) => {
-      handleParseError(err);
-    })
-  );
+  try {
+    const [records, count] = await Promise.all([table.find(), table.count()]);
+    return new FindList(records.map((item) => item.toJSON()), count);
+  } catch (error) {
+    handleParseError(error);
+    return new FindList();
+  }
 };
 
 /* 查询字段 */
@@ -120,10 +131,6 @@ export const InsertRow = async ({ className, fields, params }) => {
       objectId: sessionStorage.getItem("companyId"),
     });
   }
-  const acl = new Parse.ACL();
-  acl.setPublicReadAccess(true);
-  acl.setPublicWriteAccess(true);
-  table.setACL(acl);
   return await Capture(table.save()).then((success) => {
     notification.success({
       message: sessionStorage.getItem("pageName"),

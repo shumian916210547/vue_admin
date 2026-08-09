@@ -1,4 +1,4 @@
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 
 /* 节点是否已选 */
 export const isSelected = async (className, classField, selectId) => {

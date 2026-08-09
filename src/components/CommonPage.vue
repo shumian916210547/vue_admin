@@ -8,10 +8,11 @@
     :innerContainer="innerContainer"
     :innerContainerTitle="innerContainerTitle"
     :fields="fields"
+    :tableLoading="tableLoading"
     @onQueryReset="handleReset()"
     @onQuery="loadData(queryState)"
     @onInsert="handleInsert()"
-    @onChange="queryState.onChange"
+    @onChange="handleTableChange"
     @onDelete="handleDelete"
     @onEdit="handleEdit"
     @onAdd="emit('add', $event)"
@@ -84,18 +85,14 @@ let fields = reactive({});
 const queryState = reactive({
   pageSize: 10,
   pageNum: 1,
+  current: 1,
   where: {},
   total: 0,
   className: props.className,
   position: ["bottomRight"],
   showSizeChanger: true,
-  showTotal: (total) => `Total ${total} items`,
+  showTotal: (total) => `共 ${total} 条`,
   pageSizeOptions: ["10", "20", "50", "100"],
-  onChange: (num, size) => {
-    queryState.pageNum = num;
-    queryState.pageSize = size;
-    loadData(queryState);
-  },
   filterFilds: {},
 });
 
@@ -157,29 +154,59 @@ const loadColumns = async (fields) => {
 };
 
 const tableData = ref([]);
+const tableLoading = ref(false);
 
-/* 获取表格数据 */
+/**
+ * 按当前统一分页与筛选状态加载业务表数据。成功加载不再提示“数据获取成功”，避免翻页、筛选时
+ * 反复弹出无操作价值的通知；异常由统一错误路径显示且保留已展示的数据。
+ * @param {{pageNum: number, pageSize: number, where: Record<string, unknown>, className: string}} query 当前查询状态。
+ * @returns {Promise<void>} 数据与总数更新完成，或错误通知显示后兑现。
+ */
 const loadData = async (query) => {
-  const result = await findList(query);
-  queryState.total = result.count;
-  tableData.value = result.data.sort((a, b) => {
-    if (a.rank || b.rank) {
-      return a.rank - b.rank;
-    } else {
+  tableLoading.value = true;
+  try {
+    const result = await findList(query);
+    const records = Array.isArray(result?.data) ? result.data : [];
+    queryState.total = Number.isFinite(result?.count) ? result.count : 0;
+    tableData.value = records.sort((a, b) => {
+      if (a.rank || b.rank) {
+        return a.rank - b.rank;
+      }
       return a.createdAt - b.createdAt;
-    }
-  });
-  notification.success({
-    message: sessionStorage.getItem("pageName"),
-    description: "数据获取成功",
-    duration: 0.5,
-  });
+    });
+  } catch (error) {
+    notification.error({
+      message: "数据加载失败",
+      description: error.message || "请检查网络连接、筛选条件或当前账号权限后重试。",
+    });
+  } finally {
+    tableLoading.value = false;
+  }
 };
 
-/* 重置表格筛选数据 */
-const handleReset = () => {
+/**
+ * 清空通用表格筛选并回到第一页，防止重置条件后仍停留在不存在的旧页码。
+ * @returns {Promise<void>} 查询状态重置并完成数据刷新后兑现。
+ */
+const handleReset = async () => {
   queryState.where = {};
-  loadData(queryState);
+  queryState.pageNum = 1;
+  queryState.current = 1;
+  await loadData(queryState);
+};
+
+/**
+ * 接收 CommonTable 规范化后的分页参数，保持 Ant Design Vue current 与 BFF pageNum 同步。
+ * @param {number} pageNum 当前页码，从 1 开始。
+ * @param {number} pageSize 每页记录数。
+ * @returns {Promise<void>} 分页状态同步并完成对应页加载后兑现。
+ */
+const handleTableChange = async (pageNum, pageSize) => {
+  const nextPageNum = pageSize !== queryState.pageSize ? 1 : pageNum;
+  queryState.pageNum = nextPageNum;
+  queryState.current = nextPageNum;
+  queryState.pageSize = pageSize;
+  await loadData(queryState);
 };
 
 /* 点击新增 */
@@ -226,7 +253,6 @@ const previewMap = reactive({
 const handlePreview = (args) => {
   previewMap.data = deepClone(args);
   previewMap.show = true;
-  console.log(args, formFields);
 };
 
 /* 点击编辑 */

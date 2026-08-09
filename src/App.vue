@@ -9,6 +9,9 @@ document.title = sessionStorage.getItem("systemTitle") || "后台管理系统";
 <style lang="scss">
 #app {
   height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
 }
 * {

@@ -1,4 +1,13 @@
 <template>
+  <section class="module-page">
+    <header class="module-page__heading">
+      <div>
+        <span class="module-page__eyebrow">NAVIGATION & PERMISSIONS</span>
+        <h1>模块管理</h1>
+        <p>维护后台菜单模块及其子路由，路由可关联到已配置的数据表页面或组件。</p>
+      </div>
+    </header>
+
   <CommonPage
     ref="commonPage"
     :className="'Module'"
@@ -9,6 +18,7 @@
     <!-- 路由列表 -->
     <template #innerContainer="{ record }">
       <a-table
+        class="module-page__route-table"
         :columns="columns"
         :data-source="formattingData(record.routes)"
         :pagination="false"
@@ -16,7 +26,7 @@
       >
         <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'operation'">
-            <div style="max-width: 230px; display: flex; align-items: center">
+                <div class="module-page__row-actions">
               <span class="table-operation">
                 <a-button
                   @click="handleEdit(record, index)"
@@ -26,9 +36,9 @@
                 </a-button>
                 <a-divider type="vertical" />
                 <a-popconfirm
-                  title="Are you sure delete this task?"
-                  ok-text="Yes"
-                  cancel-text="No"
+                  title="删除路由后不可恢复，确定继续吗？"
+                  ok-text="删除"
+                  cancel-text="取消"
                   @confirm="handleDelete(record, index)"
                   @cancel="() => {}"
                 >
@@ -81,6 +91,7 @@
     v-model:modalVisible="modalState.show"
     @onOk="handleSubmit"
   ></CommonForm>
+  </section>
 </template>
 
 
@@ -100,16 +111,20 @@ import { findAll, findSchema } from "@/service/base.service";
 import { defaultFields } from "@/service/schema.service";
 
 import { Mixins } from "@/mixins";
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 
 const { queryPermission } = Mixins();
 
-/* 查询路由id */
+/**
+ * 查询“路由管理”页面对应的 Route 元数据标识。
+ * @returns {Promise<string | undefined>} 找到时返回 Route 的 objectId；元数据尚未初始化时返回 undefined。
+ * @throws {Error} BFF 请求失败时向页面 Suspense 边界抛出异常。
+ */
 const queryRouteId = async () => {
   const query = new Parse.Query("Route");
   query.equalTo("targetClass", "Route");
   const result = await query.first();
-  return result.id;
+  return result?.id;
 };
 const routeId = await queryRouteId();
 const permissions = await queryPermission(routeId);
@@ -228,3 +243,45 @@ const formattingData = (list) => {
 await loadFields();
 await findAll("Route");
 </script>
+
+<style lang="scss" scoped>
+.module-page__heading {
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.module-page__eyebrow {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.module-page__heading h1 {
+  margin: 6px 0 7px;
+  color: var(--app-ink);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.module-page__heading p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.module-page__route-table {
+  overflow: hidden;
+  margin: 0 10px 12px;
+  border: 1px solid var(--app-glass-border);
+  border-radius: 10px;
+  background: var(--app-glass-surface);
+}
+
+.module-page__row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+</style>

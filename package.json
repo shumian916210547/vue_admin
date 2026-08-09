@@ -1,27 +1,45 @@
 {
   "name": "backstage_management_system",
   "version": "0.1.0",
+  "description": "Vue 3 low-code admin frontend with schema-driven CRUD, RBAC, multi-tenant organization scopes and Ant Design Vue.",
   "private": true,
   "author": "shumian",
-  "scripts": {
-    "serve": "vue-cli-service serve --port 4200",
-    "build": "vue-cli-service build"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shumian916210547/vue_admin.git"
   },
+  "homepage": "https://github.com/shumian916210547/vue_admin#readme",
+  "bugs": {
+    "url": "https://github.com/shumian916210547/vue_admin/issues"
+  },
+  "keywords": [
+    "vue3",
+    "vue-admin",
+    "admin-template",
+    "low-code",
+    "admin-dashboard",
+    "dynamic-form",
+    "dynamic-crud",
+    "schema-driven",
+    "rbac",
+    "multi-tenant",
+    "organization-tree",
+    "enterprise-admin",
+    "parse-server",
+    "postgresql",
+    "ant-design-vue"
+  ],
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@vueuse/core": "^10.2.1",
-    "@wangeditor/editor": "^5.1.23",
-    "@wangeditor/editor-for-vue": "^5.1.12",
     "ant-design-vue": "^3.2.20",
-    "axios": "^1.6.7",
-    "core-js": "^3.8.3",
-    "moment": "^2.29.4",
-    "parse": "^4.1.0",
+    "axios": "^1.19.0",
+    "core-js": "^3.50.0",
+    "moment": "^2.30.1",
     "register-service-worker": "^1.7.2",
-    "vue": "^3.2.13",
-    "vue-router": "^4.0.3",
-    "vuex": "^4.0.0",
-    "xlsx": "^0.18.5"
+    "vue": "^3.5.41",
+    "vue-router": "^4.6.4",
+    "vuex": "^4.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
@@ -36,5 +54,21 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve --port 4200",
+    "build": "vue-cli-service build",
+    "security:check": "node scripts/security-check.js",
+    "audit:prod": "npm audit --omit=dev --audit-level=high"
+  },
+  "overrides": {
+    "@babel/runtime": "^7.29.7",
+    "lodash": "^4.18.1",
+    "lodash-es": "^4.18.1",
+    "nanoid": "^3.3.17",
+    "postcss": "^8.5.26",
+    "minimatch@3.1.2": {
+      "brace-expansion": "^1.1.18"
+    }
+  }
 }

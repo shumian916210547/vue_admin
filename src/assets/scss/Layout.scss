@@ -1,50 +1,215 @@
-#components-layout-demo-custom-trigger .trigger {
-  font-size: 18px;
-  line-height: 64px;
-  padding: 0 24px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-#components-layout-demo-custom-trigger .trigger:hover {
-  color: #1890ff;
-}
-
-#components-layout-demo-custom-trigger .logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.3);
-  margin: 16px;
-}
-
-.ant-layout {
+.app-shell {
   height: 100%;
-
-  .ant-layout-content {
-    height: 100%;
-    overflow-y: scroll;
-  }
-
-  .logo {
-    height: 60px;
-    width: auto;
-    display: flex;
-    cursor: pointer;
-  }
-
-  .ant-layout-header {
-    /* padding: 0 20px !important; */
-    height: auto !important;
-  }
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-.site-layout .site-layout-background {
-  background: #fff;
-}
-
-.pageLoading {
+// Vue 组件上的 class 会合并到 TopLayout / LeftLayout 的根 a-layout，而非额外包一层节点；
+// 直接匹配根节点可确保内容区获得可计算高度，从而让 overflow: auto 正常出现滚动条。
+.app-shell.ant-layout {
   height: 100%;
-  width: 100%;
+  min-height: 0;
+}
+
+.app-shell > .ant-layout {
+  height: 100%;
+}
+
+.app-shell > .ant-layout,
+.app-shell .ant-layout {
+  min-height: 0;
+}
+
+.app-shell .ant-layout-content {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  // 内容节点本身就是 app-content。此处若设为 hidden，会以更高选择器优先级覆盖
+  // app-content 的 overflow: auto，导致页面超出视口后无法滚动。
+  overflow: auto;
+}
+
+.app-content {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  margin: 20px !important;
+  padding: 24px !important;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+  border: 1px solid var(--app-glass-border);
+  border-radius: var(--app-radius-lg);
+  background: var(--app-glass-surface) !important;
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+}
+
+.app-content--top {
+  min-height: 0;
+}
+
+.app-content > * {
+  // 页面根节点至少填满内容区，使表格页可以把列表区域设为 flex: 1；内容高于视口时仍由
+  // app-content 统一承接纵向滚动，避免子页在 flex 收缩后内容溢出却无法滚动。
+  flex: 1 0 auto;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.app-brand {
   display: flex;
   align-items: center;
+  min-width: 0;
+  height: 64px;
+  padding: 0 18px;
+  overflow: hidden;
+  color: inherit;
+  cursor: pointer;
+}
+
+.app-brand__logo,
+.app-brand__mark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.app-brand__logo {
+  object-fit: cover;
+  background: var(--app-glass-strong);
+  border: 1px solid var(--app-glass-border);
+}
+
+.app-brand__mark {
+  color: #fff;
+  background: linear-gradient(135deg, var(--app-primary-hover), var(--app-primary));
+  box-shadow: 0 8px 18px rgba(var(--app-primary-rgb), 0.28);
+}
+
+.app-brand__mark .anticon {
+  display: grid;
+  width: 1em;
+  height: 1em;
+  place-items: center;
+}
+
+.app-brand__copy {
+  display: flex;
+  min-width: 0;
+  margin-left: 10px;
+  line-height: 1.25;
+  flex-direction: column;
+}
+
+.app-brand__title {
+  overflow: hidden;
+  color: var(--app-ink);
+  font-size: 15px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-brand__caption {
+  margin-top: 2px;
+  color: var(--app-muted);
+  font-size: 11px;
+}
+
+.ant-layout-sider-dark .app-brand__title,
+.top-layout--dark .app-brand__title {
+  color: var(--app-ink);
+}
+
+.ant-layout-sider-dark .app-brand__caption,
+.top-layout--dark .app-brand__caption {
+  color: var(--app-muted);
+}
+
+.ant-layout-sider-collapsed .app-brand {
   justify-content: center;
+  padding: 0;
+}
+
+.ant-layout-sider-collapsed .app-brand__copy {
+  display: none;
+}
+
+.app-shell .ant-layout-sider {
+  z-index: 2;
+  border-right: 1px solid var(--app-glass-border);
+  box-shadow: 4px 0 20px rgba(var(--app-primary-rgb), 0.05);
+}
+
+.app-shell .ant-layout-sider-light {
+  background: var(--app-glass-strong) !important;
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.app-shell .ant-layout-sider-dark {
+  background: var(--app-surface) !important;
+}
+
+.app-shell .ant-menu-inline,
+.app-shell .ant-menu-vertical,
+.app-shell .ant-menu-horizontal {
+  border-right: 0;
+}
+
+.app-shell .ant-menu-inline > .ant-menu-item,
+.app-shell .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title,
+.app-shell .ant-menu-vertical > .ant-menu-item,
+.app-shell .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title {
+  width: calc(100% - 16px);
+  height: 42px;
+  margin: 4px 8px;
+  line-height: 42px;
+  border-radius: 9px;
+}
+
+.app-shell .ant-menu-sub.ant-menu-inline {
+  background: transparent;
+}
+
+.app-shell .ant-menu-light .ant-menu-item-selected {
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.app-shell .ant-menu-dark .ant-menu-item-selected {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+.app-shell .ant-layout-header {
+  height: auto !important;
+}
+
+.page-loading {
+  display: flex;
+  width: 100%;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .app-content,
+  .app-content--top {
+    min-height: 0;
+    margin: 12px !important;
+    padding: 16px !important;
+    border-radius: var(--app-radius);
+  }
+
+  .app-brand__caption {
+    display: none;
+  }
 }

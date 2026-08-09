@@ -1,5 +1,5 @@
 import { useRouter, useRoute } from "vue-router";
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 import { useStore } from "vuex";
 import { ref } from "vue";
 export function Mixins() {
@@ -10,23 +10,41 @@ export function Mixins() {
     JSON.parse(sessionStorage.getItem("historyPage")) || []
   );
 
-  //查询页面按钮权限
+  /**
+ * 查询当前会话在指定业务路由上的按钮权限；岗位配置使用 routePermissions 为每个页面分别存储权限，
+ * 旧版统一 permissions 记录仍作为兼容回退。没有岗位、未分配权限或路由缺失时返回空数组。
+   * @param {string | undefined} id 目标 Route 的 objectId；省略时使用当前路由元数据中的 id。
+   * @returns {Promise<string[]>} 当前用户可用于前端体验优化的权限标识数组。
+   */
   const queryPermission = async (id) => {
+    const currentUser = Parse.User.current();
+    const role = currentUser?.get("role");
+    const roleId = role?.id || role?.objectId;
+    const routeId = id || route.meta?.id;
+    if (!roleId || !routeId) return [];
+
     const query = new Parse.Query("AllotPermission");
     query.containedIn("routes", [
       {
         __type: "Pointer",
         className: "Route",
-        objectId: id || route.meta.id,
+        objectId: routeId,
       },
     ]);
-    query.equalTo("role", Parse.User.current().get("role").id);
-    const result = await query.first();
-    if (result && result.id) {
-      return result.get("permissions") || [];
-    } else {
-      return [];
-    }
+    query.equalTo("role", roleId);
+    const records = await query.find();
+    const managedRecords = records.filter((record) => record.get("positionManaged") === true);
+    const sources = managedRecords.length ? managedRecords : records;
+    return [
+      ...new Set(
+        sources.flatMap((record) => {
+          const routePermissions = record.get("routePermissions");
+          return Array.isArray(routePermissions?.[routeId])
+            ? routePermissions[routeId]
+            : record.get("permissions") || [];
+        })
+      ),
+    ];
   };
 
   //删除历史数据中的其中一项

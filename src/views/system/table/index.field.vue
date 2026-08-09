@@ -458,6 +458,7 @@ import { deepClone } from "@/utils/utils";
 import { computed, reactive, ref, watch } from "vue";
 import { findAll } from "@/service/base.service";
 import * as antd from "ant-design-vue";
+import { notification } from "ant-design-vue";
 import store from "@/store";
 const emit = defineEmits(["update:modalVisible", "onSubmit"]);
 const props = defineProps({
@@ -505,13 +506,17 @@ watch(
         form3.value.resetFields();
   }
 );
-const handleOk = () => {
-  Promise.all([
-    form1.value.validate(),
-    form2.value.validate(),
-    form3.value.validate(),
-  ])
-    .then((success) => {
+/**
+ * 校验字段定义的三个表单分区，并将合并后的字段配置提交给父级 Schema 页面。
+ * @returns {Promise<void>} 校验成功时触发 onSubmit；失败时保留弹窗和字段错误状态。
+ */
+const handleOk = async () => {
+  try {
+    const success = await Promise.all([
+      form1.value.validate(),
+      form2.value.validate(),
+      form3.value.validate(),
+    ]);
       const { fieldType, fieldName } = success[0];
       const {
         required,
@@ -565,11 +570,13 @@ const handleOk = () => {
           },
         },
       };
-      emit("onSubmit", params);
-    })
-    .catch((err) => {
-      console.log(err);
+    emit("onSubmit", params);
+  } catch {
+    notification.warning({
+      message: "字段配置未完成",
+      description: "请检查必填项和组件配置后再提交。",
     });
+  }
 };
 let antdComponents = [
   { value: "RichTextEditor", label: "RichTextEditor" },

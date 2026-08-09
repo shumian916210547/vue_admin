@@ -42,12 +42,14 @@
 </template>
 
 <script setup>
-import CommonFields from "./CommonFields.vue";
-import { findAll } from "@/service/base.service";
-import { data_dict } from "@/utils/dataDict";
-import { Sheet } from "@/utils/xlsx";
+import { notification } from "ant-design-vue";
 import { inject, reactive, ref, watch } from "vue";
-import { writeFile } from "xlsx";
+
+import { findAll } from "@/service/base.service";
+import { CsvSheet } from "@/utils/csv";
+import { data_dict } from "@/utils/dataDict";
+
+import CommonFields from "./CommonFields.vue";
 
 const emit = defineEmits(["update:modalVisible"]);
 const props = defineProps({
@@ -57,7 +59,7 @@ const props = defineProps({
   },
   tableColumns: {
     type: Array,
-    defult: () => new Array(),
+    default: () => [],
     required: true,
   },
   fields: {
@@ -75,21 +77,48 @@ const schemaColumns = inject("schemaColumns");
 const visible = ref(props.modalVisible);
 watch(
   () => props.modalVisible,
-  (n, o) => {
-    visible.value = n;
-    if (n) loadData(props.className);
+  (visibleValue) => {
+    visible.value = visibleValue;
+    if (visibleValue) void loadData(props.className);
   },
   { deep: true }
 );
+
+/**
+ * 将弹窗内部可见状态同步回父组件，修复点击右上角关闭后父级仍认为弹窗打开的问题。
+ * @param {boolean} visibleValue Ant Design Vue 更新后的弹窗可见状态。
+ * @returns {void} 通过 update:modalVisible 更新父组件的 v-model。
+ */
+watch(visible, (visibleValue) => {
+  if (visibleValue !== props.modalVisible) emit("update:modalVisible", visibleValue);
+});
+
+/**
+ * 关闭导出弹窗。
+ * @returns {void} 通知父组件更新 v-model 状态。
+ */
 const handleCancel = () => {
   emit("update:modalVisible", false);
 };
 
 const dataList = ref([]);
+/**
+ * 加载待导出数据表的记录，供用户勾选后生成 CSV。
+ * @param {string} className 当前动态页面绑定的 Parse 类名；为空时跳过请求。
+ * @returns {Promise<void>} 查询成功后替换 dataList；请求失败由调用链统一处理。
+ */
 const loadData = async (className) => {
   if (!className) return;
-  const result = await findAll(className);
-  dataList.value = [...result];
+  try {
+    const result = await findAll(className);
+    dataList.value = [...result];
+  } catch {
+    dataList.value = [];
+    notification.error({
+      message: "导出数据加载失败",
+      description: "请检查网络连接或权限后重试。",
+    });
+  }
 };
 
 const _selectedRows = ref([]);
@@ -99,15 +128,23 @@ const rowSelection = {
   },
 };
 
-const handleOk = () => {
-  if (!_selectedRows.value.length) return;
+/**
+ * 将勾选记录转换为带公式注入防护的 CSV 并下载，成功后自动关闭弹窗。
+ * @returns {Promise<void>} 用户未选择记录时显示提示；下载触发后同步关闭弹窗。
+ */
+const handleOk = async () => {
+  if (!_selectedRows.value.length) {
+    notification.warning({ message: "请先选择需要导出的记录" });
+    return;
+  }
   const { columns, columnData } = generateData(
     _selectedRows.value,
     schemaColumns.value,
     schemaFields.value
   );
-  const sheet1 = new Sheet("sheet1", columns, columnData);
-  writeFile(sheet1.wb, props.className + ".xlsx");
+  const sheet1 = new CsvSheet(columns, columnData);
+  sheet1.download(props.className + ".csv");
+  emit("update:modalVisible", false);
 };
 
 /**

@@ -246,6 +246,7 @@ import * as AntdIcon from "@ant-design/icons-vue";
 import Upload from "./Upload.vue";
 import { deepClone, dataDefault } from "@/utils/utils";
 import { useDraggable } from "@vueuse/core";
+import { notification } from "ant-design-vue";
 import RichTextEditor from "./RichTextEditor.vue";
 const emit = defineEmits(["update:modalVisible", "onOk"]);
 const props = defineProps({
@@ -372,29 +373,31 @@ watch(
   { deep: true, immediate: true }
 );
 
-const handleOk = () => {
-  Promise.all([form1.value.validate()])
-    .then((success) => {
-      const params = deepClone(success[0]);
-      Object.keys(success[0]).forEach((key) => {
-        if (
-          props.fields[key] &&
-          props.fields[key].editComponent &&
-          props.fields[key].editComponent == "AUpload" &&
-          props.fields[key].componentOption.maxLength == 1
-        ) {
-          params[key] = params[key]?.[0]?.url;
-        } else {
-          params[key] = params[key];
-        }
-      });
-      console.log(params);
-
-      emit("onOk", params);
-    })
-    .catch((error) => {
-      console.log(error);
+/**
+ * 校验通用动态表单并把标准化数据发给父级页面；单文件上传值会转换为其受控 URL。
+ * @returns {Promise<void>} 校验成功后触发 onOk；校验失败时保留当前弹窗和字段提示。
+ */
+const handleOk = async () => {
+  try {
+    const values = await form1.value.validate();
+    const params = deepClone(values);
+    Object.keys(values).forEach((key) => {
+      if (
+        props.fields[key] &&
+        props.fields[key].editComponent &&
+        props.fields[key].editComponent == "AUpload" &&
+        props.fields[key].componentOption.maxLength == 1
+      ) {
+        params[key] = params[key]?.[0]?.url;
+      }
     });
+    emit("onOk", params);
+  } catch {
+    notification.warning({
+      message: "表单校验未通过",
+      description: "请检查标记的字段后再提交。",
+    });
+  }
 };
 
 //treeSelect 事件；不可超出最大可选数字

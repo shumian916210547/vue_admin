@@ -1,23 +1,565 @@
-.line_3 {
-  display: -webkit-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+@import "./tokens.scss";
+
+html,
+body,
+#app {
+  height: 100%;
+  min-height: 100%;
 }
 
-.line_5 {
-  display: -webkit-box;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
+html {
+  background: var(--app-canvas);
 }
 
+body {
+  margin: 0;
+  color: var(--app-text);
+  background:
+    radial-gradient(circle at 100% -12%, rgba(var(--app-primary-rgb), 0.2), transparent 26rem),
+    radial-gradient(circle at -8% 92%, rgba(var(--app-primary-rgb), 0.08), transparent 24rem),
+    var(--app-canvas);
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: color 220ms ease, background-color 220ms ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  color: #fff;
+  background: var(--app-primary);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--app-primary-rgb), 0.22);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--app-primary-rgb), 0.38);
+}
+
+// 公共滚动容器：页面、表格、树和弹窗可复用此类获得统一且可见的滚动反馈。
+.app-scrollbar {
+  overflow: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+// Ant Design Vue 的滚动承载层同步使用同一套滚动条外观，避免菜单、树、表格和弹窗各自表现不一致。
+.app-scrollbar,
+.ant-menu-inline,
+.ant-modal-body,
+.ant-drawer-body,
+.ant-table-body,
+.ant-table-content,
+.ant-tree-list-holder,
+.rc-virtual-list-holder {
+  scrollbar-color: rgba(var(--app-primary-rgb), 0.42) transparent;
+  scrollbar-width: thin;
+}
+
+.app-scrollbar::-webkit-scrollbar,
+.ant-menu-inline::-webkit-scrollbar,
+.ant-modal-body::-webkit-scrollbar,
+.ant-drawer-body::-webkit-scrollbar,
+.ant-table-body::-webkit-scrollbar,
+.ant-table-content::-webkit-scrollbar,
+.ant-tree-list-holder::-webkit-scrollbar,
+.rc-virtual-list-holder::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.app-scrollbar::-webkit-scrollbar-track,
+.ant-menu-inline::-webkit-scrollbar-track,
+.ant-modal-body::-webkit-scrollbar-track,
+.ant-drawer-body::-webkit-scrollbar-track,
+.ant-table-body::-webkit-scrollbar-track,
+.ant-table-content::-webkit-scrollbar-track,
+.ant-tree-list-holder::-webkit-scrollbar-track,
+.rc-virtual-list-holder::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb,
+.ant-menu-inline::-webkit-scrollbar-thumb,
+.ant-modal-body::-webkit-scrollbar-thumb,
+.ant-drawer-body::-webkit-scrollbar-thumb,
+.ant-table-body::-webkit-scrollbar-thumb,
+.ant-table-content::-webkit-scrollbar-thumb,
+.ant-tree-list-holder::-webkit-scrollbar-thumb,
+.rc-virtual-list-holder::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  background: rgba(var(--app-primary-rgb), 0.28);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb:hover,
+.ant-menu-inline::-webkit-scrollbar-thumb:hover,
+.ant-modal-body::-webkit-scrollbar-thumb:hover,
+.ant-drawer-body::-webkit-scrollbar-thumb:hover,
+.ant-table-body::-webkit-scrollbar-thumb:hover,
+.ant-table-content::-webkit-scrollbar-thumb:hover,
+.ant-tree-list-holder::-webkit-scrollbar-thumb:hover,
+.rc-virtual-list-holder::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--app-primary-rgb), 0.52);
+}
+
+.line_3,
+.line_5,
 .line_8 {
   display: -webkit-box;
   overflow: hidden;
   text-overflow: ellipsis;
-  -webkit-line-clamp: 8;
   -webkit-box-orient: vertical;
+}
+
+.line_3 {
+  -webkit-line-clamp: 3;
+}
+
+.line_5 {
+  -webkit-line-clamp: 5;
+}
+
+.line_8 {
+  -webkit-line-clamp: 8;
+}
+
+// Ant Design Vue 全局覆写：保证由 Schema 生成的列表、表单和弹窗也随主题实时变化。
+.ant-layout {
+  color: var(--app-text);
+  background: transparent;
+}
+
+.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-sm);
+  color: var(--app-text);
+  background: var(--app-glass-strong);
+  font-weight: 550;
+  box-shadow: none;
+  transition: transform var(--app-transition), box-shadow var(--app-transition),
+    background-color var(--app-transition), border-color var(--app-transition),
+    color var(--app-transition);
+
+  // 普通按钮悬停才使用主色文字；主按钮和危险按钮必须保留各自的高对比前景色。
+  &:not([disabled]):not(.ant-btn-primary):not(.ant-btn-dangerous):hover {
+    color: var(--app-primary);
+    border-color: var(--app-primary);
+    transform: translateY(-1px);
+  }
+}
+
+// 面包屑保持中性表面色，避免与主操作按钮共用高饱和背景而造成层级不清。
+.ant-breadcrumb {
+  display: inline-flex;
+  min-height: 32px;
+  padding: 0 10px;
+  color: var(--app-muted);
+  background: rgba(var(--app-primary-rgb), 0.045);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-xs);
+  align-items: center;
+}
+
+.ant-breadcrumb a,
+.ant-breadcrumb-link,
+.ant-breadcrumb-separator {
+  color: var(--app-muted) !important;
+}
+
+.ant-breadcrumb a:hover,
+.ant-breadcrumb-link:last-child {
+  color: var(--app-primary) !important;
+}
+
+.ant-breadcrumb > span:last-child .ant-breadcrumb-link,
+.ant-breadcrumb > ol > li:last-child .ant-breadcrumb-link,
+.ant-breadcrumb > ol > li:last-child a,
+.ant-breadcrumb .ant-breadcrumb-link[aria-current="page"] {
+  display: inline-flex;
+  min-height: 28px;
+  padding: 0 10px;
+  color: var(--app-primary-contrast) !important;
+  background: var(--app-primary) !important;
+  border-radius: var(--app-radius-xs);
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-breadcrumb > span:last-child .ant-breadcrumb-separator,
+.ant-breadcrumb > ol > li:last-child .ant-breadcrumb-separator,
+.ant-breadcrumb .ant-breadcrumb-separator {
+  color: var(--app-muted) !important;
+}
+
+// 所有管理页共享的标题、告警和卡片标题布局。标题区可在窄屏自然换行，避免按钮被挤到页面外。
+.management-page__heading {
+  display: flex;
+  min-width: 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--app-border);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.management-page__eyebrow {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.management-page__heading h1 {
+  margin: 6px 0 7px;
+  color: var(--app-ink);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.management-page__heading p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.management-page__alert {
+  margin: 0;
+}
+
+.management-page__card-title {
+  display: inline-flex;
+  gap: 8px;
+  color: var(--app-ink);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .management-page__heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+// 使用更高的选择器优先级覆盖 Ant Design Vue 的悬停规则，确保任意主题下主操作按钮均以高对比文字显示。
+.ant-btn.ant-btn-primary:not([disabled]):not(.ant-btn-disabled) {
+  color: var(--app-primary-contrast) !important;
+  border-color: var(--app-primary) !important;
+  background: var(--app-primary) !important;
+  box-shadow: 0 7px 16px rgba(var(--app-primary-rgb), 0.24);
+
+  &:hover,
+  &:focus {
+    color: var(--app-primary-hover-contrast) !important;
+    border-color: var(--app-primary-hover) !important;
+    background: var(--app-primary-hover) !important;
+  }
+}
+
+.ant-btn-dangerous,
+.ant-btn-dangerous:hover,
+.ant-btn-dangerous:focus {
+  color: var(--app-danger);
+  border-color: rgba(232, 74, 95, 0.35);
+}
+
+.ant-input,
+.ant-input-password,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker,
+.ant-input-number {
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+  border-radius: var(--app-radius-sm) !important;
+  background: var(--app-glass-strong) !important;
+  box-shadow: none !important;
+}
+
+.ant-input,
+.ant-input-password input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker {
+  min-height: 36px;
+}
+
+.ant-input::placeholder,
+.ant-select-selection-placeholder,
+.ant-picker-input > input::placeholder {
+  color: var(--app-muted) !important;
+}
+
+.ant-input:hover,
+.ant-input:focus,
+.ant-input-affix-wrapper:hover,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: var(--app-primary) !important;
+  box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb), 0.12) !important;
+}
+
+.ant-select-dropdown,
+.ant-picker-dropdown,
+.ant-dropdown-menu,
+.ant-popover-inner,
+.ant-modal-content,
+.ant-drawer-content,
+.ant-notification-notice {
+  color: var(--app-text);
+  background: var(--app-glass-strong);
+  border: 1px solid var(--app-glass-border);
+  box-shadow: var(--app-shadow);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.ant-modal-content,
+.ant-drawer-content {
+  overflow: hidden;
+  border-radius: var(--app-radius);
+}
+
+// 为超长表单、组织树和字段配置提供受限且可见的内容滚动，不让内容越出弹窗或抽屉的父容器。
+.ant-modal-body {
+  max-height: calc(100vh - 210px);
+  max-height: calc(100dvh - 210px);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.ant-drawer-body {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.ant-modal-header,
+.ant-drawer-header {
+  color: var(--app-ink);
+  border-bottom-color: var(--app-border);
+  background: transparent;
+}
+
+.ant-modal-title,
+.ant-drawer-title,
+.ant-form-item-label > label,
+.ant-tabs-tab,
+.ant-descriptions-item-label {
+  color: var(--app-ink) !important;
+  font-weight: 650;
+}
+
+.ant-select-item,
+.ant-dropdown-menu-item,
+.ant-dropdown-menu-submenu-title,
+.ant-picker-content th,
+.ant-picker-cell-in-view,
+.ant-notification-notice-message,
+.ant-alert-message {
+  color: var(--app-ink) !important;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled),
+.ant-dropdown-menu-item:hover,
+.ant-dropdown-menu-submenu-title:hover {
+  background: var(--app-primary-soft) !important;
+}
+
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  color: var(--app-primary) !important;
+  background: var(--app-primary-soft) !important;
+  font-weight: 650;
+}
+
+.ant-modal-close-x,
+.ant-drawer-close,
+.ant-alert-description,
+.ant-notification-notice-description,
+.ant-descriptions-item-content {
+  color: var(--app-text) !important;
+}
+
+.ant-card {
+  color: var(--app-text);
+  border-color: var(--app-glass-border);
+  border-radius: var(--app-radius);
+  background: var(--app-glass-surface);
+  box-shadow: var(--app-shadow-soft);
+  backdrop-filter: blur(16px) saturate(135%);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+}
+
+.ant-card-head {
+  color: var(--app-ink);
+  border-bottom-color: var(--app-border);
+}
+
+.ant-table {
+  color: var(--app-text);
+  background: transparent;
+
+  .ant-table-thead > tr > th {
+    color: var(--app-text);
+    background: rgba(var(--app-primary-rgb), 0.055);
+    border-bottom-color: var(--app-border);
+    font-weight: 650;
+  }
+
+  .ant-table-tbody > tr > td {
+    border-bottom-color: var(--app-border);
+    transition: background-color var(--app-transition);
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: rgba(var(--app-primary-rgb), 0.06);
+  }
+}
+
+.ant-table-container {
+  border-color: var(--app-border) !important;
+}
+
+.ant-pagination-item,
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+  border-color: var(--app-border);
+  border-radius: var(--app-radius-xs);
+  background: var(--app-glass-strong);
+}
+
+.ant-pagination-item a,
+.ant-pagination-item-link,
+.ant-pagination-total-text,
+.ant-empty-description {
+  color: var(--app-muted) !important;
+}
+
+.ant-pagination-item-active {
+  border-color: var(--app-primary);
+}
+
+.ant-pagination-item-active a,
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn,
+.ant-tabs-tab:hover,
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  color: var(--app-primary) !important;
+}
+
+.ant-tabs-ink-bar,
+.ant-switch-checked,
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-radio-inner::after {
+  background-color: var(--app-primary) !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner,
+.ant-radio-checked .ant-radio-inner {
+  border-color: var(--app-primary) !important;
+}
+
+.ant-menu-light,
+.ant-menu-light .ant-menu-sub {
+  color: var(--app-text);
+  background: transparent;
+}
+
+.ant-menu-light .ant-menu-item-selected,
+.ant-menu-light .ant-menu-item-selected:hover {
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-dark .ant-menu-item-selected:hover {
+  background: rgba(var(--app-primary-rgb), 0.24);
+}
+
+// 图标根节点统一采用 inline-flex，消除 SVG 基线差异导致的偏上、偏下或按钮内不居中问题。
+.ant-btn .anticon,
+.app-shell .ant-menu-item .anticon,
+.app-shell .ant-menu-submenu-title .anticon,
+.app-shell .ant-card-head .anticon,
+.app-shell .ant-tag .anticon,
+.ant-input-prefix .anticon,
+.ant-input-suffix .anticon,
+.ant-pagination-item-link .anticon,
+.ant-tree-switcher .anticon,
+.ant-collapse-arrow,
+.ant-tabs-tab-remove {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.ant-btn .anticon > svg,
+.app-shell .ant-menu-item .anticon > svg,
+.app-shell .ant-menu-submenu-title .anticon > svg,
+.app-shell .ant-card-head .anticon > svg,
+.app-shell .ant-tag .anticon > svg,
+.ant-input-prefix .anticon > svg,
+.ant-input-suffix .anticon > svg,
+.ant-pagination-item-link .anticon > svg,
+.ant-tree-switcher .anticon > svg,
+.ant-collapse-arrow > svg,
+.ant-tabs-tab-remove > svg {
+  display: block;
+}
+
+// 下拉、日期和分页控件的图标位于固定尺寸的定位容器中，使用网格对齐防止自定义字体或浏览器缩放造成偏移。
+.ant-select-arrow,
+.ant-picker-suffix,
+.ant-pagination-item-link,
+.ant-tree-switcher {
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

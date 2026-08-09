@@ -7,6 +7,8 @@
       class="avatar-uploader"
       :show-upload-list="true"
       :action="uploadServer"
+      :headers="uploadHeaders"
+      :withCredentials="true"
       :before-upload="beforeUpload"
       @change="handleChange"
       @remove="handleRemove"
@@ -77,8 +79,8 @@
 
 <script setup>
 import { PlusOutlined, UploadOutlined } from "@ant-design/icons-vue";
-import Parse from "parse";
-import { defineComponent, h, ref, watch } from "vue";
+import { computed, ref } from "vue";
+import { getCsrfToken } from "@/service/api-client";
 const props = defineProps({
   files: {
     type: [String, Array],
@@ -94,7 +96,11 @@ const props = defineProps({
   },
   fileType: { type: String, default: "*" },
 });
-const uploadServer = window.process.env.VUE_APP_PARSE_SERVER_HOST + "/upload";
+const uploadServer =
+  (window.__SHUMIAN_CONFIG__?.apiBase || process.env.VUE_APP_API_BASE || "/api") + "/files";
+const uploadHeaders = computed(() => ({
+  "X-CSRF-Token": getCsrfToken() || "",
+}));
 
 const emit = defineEmits(["update:files", "change"]);
 function getBase64(file) {
@@ -130,12 +136,14 @@ const beforeUpload = (file) => {};
 const handleChange = ({ file }) => {
   //判断上传图片文件是否上传完成
   if (file.status == "done") {
+    const uploadResult = file.response?.data;
+    if (!uploadResult?.url) return;
     if (props.maxLength == 1) {
       fileList.value = [
         {
           name: file.name,
           status: "done",
-          url: window.process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
+          url: uploadResult.url,
           uid: file.uid,
         },
       ];
@@ -146,7 +154,7 @@ const handleChange = ({ file }) => {
             item = {
               name: file.name,
               status: "done",
-              url: window.process.env.VUE_APP_PARSE_SERVER_HOST + file.response.path,
+              url: uploadResult.url,
               uid: file.uid,
             };
           }
@@ -275,11 +283,11 @@ const autoSelectComponent = (info) => {
 <style lang="scss" scoped>
 .ant-upload-select-picture-card i {
   font-size: 32px;
-  color: #999;
+  color: var(--app-muted);
 }
 
 .ant-upload-select-picture-card .ant-upload-text {
   margin-top: 8px;
-  color: #666;
+  color: var(--app-text);
 }
 </style>

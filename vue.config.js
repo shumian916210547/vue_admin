@@ -4,6 +4,12 @@ module.exports = defineConfig({
   productionSourceMap: false,
   transpileDependencies: true,
   devServer: {
+    proxy: {
+      "/api": {
+        target: process.env.VUE_APP_API_PROXY_TARGET || "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
     client: {
       overlay: {
         runtimeErrors: (error) => {

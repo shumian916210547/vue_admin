@@ -1,4 +1,4 @@
-import Parse from "parse";
+import Parse from "@/service/parse-client";
 import { Capture } from "./service.config";
 
 /* 新增路由 */
