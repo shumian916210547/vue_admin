@@ -160,7 +160,7 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
+  min-height: 24px;
   border-color: var(--app-border);
   border-radius: var(--app-radius-sm);
   color: var(--app-text);
@@ -177,6 +177,10 @@ select {
     border-color: var(--app-primary);
     transform: translateY(-1px);
   }
+}
+
+.ant-btn.ant-btn-sm {
+  min-height: 24px;
 }
 
 // 面包屑保持中性表面色，避免与主操作按钮共用高饱和背景而造成层级不清。
@@ -228,9 +232,27 @@ select {
   min-width: 0;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--app-border);
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+.management-page__heading > :first-child {
+  min-width: 0;
+}
+
+.management-page__heading-actions {
+  display: flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.management-page__heading-actions > .ant-btn {
+  min-height: 24px;
 }
 
 .management-page__eyebrow {
@@ -262,6 +284,7 @@ select {
 
 .management-page__card-title {
   display: inline-flex;
+  min-height: 24px;
   gap: 8px;
   color: var(--app-ink);
   align-items: center;
@@ -271,6 +294,10 @@ select {
   .management-page__heading {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .management-page__heading-actions {
+    justify-content: flex-start;
   }
 }
 
@@ -428,6 +455,28 @@ select {
   border-bottom-color: var(--app-border);
 }
 
+.ant-card-head-wrapper,
+.ant-card-head-title,
+.ant-card-extra {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.ant-card-head-wrapper {
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ant-card-head-title {
+  flex: 1 1 auto;
+}
+
+.ant-card-extra {
+  flex: 0 0 auto;
+}
+
 .ant-table {
   color: var(--app-text);
   background: transparent;
@@ -440,13 +489,43 @@ select {
   }
 
   .ant-table-tbody > tr > td {
+    vertical-align: middle;
     border-bottom-color: var(--app-border);
     transition: background-color var(--app-transition);
+  }
+
+  .ant-table-thead > tr > th {
+    vertical-align: middle;
   }
 
   .ant-table-tbody > tr:hover > td {
     background: rgba(var(--app-primary-rgb), 0.06);
   }
+}
+
+.ant-table-cell > .ant-btn,
+.ant-table-cell .ant-popconfirm > .ant-btn {
+  margin: 0;
+}
+
+// 操作列需要容纳完整的按钮组；列宽由各表格按按钮数量配置，单元格本身不允许换行。
+.table-operation-column {
+  padding-right: 8px !important;
+  padding-left: 8px !important;
+  white-space: nowrap;
+}
+
+.table-operation,
+.table-operation-column .ant-table-cell-fix-right,
+.table-operation-column .ant-btn,
+.table-operation-column .ant-popconfirm {
+  white-space: nowrap;
+}
+
+.table-operation .ant-divider-vertical,
+.table-operation-column .ant-divider-vertical {
+  margin-right: 3px;
+  margin-left: 3px;
 }
 
 .ant-table-container {
@@ -494,7 +573,61 @@ select {
 .ant-menu-light,
 .ant-menu-light .ant-menu-sub {
   color: var(--app-text);
+  background: var(--app-glass-strong);
+}
+
+// 顶部布局的操作区、按钮和图标共享同一条 Flex 对齐基线，避免 SVG 字体基线差异造成视觉偏移。
+.top-layout__main,
+.top-layout__main .header-actions,
+.top-layout__main .header-right,
+.top-layout__main .ant-btn,
+.top-layout__main .ant-btn > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-layout__main {
+  justify-content: space-between;
+}
+
+.top-layout__main .header-actions,
+.top-layout__main .ant-btn {
+  justify-content: center;
+}
+
+.top-layout__main .ant-btn .anticon,
+.top-layout__main .header-action-icon,
+.top-layout__main .header-user-chevron {
+  align-self: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+// 子菜单弹层必须使用不透明的表面色和独立层级，避免底层页面文字穿透菜单背景。
+.ant-menu-submenu-popup {
+  z-index: 1200 !important;
+  opacity: 1 !important;
+}
+
+.ant-menu-submenu-popup > .ant-menu,
+.ant-menu-submenu-popup .ant-menu-sub,
+.ant-menu-light.ant-menu-submenu-popup,
+.ant-menu-dark.ant-menu-submenu-popup {
+  color: var(--app-text) !important;
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-glass-border);
+  box-shadow: var(--app-shadow);
+  opacity: 1 !important;
+}
+
+.ant-menu-submenu-popup .ant-menu-item,
+.ant-menu-submenu-popup .ant-menu-submenu-title {
   background: transparent;
+}
+
+.ant-menu-submenu-popup .ant-menu-item:hover,
+.ant-menu-submenu-popup .ant-menu-submenu-title:hover {
+  background: var(--app-primary-soft) !important;
 }
 
 .ant-menu-light .ant-menu-item-selected,

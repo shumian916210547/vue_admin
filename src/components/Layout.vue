@@ -17,7 +17,7 @@
             </template>
             <template #fallback>
               <div class="page-loading">
-                <a-spin tip="页面加载中..." size="large" />
+                <a-spin tip="页面加载中..." size="small" />
               </div>
             </template>
           </suspense>
@@ -150,11 +150,12 @@
           <template #content>
             <div class="user-popover">
               <a-button
+                size="small"
                 @click="openPersonalCenter"
               >
                 个人中心
               </a-button>
-              <a-button @click="loginOut">
+              <a-button size="small" @click="loginOut">
                 退出登录
               </a-button>
             </div>
@@ -183,11 +184,10 @@
 
     <template #layout-tags v-if="systemOptions.showTags">
       <div
-        class="tags-view"
+        :class="['tags-view', { 'tags-view--top': systemOptions.layout === 'TopLayout' }]"
         :style="{
           padding:
             systemOptions.layout == 'TopLayout' ? '4px 0 4px 0px' : '4px 10px',
-          marginLeft: systemOptions.layout == 'TopLayout' ? '200px' : '0',
         }"
       >
         <template v-for="(item, index) in historyPage" :key="item.pageKey">
@@ -223,11 +223,14 @@
       :label-col="{ span: 10 }"
       :wrapper-col="{ span: 14 }"
       autocomplete="off"
+      size="small"
       labelAlign="left"
     >
       <a-form-item label="布局方式">
         <a-select
           v-model:value="systemOptions.layout"
+          size="small"
+          placeholder="请选择布局方式"
           @change="handleSystemOptionChange"
           class="system-settings__select"
         >
@@ -239,6 +242,8 @@
       <a-form-item label="界面模式">
         <a-select
           v-model:value="systemOptions.theme"
+          size="small"
+          placeholder="请选择界面模式"
           @change="handleSystemOptionChange"
           class="system-settings__select"
         >
@@ -295,6 +300,7 @@
       <a-form-item label="毛玻璃" class="system-settings__wide-item">
         <a-switch
           v-model:checked="systemOptions.glassEffect"
+          size="small"
           checked-children="开启"
           un-checked-children="关闭"
           @change="handleSystemOptionChange"
@@ -305,6 +311,7 @@
       <a-form-item label="图标">
         <a-switch
           v-model:checked="systemOptions.showLogo"
+          size="small"
           checked-children="开"
           un-checked-children="关"
           @change="handleSystemOptionChange"
@@ -317,6 +324,7 @@
           :maxLength="1"
           @change="handleSystemOptionChange"
           fileType="image/*"
+          placeholder="请选择系统 Logo"
           :is="Upload"
         ></component>
       </a-form-item>
@@ -324,6 +332,7 @@
       <a-form-item label="标签">
         <a-switch
           v-model:checked="systemOptions.showTags"
+          size="small"
           checked-children="开"
           un-checked-children="关"
           @change="handleSystemOptionChange"
@@ -333,6 +342,7 @@
       <a-form-item label="刷新">
         <a-switch
           v-model:checked="systemOptions.refresh"
+          size="small"
           checked-children="开"
           un-checked-children="关"
           @change="handleSystemOptionChange"
@@ -342,6 +352,7 @@
       <a-form-item label="全屏">
         <a-switch
           v-model:checked="systemOptions.fullScreen"
+          size="small"
           checked-children="开"
           un-checked-children="关"
           @change="handleSystemOptionChange"
@@ -717,7 +728,7 @@ onUnmounted(() => {
 }
 
 .header-action-icon {
-  display: grid;
+  display: flex !important;
   width: 36px;
   height: 36px;
   margin-right: 0;
@@ -753,7 +764,8 @@ onUnmounted(() => {
 }
 
 .header-avatar {
-  display: grid;
+  display: flex !important;
+  justify-content: center;
   width: 32px;
   height: 32px;
   margin-right: 9px;
@@ -825,6 +837,11 @@ onUnmounted(() => {
   .tags-view__tag--active .anticon-close {
     color: currentColor !important;
   }
+}
+
+.tags-view--top {
+  // 与横向布局的品牌区保持同一宽度，使页签起点与首个菜单项对齐。
+  margin-left: 228px;
 }
 
 .system-settings__select {
@@ -1012,7 +1029,11 @@ onUnmounted(() => {
 
   .header-user-name,
   .header-user-chevron {
-    display: none;
+    display: none !important;
+  }
+
+  .tags-view--top {
+    margin-left: 0;
   }
 }
 

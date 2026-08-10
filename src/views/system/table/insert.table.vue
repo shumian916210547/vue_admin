@@ -1,12 +1,13 @@
 <template>
   <a-modal
     v-model:visible="visible"
-    title="新增table"
+    title="新增数据表"
     @ok="handleOk"
     width="600px"
   >
     <a-form
       :model="tableState"
+      size="small"
       ref="form1"
       :label-col="{ span: 4 }"
       :wrapper-col="{ span: 20 }"
@@ -16,9 +17,10 @@
       <a-form-item
         label="表格名称"
         name="className"
-        :rules="[{ required: true, message: 'Please input your 表格名称!' }]"
+        :rules="[{ required: true, message: '请输入表格名称' }]"
       >
         <a-input
+          size="small"
           v-model:value="tableState.className"
           allowClear
           placeholder="请输入表格名称"
@@ -27,9 +29,10 @@
       <a-form-item
         label="表格别名"
         name="nickName"
-        :rules="[{ required: true, message: 'Please input your 表格别名!' }]"
+        :rules="[{ required: true, message: '请输入表格别名' }]"
       >
         <a-input
+          size="small"
           v-model:value="tableState.nickName"
           allowClear
           placeholder="请输入表格别名"
@@ -37,6 +40,7 @@
       </a-form-item>
       <a-form-item label="生成路由" name="generate">
         <a-switch
+          size="small"
           v-model:checked="tableState.generate"
           checked-children="是"
           un-checked-children="否"
@@ -48,6 +52,7 @@
         extra="启用后自动添加“所属组织”字段，并按组织树与成员管理范围隔离业务数据。"
       >
         <a-switch
+          size="small"
           v-model:checked="tableState.organizationScoped"
           checked-children="启用"
           un-checked-children="关闭"

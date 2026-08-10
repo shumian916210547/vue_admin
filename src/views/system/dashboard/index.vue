@@ -4,7 +4,7 @@
       <div>
         <span class="operations-dashboard__eyebrow">受控运维</span>
         <h1>运维看板</h1>
-        <p>仅在受控内部网络中加载 Parse Dashboard，避免将数据库运维入口暴露给业务用户。</p>
+        <p>仅在受控内部网络中加载内部运维看板，避免将数据库运维入口暴露给业务用户。</p>
       </div>
       <span :class="['operations-dashboard__status', { 'operations-dashboard__status--inactive': !url }]">
         <span></span>{{ url ? "受控入口已配置" : "受控入口未配置" }}
@@ -18,7 +18,7 @@
       frameborder="0"
       class="operations-dashboard__frame"
     ></iframe>
-    <a-empty v-else class="operations-dashboard__empty" description="Parse Dashboard 仅在受控的内部网络中提供，请通过运维入口访问。" />
+    <a-empty v-else class="operations-dashboard__empty" description="内部运维看板仅在受控网络中提供，请通过运维入口访问。" />
   </section>
 </template>
 

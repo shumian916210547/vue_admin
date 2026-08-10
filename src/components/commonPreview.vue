@@ -6,7 +6,7 @@
                 {{ className }}
             </div>
         </template>
-        <a-descriptions :title="dataMap.name" bordered>
+        <a-descriptions size="small" :title="dataMap.name" bordered>
             <template v-for="(key, index) in Object.keys(props.fields)" :key="index">
                 <a-descriptions-item :label="props.fields[key].chineseName">
                     {{ colValue(dataMap[key], props.fields[key]) }}

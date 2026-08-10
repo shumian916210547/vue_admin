@@ -19,13 +19,13 @@
       <template v-if="fileType == 'image/*'">
         <div v-if="fileList.length < props.maxLength">
           <plus-outlined />
-          <div style="margin-top: 8px">Upload</div>
+          <div class="upload-control__hint">{{ placeholder }}</div>
         </div>
       </template>
       <template v-else>
-        <a-button v-if="fileList.length < props.maxLength">
+        <a-button v-if="fileList.length < props.maxLength" size="small">
           <upload-outlined></upload-outlined>
-          Upload
+          选择文件
         </a-button>
       </template>
     </a-upload>
@@ -37,31 +37,31 @@
       width="800px"
     >
       <template v-if="fileType == 'image/*'">
-        <img alt="example" style="width: 100%;object-fit: contain;" :src="previewUrl" />
+        <img alt="文件预览" style="width: 100%;object-fit: contain;" :src="previewUrl" />
       </template>
       <template v-if="fileType == 'audio/*'">
-        <audio alt="example" style="width: 100%" :src="previewUrl" />
+        <audio aria-label="音频文件预览" style="width: 100%" :src="previewUrl" />
       </template>
       <template v-if="fileType == 'video/*'">
-        <video controls alt="example" style="width: 100%" :src="previewUrl" />
+        <video controls aria-label="视频文件预览" style="width: 100%" :src="previewUrl" />
       </template>
       <template v-if="fileType == '*'">
         <img
           v-if="autoSelectComponent('img')"
-          alt="example"
+          alt="文件预览"
           style="width: 100%"
           :src="previewUrl"
         />
         <audio
           v-if="autoSelectComponent('audio')"
-          alt="example"
+          aria-label="音频文件预览"
           style="width: 100%"
           :src="previewUrl"
         />
         <video
           v-if="autoSelectComponent('video')"
           controls
-          alt="example"
+          aria-label="视频文件预览"
           style="width: 100%"
           :src="previewUrl"
         />
@@ -95,6 +95,7 @@ const props = defineProps({
     default: false,
   },
   fileType: { type: String, default: "*" },
+  placeholder: { type: String, default: "请选择要上传的文件" },
 });
 const uploadServer =
   (window.__SHUMIAN_CONFIG__?.apiBase || process.env.VUE_APP_API_BASE || "/api") + "/files";
@@ -132,7 +133,12 @@ if (typeof props.files == "string") {
 } else {
   fileList.value = props.files;
 }
-const beforeUpload = (file) => {};
+/**
+ * 在文件发送到服务端前保留 Ant Design Vue 的默认上传流程。
+ * @param {File} file 待上传的浏览器文件对象；文件类型和大小由 BFF 继续进行最终校验。
+ * @returns {boolean} 返回 true 允许上传组件继续发送请求。
+ */
+const beforeUpload = (file) => Boolean(file);
 const handleChange = ({ file }) => {
   //判断上传图片文件是否上传完成
   if (file.status == "done") {
@@ -289,5 +295,11 @@ const autoSelectComponent = (info) => {
 .ant-upload-select-picture-card .ant-upload-text {
   margin-top: 8px;
   color: var(--app-text);
+}
+
+.upload-control__hint {
+  margin-top: 8px;
+  color: var(--app-muted);
+  font-size: 12px;
 }
 </style>

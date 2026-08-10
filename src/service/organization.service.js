@@ -9,7 +9,7 @@ export const getOrganizationOverview = () => request({ method: "get", url: "/org
 
 /**
  * 分页检索当前企业的成员账号及其组织授权范围；仅系统管理员可以调用。
- * @param {{page?: number, pageSize?: number, keyword?: string}} query 成员列表查询参数；page 从 1 开始，pageSize 最大 100，keyword 按登录账号包含匹配。
+ * @param {{page?: number, pageSize?: number, keyword?: string, organizationId?: string, includeDescendants?: boolean}} query 成员列表查询参数；组织范围由 BFF 按同租户组织树解析。
  * @returns {Promise<{members: Array<Record<string, unknown>>, count: number, page: number, pageSize: number}>} 当前页成员、安全总数和服务端确认的分页信息。
  * @throws {Error} 会话失效、无系统管理员权限或查询参数非法时抛出统一错误。
  */

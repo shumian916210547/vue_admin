@@ -190,6 +190,9 @@
 
 .app-shell .ant-layout-header {
   height: auto !important;
+  // Ant Design 默认给 Header 注入 0 50px 内边距；布局组件已经自行管理横向间距，必须覆盖默认值，
+  // 否则横向品牌、菜单、页签和纵向折叠按钮会出现整体错位。
+  padding: 0 !important;
 }
 
 .page-loading {

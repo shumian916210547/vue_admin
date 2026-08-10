@@ -2,13 +2,13 @@
   <section class="profile-page">
     <header class="profile-page__heading">
       <div>
-        <span class="profile-page__eyebrow">ACCOUNT SETTINGS</span>
+        <span class="profile-page__eyebrow">账号设置</span>
         <h1>个人中心</h1>
         <p>维护个人头像、名称和邮箱信息。</p>
       </div>
     </header>
 
-  <a-tabs v-model:activeKey="activeKey" class="profile-page__card">
+  <a-tabs v-model:activeKey="activeKey" class="profile-page__card" size="small">
     <a-tab-pane key="1" tab="基本信息">
       <a-form
         :model="userInfo"
@@ -16,6 +16,7 @@
         :label-col="{ span: 3 }"
         :wrapper-col="{ span: 5 }"
         class="profile-page__form"
+        size="small"
         autocomplete="off"
         labelAlign="left"
         @finish="onFinish"
@@ -34,7 +35,7 @@
           name="username"
           :rules="[{ required: true, message: '请输入你的昵称' }]"
         >
-          <a-input v-model:value="userInfo.username" disabled />
+          <a-input v-model:value="userInfo.username" disabled placeholder="登录账号不可修改" size="small" />
         </a-form-item>
 
         <a-form-item
@@ -42,15 +43,15 @@
           name="name"
           :rules="[{ required: true, message: '请输入你的姓名' }]"
         >
-          <a-input v-model:value="userInfo.name" />
+          <a-input v-model:value="userInfo.name" placeholder="请输入姓名" size="small" />
         </a-form-item>
 
         <a-form-item label="邮箱" name="email" :rules="[{ type: 'email' }]">
-          <a-input v-model:value="userInfo.email" />
+          <a-input v-model:value="userInfo.email" placeholder="请输入邮箱地址" size="small" />
         </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 4, span: 16 }">
-          <a-button type="primary" html-type="submit" :loading="submitting">更新</a-button>
+          <a-button size="small" type="primary" html-type="submit" :loading="submitting">更新</a-button>
         </a-form-item>
       </a-form>
     </a-tab-pane>

@@ -5,7 +5,7 @@
       <span>404</span>
       <h1>页面未找到</h1>
       <p>你访问的地址可能已变更、无权限访问，或尚未分配到当前角色。</p>
-      <a-button type="primary" @click="goHome">返回首页</a-button>
+  <a-button size="small" type="primary" @click="goHome">返回首页</a-button>
     </div>
   </section>
 </template>

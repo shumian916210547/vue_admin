@@ -1,5 +1,6 @@
 <template>
   <a-textarea
+    size="small"
     v-model:value="modelValue"
     :placeholder="placeholder"
     :disabled="disabled"

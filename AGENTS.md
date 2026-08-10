@@ -14,10 +14,10 @@ vue_admin/
 │  ├─ config/                    # 表格配置
 │  ├─ mixins/                    # 导航、权限、筛选辅助逻辑
 │  ├─ router/                    # 静态路由、动态路由、守卫
-│  ├─ service/                   # BFF 请求与 Parse 兼容适配层
+│  ├─ service/                   # BFF 请求、Parse 兼容适配层、天气与在线成员服务
 │  ├─ store/                     # Vuex 状态
 │  ├─ utils/                     # CSV、请求、数据字典与通用工具
-│  └─ views/                     # 页面；system/ 下含组织、成员、岗位等系统管理页
+│  └─ views/                     # 页面；system/ 下含组织、成员、岗位、在线成员等系统管理页
 ├─ .env.example                  # 无机密的浏览器配置模板
 ├─ README.md                     # 功能、配置、结构和快速开始
 └─ package.json

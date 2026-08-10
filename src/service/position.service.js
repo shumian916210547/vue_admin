@@ -1,8 +1,8 @@
 import { request } from "@/service/api-client";
 
 /**
- * 读取岗位列表、当前企业可下放的业务页面和每页可选按钮权限。
- * @returns {Promise<{positions: Array<Record<string, unknown>>, routes: Array<Record<string, unknown>>, buttonPermissions: string[]}>} 岗位管理页的完整配置数据。
+ * 读取岗位列表、当前企业可配置的完整页面目录和每页实际可选按钮权限。
+ * @returns {Promise<{positions: Array<Record<string, unknown>>, routes: Array<Record<string, unknown> & {availablePermissions?: string[]}>, buttonPermissions: string[]}>} 岗位管理页的完整配置数据。
  * @throws {Error} 会话失效、权限不足或 BFF 请求失败时抛出统一错误。
  */
 export const getPositionOverview = () => request({ method: "get", url: "/positions/overview" });

@@ -7,7 +7,8 @@ import { ensureSystemConfiguration } from "@/service/system-configuration.servic
 const STATIC_ROUTE_PATHS = new Set(chil_routes.map((route) => route.path));
 const ROUTE_PATH_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_/-]*$/;
 const COMPONENT_PATH_PATTERN = /^\/[A-Za-z0-9_./-]+$/;
-const REQUIRED_SYSTEM_ROUTE_PATHS = new Set(["module", "table", "organization", "member", "position"]);
+const REQUIRED_SYSTEM_ROUTE_PATHS = new Set(["module", "table", "organization", "member", "position", "online-member"]);
+const STATIC_PERMISSION_PATHS = new Set(["home"]);
 /** 旧版将组织与成员配置合并在同一入口时使用的菜单名称，发现后触发一次幂等迁移。 */
 const LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME = "组织与成员";
 let routes = [...chil_routes];
@@ -48,21 +49,67 @@ const getRank = (item) => {
 };
 
 /**
- * 判断当前管理员所属企业是否缺少基础系统配置。仅在 Module 或关键 Route 缺失时触发后端幂等修复，
+ * 根据当前租户的首页元数据同步静态首页入口的页面权限标识和菜单显隐状态。
+ * 首页保留静态组件作为首屏兜底，但实际访问权限使用后端生成的 Route/Module objectId 校验。
+ * @param {Array<Record<string, unknown>>} moduleRecords BFF 返回的当前企业 Module 记录，routes 已展开为对象。
+ * @param {{role?: {module?: Array<{objectId?: string}>}, isAdmin?: boolean} | null} authContext 当前可信认证上下文。
+ * @returns {void} 原地更新静态首页路由的 meta.id、meta.moduleId 和 menu；缺少旧数据时保留兼容兜底。
+ */
+const syncStaticRoutePermissions = (moduleRecords, authContext) => {
+  for (const staticRoute of chil_routes) {
+    if (!STATIC_PERMISSION_PATHS.has(staticRoute.path)) continue;
+    const module = moduleRecords.find((record) => record?.path === staticRoute.path);
+    const route = module?.routes?.find((child) => child?.path === staticRoute.path);
+    const roleModuleIds = new Set(
+      (Array.isArray(authContext?.role?.module) ? authContext.role.module : [])
+        .map((item) => item?.objectId)
+        .filter(Boolean)
+    );
+    const hasMetadata = Boolean(module?.objectId && route?.objectId);
+    const authorized =
+      Boolean(authContext?.isAdmin) ||
+      !hasMetadata ||
+      roleModuleIds.has(module.objectId) ||
+      roleModuleIds.has(route.objectId);
+    staticRoute.meta = {
+      ...staticRoute.meta,
+      ...(hasMetadata ? { id: route.objectId, moduleId: module.objectId } : { id: undefined, moduleId: undefined }),
+    };
+    staticRoute.menu = authorized;
+  }
+};
+
+/**
+ * 清除上一个会话写入静态入口的动态元数据，避免切换企业或退出登录后沿用旧 Route objectId。
+ * @returns {void} 将静态入口恢复到无租户绑定的兼容状态。
+ */
+const resetStaticRoutePermissions = () => {
+  for (const staticRoute of chil_routes) {
+    if (!STATIC_PERMISSION_PATHS.has(staticRoute.path)) continue;
+    staticRoute.meta = { ...staticRoute.meta, id: undefined, moduleId: undefined };
+    staticRoute.menu = true;
+  }
+};
+
+/**
+ * 判断当前管理员所属企业是否缺少基础系统配置。仅在 Module、首页元数据或关键 Route 缺失时触发后端幂等修复，
  * 不覆盖已配置的自定义业务模块。
  * @param {Array<Record<string, unknown>>} moduleRecords BFF 返回的当前企业 Module 记录。
  * @param {{isAdmin?: boolean} | null} authContext 当前可信认证上下文。
- * @returns {boolean} 系统管理员且缺少任一基础配置路由，或仍使用旧的组织成员合并入口名称时返回 true。
+ * @returns {boolean} 系统管理员且缺少任一基础配置、首页元数据或仍使用旧组织成员入口名称时返回 true。
  */
 const needsSystemConfigurationRepair = (moduleRecords, authContext) => {
   if (!authContext?.isAdmin) return false;
   const systemModule = moduleRecords.find((module) => module?.path === "system");
+  const homeModule = moduleRecords.find((module) => module?.path === "home");
   if (!systemModule || !Array.isArray(systemModule.routes)) return true;
   const currentPaths = new Set(systemModule.routes.map((route) => route?.path));
   const organizationRoute = systemModule.routes.find((route) => route?.path === "organization");
+  const homeRoute = homeModule?.routes?.find((route) => route?.path === "home");
   return (
     [...REQUIRED_SYSTEM_ROUTE_PATHS].some((path) => !currentPaths.has(path)) ||
-    organizationRoute?.name === LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME
+    organizationRoute?.name === LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME ||
+    !homeRoute
   );
 };
 
@@ -114,6 +161,7 @@ const buildAuthorizedModules = (moduleRecords, authContext) => {
                 targetClass: route.targetClass,
                 id: route.objectId,
                 menu: route.menu,
+                permissionCode: `page:${module.path}/${route.path}`,
               },
             }))
         : [];
@@ -133,6 +181,7 @@ const buildAuthorizedModules = (moduleRecords, authContext) => {
           id: module.objectId,
           icon: module.icon,
           menu: module.menu,
+          permissionCode: `page:${module.path}`,
         },
       };
     })
@@ -158,6 +207,7 @@ const addManagedRoute = (router, route) => {
 export const resetDynamicRoutes = () => {
   routeLoadVersion += 1;
   loadingRoutesPromise = null;
+  resetStaticRoutePermissions();
   activeRouteRemovers.splice(0).reverse().forEach((removeRoute) => {
     try {
       removeRoute();
@@ -202,6 +252,7 @@ export const loadRoutes = async (router) => {
     }
     if (loadVersion !== routeLoadVersion) return routes;
 
+    syncStaticRoutePermissions(moduleRecords, getCurrentAuthContext());
     const modules = buildAuthorizedModules(moduleRecords, getCurrentAuthContext());
     modules.forEach((module) => addManagedRoute(router, module));
     if (loadVersion !== routeLoadVersion) {

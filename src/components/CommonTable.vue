@@ -2,184 +2,96 @@
   <section class="common-table">
     <!-- 筛选 -->
     <slot name="top">
-      <a-form class="common-table__filters" :model="where" ref="form">
-      <a-row :gutter="[16, 12]">
-        <a-col :xs="24" :lg="5" class="common-table__create-action">
-          <a-button
-            type="primary"
-            @click="emit('onInsert')"
-            v-permission="['permission:insert', permissions]"
-            >新建</a-button
-          >
-        </a-col>
-        <a-col :xs="24" :lg="19" class="common-table__query-area">
-          <div class="common-table__filter-fields">
-            <template
-              v-for="(field_name, index) in getFilterField(props.fields)"
-              :key="index"
-            >
-              <a-form-item
-                :label="fields[field_name].chineseName"
-                class="common-table__filter-item"
-                :name="field_name"
-                v-permission="['permission:query', permissions]"
-              >
-                <template v-if="fields[field_name].editComponent == 'ASelect'">
-                  <component
-                    class="common-table__filter-control"
-                    v-model:value="where[field_name]"
-                    :placeholder="'请选择' + fields[field_name].chineseName"
-                    :allowClear="true"
-                    :is="fields[field_name].editComponent"
-                    :fieldNames="{
-                      label: fields[field_name].componentOption.labelKey,
-                      value: fields[field_name].componentOption.valueKey,
-                    }"
-                    :mode="fields[field_name].componentOption.mode"
-                    :options="
-                      selectoptions[
+      <a-form class="common-table__filters" :model="where" ref="form" size="small">
+        <a-row :gutter="[16, 12]">
+          <a-col :xs="24" :lg="5" class="common-table__create-action">
+            <a-button size="small" type="primary" @click="emit('onInsert')"
+              v-permission="['permission:insert', permissions]">新建</a-button>
+          </a-col>
+          <a-col :xs="24" :lg="19" class="common-table__query-area">
+            <div class="common-table__filter-fields">
+              <template v-for="(field_name, index) in getFilterField(props.fields)" :key="index">
+                <a-form-item :label="fields[field_name].chineseName" class="common-table__filter-item"
+                  :name="field_name" v-permission="['permission:query', permissions]">
+                  <template v-if="fields[field_name].editComponent == 'ASelect'">
+                    <component size="small" class="common-table__filter-control" v-model:value="where[field_name]"
+                      :placeholder="getFieldPlaceholder(fields[field_name], field_name, true)" :allowClear="true"
+                      :is="fields[field_name].editComponent" :fieldNames="{
+                        label: fields[field_name].componentOption.labelKey,
+                        value: fields[field_name].componentOption.valueKey,
+                      }" :mode="fields[field_name].componentOption.mode" :options="selectoptions[
                         fields[field_name].componentOption.selectTable
                       ]
-                    "
-                  >
-                  </component>
-                </template>
-                <template v-else>
-                  <component
-                    class="common-table__filter-control"
-                    v-model:value="where[field_name]"
-                    :allowClear="true"
-                    :placeholder="'请输入' + fields[field_name].chineseName"
-                    :is="fields[field_name].editComponent"
-                  >
-                  </component>
-                </template>
-              </a-form-item>
-            </template>
-          </div>
-          <div class="common-table__toolbar-actions">
-            <a-button
-              type="primary"
-              @click="emit('onQuery')"
-              v-permission="['permission:query', permissions]"
-              >查询</a-button
-            >
-            <a-button
-              @click="handleReset"
-              v-permission="['permission:reset', permissions]"
-              >重置</a-button
-            >
-            <a-button
-              @click="openExport"
-            >
-              导出
-            </a-button>
-          </div>
-        </a-col>
-      </a-row>
+                        ">
+                    </component>
+                  </template>
+                  <template v-else>
+                    <component size="small" class="common-table__filter-control" v-model:value="where[field_name]" :allowClear="true"
+                      :placeholder="getFieldPlaceholder(fields[field_name], field_name)" :is="fields[field_name].editComponent">
+                    </component>
+                  </template>
+                </a-form-item>
+              </template>
+            </div>
+            <div class="common-table__toolbar-actions">
+              <a-button size="small" type="primary" @click="emit('onQuery')"
+                v-permission="['permission:query', permissions]">查询</a-button>
+              <a-button size="small" @click="handleReset" v-permission="['permission:reset', permissions]">重置</a-button>
+              <a-button size="small" @click="openExport">
+                导出
+              </a-button>
+            </div>
+          </a-col>
+        </a-row>
       </a-form>
     </slot>
 
-  <!-- 表格 -->
-  <a-table
-    class="common-table__data"
-    :columns="tableColumns"
-    :data-source="tableData"
-    :pagination="queryState"
-    :loading="tableLoading"
-    rowKey="objectId"
-    :scroll="{ x: 720 }"
-    :defaultExpandedRowKeys="expandedRowKeys"
-    @change="handleTableChange"
-    bordered
-    @resizeColumn="handleResizeColumn"
-  >
-    <template #bodyCell="{ column, record }">
-      <!-- 根据数据类型展示数据 -->
-      <template v-if="column.key === 'operation'">
-        <div class="common-table__row-actions">
-          <a-button
-            @click="emit('onPreview', record)"
-            v-permission="['permission:preview', permissions]"
-          >
-            查看
-          </a-button>
-
-          <template v-if="innerContainerTitle">
-            <a-button
-              @click="emit('onAdd', record)"
-              v-permission="['permission:insertChildren', permissions]"
-            >
-              {{ innerContainerTitle }}
+    <!-- 表格 -->
+    <a-table size="small" class="common-table__data" :columns="tableColumns" :data-source="tableData" :pagination="queryState"
+      :loading="tableLoading" rowKey="objectId" :scroll="{ x: 720 }" :defaultExpandedRowKeys="expandedRowKeys"
+      @change="handleTableChange" bordered @resizeColumn="handleResizeColumn">
+      <template #bodyCell="{ column, record }">
+        <!-- 根据数据类型展示数据 -->
+        <template v-if="column.key === 'operation'">
+          <div class="common-table__row-actions">
+            <a-button size="small" @click="emit('onPreview', record)" v-permission="['permission:preview', permissions]">
+              查看
             </a-button>
-            <a-divider type="vertical" />
-          </template>
-          <a-button
-            @click="emit('onEdit', record)"
-            v-permission="['permission:edit', permissions]"
-          >
-            修改
-          </a-button>
 
-          <a-popconfirm
-            title="删除后不可恢复，确定要继续吗？"
-            ok-text="删除"
-            cancel-text="取消"
-            @confirm="emit('onDelete', record)"
-          >
-            <a-button
-              type="danger"
-              v-permission="['permission:remove', permissions]"
-            >
-              删除
+            <template v-if="innerContainerTitle">
+              <a-button size="small" @click="emit('onAdd', record)" v-permission="['permission:insertChildren', permissions]">
+                {{ innerContainerTitle }}
+              </a-button>
+              <a-divider type="vertical" />
+            </template>
+            <a-button size="small" @click="emit('onEdit', record)" v-permission="['permission:edit', permissions]">
+              修改
             </a-button>
-          </a-popconfirm>
+
+            <a-popconfirm title="删除后不可恢复，确定要继续吗？" ok-text="删除" cancel-text="取消" @confirm="emit('onDelete', record)">
+              <a-button size="small" type="danger" v-permission="['permission:remove', permissions]">
+                删除
+              </a-button>
+            </a-popconfirm>
+          </div>
+        </template>
+        <CommonFields :column="column" :record="record" :fields="fields"></CommonFields>
+      </template>
+      <template v-if="innerContainer" #expandedRowRender="{ record, index, indent, expanded }">
+        <slot name="expandedRowRender" :record="record" :index="index" :indent="indent" :expanded="expanded"></slot>
+      </template>
+      <template #expandIcon="{ record }">
+        <div v-if="record.routes && record.routes.length">
+          <button type="button" class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed" aria-label="展开行"
+            v-show="expandedRowKeys.indexOf(record.objectId) === -1" @click="expand(record.objectId)"></button>
+          <button type="button" class="ant-table-row-expand-icon ant-table-row-expand-icon-expanded" aria-label="收起行"
+            v-show="expandedRowKeys.indexOf(record.objectId) !== -1" @click="expand('')"></button>
         </div>
       </template>
-      <CommonFields
-        :column="column"
-        :record="record"
-        :fields="fields"
-      ></CommonFields>
-    </template>
-    <template
-      v-if="innerContainer"
-      #expandedRowRender="{ record, index, indent, expanded }"
-    >
-      <slot
-        name="expandedRowRender"
-        :record="record"
-        :index="index"
-        :indent="indent"
-        :expanded="expanded"
-      ></slot>
-    </template>
-    <template #expandIcon="{ record }">
-      <div v-if="record.routes && record.routes.length">
-        <button
-          type="button"
-          class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed"
-          aria-label="展开行"
-          v-show="expandedRowKeys.indexOf(record.objectId) === -1"
-          @click="expand(record.objectId)"
-        ></button>
-        <button
-          type="button"
-          class="ant-table-row-expand-icon ant-table-row-expand-icon-expanded"
-          aria-label="收起行"
-          v-show="expandedRowKeys.indexOf(record.objectId) !== -1"
-          @click="expand('')"
-        ></button>
-      </div>
-    </template>
-  </a-table>
+    </a-table>
 
-  <CommonExport
-    v-model:modalVisible="exportMap.show"
-    :className="props.className"
-    :tableColumns="tableColumns"
-    :fields="props.fields"
-  ></CommonExport>
+    <CommonExport v-model:modalVisible="exportMap.show" :className="props.className" :tableColumns="tableColumns"
+      :fields="props.fields"></CommonExport>
   </section>
 </template>
 
@@ -233,6 +145,20 @@ const props = defineProps({
 });
 const where = reactive(props.queryVal);
 const { queryPermission, getFilterField } = Mixins();
+
+/**
+ * 为动态筛选控件生成稳定的中文占位提示，兼容历史元数据缺少 componentOption 的情况。
+ * @param {{chineseName?: string, componentOption?: {placeholder?: string}} | undefined} field Schema 字段配置。
+ * @param {string} fieldName 字段键名，仅在中文名称缺失时用于生成兜底提示。
+ * @param {boolean} isSelect 是否为选择类控件；选择类使用“请选择”，其余使用“请输入”。
+ * @returns {string} 可直接传给 Ant Design Vue 输入控件的中文 placeholder。
+ */
+const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
+  const configured = field?.componentOption?.placeholder;
+  if (typeof configured === "string" && configured.trim()) return configured;
+  const label = field?.chineseName || fieldName || "该字段";
+  return `${isSelect ? "请选择" : "请输入"}${label}`;
+};
 const emit = defineEmits([
   "onChange",
   "onQueryReset",
@@ -353,7 +279,7 @@ const openExport = () => {
 .common-table__filters {
   min-height: 64px;
   margin-bottom: 18px;
-  padding: 14px 16px 2px;
+  padding: 8px 16px 8px;
   background: rgba(var(--app-primary-rgb), 0.04);
   border: 1px solid var(--app-glass-border);
   border-radius: 12px;
@@ -365,25 +291,29 @@ const openExport = () => {
 .common-table__create-action {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .common-table__query-area {
+  min-width: 0;
+  align-content: center;
   gap: 8px 12px;
   justify-content: flex-end;
 }
 
 .common-table__filter-fields {
+  min-width: 0;
+  flex: 1 1 auto;
   gap: 0 12px;
   justify-content: flex-end;
 }
 
 .common-table__filter-item {
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .common-table__filter-control {
-  width: 156px;
+  width: 220px;
 }
 
 .common-table__toolbar-actions {
@@ -398,7 +328,14 @@ const openExport = () => {
 .common-table__row-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.common-table__row-actions>.ant-btn,
+.common-table__row-actions .ant-popconfirm>.ant-btn {
+  min-width: 44px;
+  margin: 0;
 }
 
 .common-table__data {
@@ -411,13 +348,30 @@ const openExport = () => {
   box-shadow: var(--app-shadow-soft);
 }
 
+:deep(.ant-form-item-label) {
+  display: flex;
+  align-items: center;
+}
+
 :deep(.common-table__data .ant-table-container) {
   border: 0;
 }
 
 :deep(.common-table__data .ant-spin-nested-loading),
-:deep(.common-table__data .ant-spin-container) {
-  min-height: 0;
+:deep(.common-table__data .ant-spin-container),
+:deep(.ant-table-container),
+:deep(.ant-table-content) {
+  height: 100%;
+}
+
+:deep(.ant-spin-container) {
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.ant-table) {
+  flex: 1;
+  overflow: hidden;
 }
 
 :deep(p) {
@@ -426,11 +380,9 @@ const openExport = () => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ant-table-cell button {
-  margin: 3px;
-}
 
 @media (max-width: 991px) {
+
   .common-table__query-area,
   .common-table__filter-fields,
   .common-table__toolbar-actions,
@@ -441,11 +393,21 @@ const openExport = () => {
 
 @media (max-width: 576px) {
   .common-table__filters {
-    padding: 12px 12px 0;
+    padding: 6px 12px 6px;
+  }
+
+  .common-table__filter-fields,
+  .common-table__toolbar-actions,
+  .common-table__create-action {
+    width: 100%;
   }
 
   .common-table__filter-control {
     width: min(100%, 230px);
+  }
+
+  .common-table__toolbar-actions {
+    justify-content: flex-start;
   }
 }
 </style>

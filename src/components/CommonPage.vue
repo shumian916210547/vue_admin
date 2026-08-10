@@ -149,7 +149,8 @@ const loadColumns = async (fields) => {
     key: "operation",
     resizable: true,
     fixed: "right",
-    width: 230,
+    width: 220,
+    className: "table-operation-column",
   });
 };
 

@@ -1,7 +1,7 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import { loadRoutes, resetDynamicRoutes } from "./dynamicRoute";
 import { routes } from "./staticRoute";
-import Parse, { clearCurrentAuthContext } from "@/service/parse-client";
+import Parse, { clearCurrentAuthContext, getCurrentAuthContext } from "@/service/parse-client";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -76,6 +76,21 @@ const isDynamicRoutePlaceholder = (route) =>
   route.matched.some((record) => record.name === DYNAMIC_ROUTE_PLACEHOLDER_NAME);
 
 /**
+ * 对已装配的动态页面和绑定元数据的静态首页执行一次前端权限二次检查，避免手工输入深链接绕过菜单体验层。
+ * @param {import("vue-router").RouteLocationNormalized} route 已解析的目标路由。
+ * @returns {boolean} 管理员或当前岗位包含该页面 Route objectId 时返回 true；静态基础页由认证守卫保护。
+ */
+const canEnterManagedRoute = (route) => {
+  const context = getCurrentAuthContext();
+  if (context?.isAdmin) return true;
+  const routeId = route.meta?.id;
+  const moduleId = route.meta?.moduleId;
+  if (!routeId && !moduleId) return true;
+  const roleModules = Array.isArray(context?.role?.module) ? context.role.module : [];
+  return roleModules.some((item) => item?.objectId === routeId || item?.objectId === moduleId);
+};
+
+/**
  * 认证与动态路由守卫。会话恢复、路由装配或权限元数据异常时均回退到登录页，避免无匹配路由造成白屏。
  * @param {import("vue-router").RouteLocationNormalized} to 即将进入的标准化路由。
  * @returns {Promise<true | import("vue-router").RouteLocationRaw>} 允许导航或返回替代路由。
@@ -101,6 +116,7 @@ router.beforeEach(async (to) => {
       return { path: to.fullPath, replace: true };
     }
     if (isDynamicRoutePlaceholder(to)) return { path: "/404", replace: true };
+    if (!canEnterManagedRoute(to)) return { path: "/404", replace: true };
     if (to.path === "/home") ensureHomeHistory();
     return true;
   } catch {

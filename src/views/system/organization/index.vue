@@ -2,14 +2,16 @@
   <section class="organization-page management-page" :aria-busy="loading">
     <header class="management-page__heading">
       <div>
-        <span class="management-page__eyebrow">ORGANIZATION GOVERNANCE</span>
+        <span class="management-page__eyebrow">组织治理</span>
         <h1>组织管理</h1>
         <p>维护企业总部、区域、地方公司和部门的层级关系；成员关联与组织数据权限请在“成员管理”中配置。</p>
       </div>
-      <a-button type="primary" :loading="loading" @click="refreshOrganizationPage">
-        <template #icon><ReloadOutlined /></template>
-        刷新组织
-      </a-button>
+      <div class="management-page__heading-actions">
+        <a-button size="small" v-auth="['permission:query', permissions]" type="primary" :loading="loading" @click="refreshOrganizationPage">
+          <template #icon><ReloadOutlined /></template>
+          刷新组织
+        </a-button>
+      </div>
     </header>
 
     <a-alert
@@ -28,7 +30,7 @@
             <span class="management-page__card-title"><ApartmentOutlined /> 企业组织树</span>
           </template>
           <template #extra>
-            <a-button type="link" @click="openOrganizationModal('create', null)">
+            <a-button size="small" v-auth="['permission:insert', permissions]" type="link" @click="openOrganizationModal('create', null)">
               <template #icon><PlusOutlined /></template>
               新建根组织
             </a-button>
@@ -73,14 +75,14 @@
                 {{ organizationName(selectedOrganization.parentId) || "企业根节点" }}
               </a-descriptions-item>
               <a-descriptions-item label="排序">{{ selectedOrganization.rank }}</a-descriptions-item>
-              <a-descriptions-item label="备注" :span="2">{{ selectedOrganization.remark || "暂无备注" }}</a-descriptions-item>
+              <a-descriptions-item label="备注" :span="1">{{ selectedOrganization.remark || "暂无备注" }}</a-descriptions-item>
             </a-descriptions>
             <div class="organization-page__detail-actions">
-              <a-button type="primary" @click="openOrganizationModal('create', selectedOrganization.objectId)">
+              <a-button size="small" v-auth="['permission:insertChildren', permissions]" type="primary" @click="openOrganizationModal('create', selectedOrganization.objectId)">
                 <template #icon><PlusOutlined /></template>
                 新建下级组织
               </a-button>
-              <a-button @click="openOrganizationModal('edit', selectedOrganization.objectId)">
+              <a-button size="small" v-auth="['permission:edit', permissions]" @click="openOrganizationModal('edit', selectedOrganization.objectId)">
                 <template #icon><EditOutlined /></template>
                 编辑节点
               </a-button>
@@ -90,7 +92,7 @@
                 cancel-text="取消"
                 @confirm="handleDeleteOrganization"
               >
-                <a-button danger>
+                <a-button size="small" v-auth="['permission:remove', permissions]" danger>
                   <template #icon><DeleteOutlined /></template>
                   删除空组织
                 </a-button>
@@ -111,27 +113,28 @@
       @ok="submitOrganization"
       @cancel="closeOrganizationModal"
     >
-      <a-form ref="organizationFormRef" :model="organizationForm" :rules="organizationRules" layout="vertical">
+      <a-form size="small" ref="organizationFormRef" :model="organizationForm" :rules="organizationRules" layout="vertical">
         <a-form-item label="组织名称" name="name">
-          <a-input v-model:value="organizationForm.name" placeholder="例如：华北区域公司" :maxlength="100" />
+          <a-input size="small" v-model:value="organizationForm.name" placeholder="例如：华北区域公司" :maxlength="100" />
         </a-form-item>
         <a-form-item label="组织编码" name="code" extra="同一企业内编码唯一；不填写时仅按名称管理。">
-          <a-input v-model:value="organizationForm.code" placeholder="例如：CN-NORTH" :maxlength="64" />
+          <a-input size="small" v-model:value="organizationForm.code" placeholder="例如：CN-NORTH" :maxlength="64" />
         </a-form-item>
         <a-row :gutter="[12, 0]">
           <a-col :span="12">
             <a-form-item label="组织类型" name="type">
-              <a-select v-model:value="organizationForm.type" :options="organizationTypeOptions" placeholder="请选择组织类型" />
+              <a-select size="small" v-model:value="organizationForm.type" :options="organizationTypeOptions" placeholder="请选择组织类型" />
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item label="排序" name="rank">
-              <a-input-number v-model:value="organizationForm.rank" :min="0" :max="999999" class="organization-page__full-control" />
+              <a-input-number size="small" v-model:value="organizationForm.rank" placeholder="请输入排序数字" :min="0" :max="999999" class="organization-page__full-control" />
             </a-form-item>
           </a-col>
         </a-row>
         <a-form-item label="上级组织" name="parentId">
           <a-tree-select
+            size="small"
             v-model:value="organizationForm.parentId"
             :tree-data="organizationSelectTree"
             allow-clear
@@ -140,10 +143,10 @@
           />
         </a-form-item>
         <a-form-item v-if="organizationModal.mode === 'edit'" label="启用状态" name="isActive">
-          <a-switch v-model:checked="organizationForm.isActive" checked-children="启用" un-checked-children="停用" />
+          <a-switch size="small" v-model:checked="organizationForm.isActive" checked-children="启用" un-checked-children="停用" />
         </a-form-item>
         <a-form-item label="备注" name="remark">
-          <a-textarea v-model:value="organizationForm.remark" :rows="3" placeholder="填写适用业务范围、负责人或管理说明" :maxlength="500" />
+          <a-textarea size="small" v-model:value="organizationForm.remark" :rows="3" placeholder="填写适用业务范围、负责人或管理说明" :maxlength="500" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -162,6 +165,7 @@ import {
 import { computed, onMounted, reactive, ref } from "vue";
 import { notification } from "ant-design-vue";
 
+import { Mixins } from "@/mixins";
 import {
   createOrganization,
   deleteOrganization,
@@ -194,6 +198,8 @@ const organizationForm = reactive({
   isActive: true,
   remark: "",
 });
+const { queryPermission } = Mixins();
+const permissions = await queryPermission();
 
 /** 组织编辑表单的 Ant Design Vue 校验规则。 */
 const organizationRules = {

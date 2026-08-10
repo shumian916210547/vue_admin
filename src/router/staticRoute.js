@@ -14,6 +14,7 @@ export const chil_routes = [
     meta: {
       icon: "HomeOutlined",
       menu: true,
+      permissionCode: "page:home",
     },
     menu: true,
   },
@@ -25,6 +26,7 @@ export const chil_routes = [
     meta: {
       icon: "UserOutlined",
       menu: false,
+      permissionCode: "page:personal-center",
     },
     menu: false,
   },

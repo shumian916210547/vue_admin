@@ -15,8 +15,17 @@ export const columns = [
         key: "fields_num",
     },
     {
+        title: "运行状态",
+        dataIndex: "status",
+        key: "status",
+        width: 100,
+    },
+    {
         title: "操作",
         key: "operation",
+        fixed: "right",
+        width: 256,
+        className: "table-operation-column",
     },
 ];
 
@@ -35,5 +44,8 @@ export const innerColumns = [
         title: "操作",
         dataIndex: "operation",
         key: "operation",
+        fixed: "right",
+        width: 176,
+        className: "table-operation-column",
     },
 ];

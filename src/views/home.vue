@@ -8,7 +8,7 @@
       </div>
       <div class="workspace-dashboard__header-actions">
         <span class="workspace-dashboard__date">{{ currentDateLabel }}</span>
-        <a-button :loading="refreshing" @click="refreshDashboard">
+        <a-button size="small" :loading="refreshing" @click="refreshDashboard">
           <template #icon><ReloadOutlined /></template>
           刷新概览
         </a-button>
@@ -96,29 +96,31 @@
       <article class="dashboard-panel dashboard-panel--trend">
         <header class="dashboard-panel__header">
           <div>
-            <span class="dashboard-panel__eyebrow">近 7 日趋势</span>
-            <h2>登录活跃曲线</h2>
+            <span class="dashboard-panel__eyebrow">登录记录日历</span>
+            <h2>登录活跃日历</h2>
           </div>
           <span class="dashboard-panel__tag">{{ dashboardLoading || overviewError ? "--" : overview.totalLogins }} 次累计登录</span>
         </header>
 
-        <div v-if="dashboardLoading && !overviewError" class="trend-chart trend-chart--loading" aria-label="登录趋势加载中">
-          <span v-for="index in 7" :key="index" class="trend-chart__skeleton"></span>
+        <div v-if="dashboardLoading && !overviewError" class="trend-chart trend-chart--loading" aria-label="登录日历加载中">
+          <span v-for="index in 30" :key="index" class="trend-chart__skeleton"></span>
         </div>
         <div v-else-if="overviewError" class="dashboard-panel__empty-state">
           <p>{{ overviewError }}</p>
           <a-button size="small" @click="loadOverview">重试</a-button>
         </div>
-        <div v-else class="trend-chart" aria-label="近七日登录柱状图">
-          <div v-for="day in weeklyActivity" :key="day.date" class="trend-chart__item">
-            <span class="trend-chart__value">{{ day.count }}</span>
-            <div class="trend-chart__track">
-              <span class="trend-chart__bar" :style="getTrendBarStyle(day.count)"></span>
-            </div>
-            <span class="trend-chart__label">{{ day.label }}</span>
-          </div>
+        <div v-else class="trend-chart" aria-label="登录记录日历">
+          <a-calendar class="login-calendar" :fullscreen="false">
+            <template #dateCellRender="{ current }">
+              <span
+                v-if="hasLoginOnDate(calendarDateKey(current))"
+                class="login-calendar__dot"
+                aria-label="当天有登录记录"
+              ></span>
+            </template>
+          </a-calendar>
         </div>
-        <p class="dashboard-panel__caption">数据由系统在成功登录时记录；仅展示当前账号的汇总，不包含其他成员的会话信息。</p>
+        <p class="dashboard-panel__caption">蓝色标点表示当天存在成功登录记录；日历数据由服务端按当前账号汇总，不包含其他成员的会话信息。</p>
       </article>
     </section>
 
@@ -167,7 +169,7 @@
       <div class="location-panel__canvas">
         <div id="dashboardMap" class="location-panel__map"></div>
         <div v-if="mapLoading" class="location-panel__overlay">
-          <a-spin tip="正在加载地图服务..." />
+          <a-spin tip="正在加载地图服务..." size="small" />
         </div>
         <div v-else-if="mapMessage" class="location-panel__overlay">
           <a-empty :description="mapMessage">
@@ -209,12 +211,14 @@ const EMPTY_OVERVIEW = Object.freeze({
   currentSessionStartedAt: null,
   lastLoginAt: null,
   weeklyActivity: [],
+  loginDays: [],
 });
 const weatherConfig = getWeatherRuntimeConfig();
 const { toPage } = Mixins();
 const overview = ref({ ...EMPTY_OVERVIEW });
 const weather = ref({
   location: weatherConfig.location,
+  locationSource: "config",
   temperature: null,
   weatherCode: null,
   description: "正在获取天气",
@@ -231,22 +235,6 @@ const mapLoading = ref(false);
 const mapMessage = ref("");
 let map;
 let clockTimer;
-
-/**
- * 创建无统计数据时的七日趋势占位序列，保证图表布局在服务加载前保持稳定。
- * @param {Date} reference 生成序列时使用的当前时间。
- * @returns {Array<{date: string, label: string, count: number}>} 最近七日从早到晚排序的零值登录数据。
- */
-const buildEmptyWeeklyActivity = (reference) =>
-  Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(reference);
-    date.setDate(date.getDate() - (6 - index));
-    return {
-      date: date.toISOString().slice(0, 10),
-      label: `${date.getMonth() + 1}/${date.getDate()}`,
-      count: 0,
-    };
-  });
 
 /**
  * 根据当前小时返回自然的中文问候语。
@@ -325,16 +313,6 @@ const collectQuickActions = (moduleList) => {
     }
   }
   return actions.slice(0, 6);
-};
-
-/**
- * 计算趋势柱的样式；即使某日登录数为零也保留细小柱体以呈现完整时间轴。
- * @param {number} count 当日成功登录次数。
- * @returns {{height: string}} 可直接绑定到柱体元素的高度样式。
- */
-const getTrendBarStyle = (count) => {
-  const largestCount = Math.max(...weeklyActivity.value.map((day) => day.count), 1);
-  return { height: `${count ? Math.max((count / largestCount) * 100, 16) : 6}%` };
 };
 
 /**
@@ -450,13 +428,38 @@ const currentDateLabel = computed(() =>
 );
 const lastLoginText = computed(() => `最近登录：${formatDateTime(overview.value.lastLoginAt)}`);
 const weatherUpdateText = computed(() =>
-  weather.value.observedAt ? `数据更新于 ${formatDateTime(weather.value.observedAt)}` : "使用运行时城市配置"
+  weather.value.observedAt
+    ? `数据更新于 ${formatDateTime(weather.value.observedAt)}`
+    : weather.value.locationSource === "device"
+      ? "已使用设备原生定位"
+      : weather.value.locationSource === "ip"
+        ? "已使用 IP 城市定位"
+        : "使用运行时城市配置"
 );
-const weeklyActivity = computed(() =>
-  overview.value.weeklyActivity?.length
-    ? overview.value.weeklyActivity
-    : buildEmptyWeeklyActivity(currentTime.value)
-);
+const loginDaySet = computed(() => new Set(Array.isArray(overview.value.loginDays) ? overview.value.loginDays : []));
+
+/**
+ * 将 Ant Design Calendar 的 moment/dayjs 日期值规范化为本地自然日键。
+ * @param {unknown} value 日历插槽提供的日期对象。
+ * @returns {string} YYYY-MM-DD 格式的日期键；无法解析时返回空字符串。
+ */
+const calendarDateKey = (value) => {
+  if (typeof value?.format === "function") return value.format("YYYY-MM-DD");
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * 判断日历单元格对应日期是否存在服务端登录记录。
+ * @param {string} dateKey YYYY-MM-DD 日期键。
+ * @returns {boolean} 当前账号在该自然日有成功登录记录时返回 true。
+ */
+const hasLoginOnDate = (dateKey) => Boolean(dateKey && loginDaySet.value.has(dateKey));
+
 const overviewReady = computed(() => !dashboardLoading.value && !overviewError.value);
 const sessionDuration = computed(() =>
   overviewReady.value ? formatSessionDuration(overview.value.currentSessionStartedAt, currentTime.value) : "--"
@@ -551,6 +554,11 @@ onBeforeUnmount(() => {
 .dashboard-panel__header {
   justify-content: space-between;
   gap: 16px;
+}
+
+.workspace-dashboard__header > :first-child,
+.dashboard-panel__header > :first-child {
+  min-width: 0;
 }
 
 .workspace-dashboard__eyebrow,
@@ -864,9 +872,10 @@ onBeforeUnmount(() => {
 .stat-card {
   display: flex;
   min-width: 0;
+  min-height: 112px;
   padding: 18px;
   border-radius: var(--app-radius);
-  align-items: flex-start;
+  align-items: center;
   gap: 13px;
 }
 
@@ -901,6 +910,7 @@ onBeforeUnmount(() => {
   display: grid;
   min-width: 0;
   gap: 2px;
+  align-content: center;
 }
 
 .stat-card__content > span,
@@ -958,12 +968,15 @@ onBeforeUnmount(() => {
 }
 
 .dashboard-panel__tag {
+  max-width: 42%;
+  overflow: hidden;
   padding: 5px 9px;
   color: var(--app-primary);
   font-size: 11px;
   font-weight: 650;
   background: var(--app-primary-soft);
   border-radius: 999px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -973,60 +986,62 @@ onBeforeUnmount(() => {
 }
 
 .trend-chart {
-  display: grid;
-  height: 192px;
-  padding: 8px 4px 0;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  align-items: end;
-  gap: 10px;
+  min-height: 280px;
 }
 
-.trend-chart__item {
-  display: grid;
-  height: 100%;
-  text-align: center;
-  grid-template-rows: 20px 1fr 20px;
-  gap: 5px;
-}
-
-.trend-chart__value,
-.trend-chart__label {
-  color: var(--app-muted);
-  font-size: 11px;
-}
-
-.trend-chart__value {
+.login-calendar {
   color: var(--app-text);
-  font-weight: 650;
+  background: transparent;
 }
 
-.trend-chart__track {
-  display: flex;
-  min-height: 0;
-  padding: 0 5px;
-  background: rgba(var(--app-primary-rgb), 0.06);
-  border-radius: 999px;
-  align-items: flex-end;
+.login-calendar :deep(.ant-picker-calendar-header) {
+  padding: 0 0 12px;
 }
 
-.trend-chart__bar {
-  width: 100%;
-  min-height: 5px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--app-primary-hover), var(--app-primary));
-  box-shadow: 0 4px 9px rgba(var(--app-primary-rgb), 0.23);
-  transition: height 280ms ease;
+.login-calendar :deep(.ant-picker-calendar-date) {
+  border-color: transparent;
+}
+
+.login-calendar :deep(.ant-picker-calendar-date:hover),
+.login-calendar :deep(.ant-picker-calendar-date-today) {
+  background: var(--app-primary-soft);
+}
+
+.login-calendar :deep(.ant-picker-calendar-date-value),
+.login-calendar :deep(.ant-picker-content th),
+.login-calendar :deep(.ant-picker-calendar-header .ant-select-selection-item) {
+  color: var(--app-text);
+}
+
+.login-calendar :deep(.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-calendar-date) {
+  color: var(--app-primary-contrast);
+  background: var(--app-primary);
+}
+
+.login-calendar__dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  margin: 4px auto 0;
+  background: var(--app-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb), 0.12);
 }
 
 .trend-chart--loading {
-  align-items: end;
+  display: grid;
+  height: 280px;
+  padding: 10px 4px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .trend-chart__skeleton {
   display: block;
   width: 100%;
-  height: 38%;
-  border-radius: 999px;
+  height: 100%;
+  border-radius: 8px;
   background: linear-gradient(
     90deg,
     rgba(var(--app-primary-rgb), 0.08),
@@ -1038,11 +1053,11 @@ onBeforeUnmount(() => {
 }
 
 .trend-chart__skeleton:nth-child(2n) {
-  height: 58%;
+  opacity: 0.8;
 }
 
 .trend-chart__skeleton:nth-child(3n) {
-  height: 76%;
+  opacity: 0.6;
 }
 
 @keyframes trend-chart-skeleton {
@@ -1083,6 +1098,8 @@ onBeforeUnmount(() => {
 .quick-action {
   display: grid;
   min-width: 0;
+  min-height: 66px;
+  height: 100%;
   padding: 13px;
   color: var(--app-text);
   text-align: left;
@@ -1134,6 +1151,10 @@ onBeforeUnmount(() => {
 
 .location-panel__actions {
   gap: 10px;
+}
+
+.location-panel__actions > .ant-btn {
+  min-width: 96px;
 }
 
 .location-panel__status {
@@ -1233,8 +1254,18 @@ onBeforeUnmount(() => {
     margin-top: 10px;
   }
 
+  .dashboard-panel__tag {
+    max-width: 100%;
+  }
+
   .location-panel__actions > .ant-btn {
-    margin-left: 8px;
+    margin-left: 0;
+  }
+
+  .location-panel__status {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }
 

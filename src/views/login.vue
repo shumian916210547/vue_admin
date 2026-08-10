@@ -7,7 +7,7 @@
       </div>
 
       <div class="login-page__message">
-        <span class="login-page__eyebrow">LOW-CODE ADMIN PLATFORM</span>
+        <span class="login-page__eyebrow">低代码管理平台</span>
         <h1>用配置构建，<br />用数据驱动。</h1>
         <p>面向多租户后台场景的低代码管理平台，支持动态表结构、模块路由与权限配置。</p>
       </div>
@@ -30,6 +30,7 @@
         <a-form
           ref="form"
           :model="formState"
+          size="small"
           layout="vertical"
           autocomplete="on"
           @finish="handleLogin"
@@ -41,7 +42,7 @@
           >
             <a-input
               v-model:value="formState.username"
-              size="large"
+              size="small"
               autocomplete="username"
               placeholder="请输入账号"
             >
@@ -56,7 +57,7 @@
           >
             <a-input-password
               v-model:value="formState.password"
-              size="large"
+              size="small"
               autocomplete="current-password"
               placeholder="请输入密码"
             >
@@ -67,7 +68,7 @@
           <a-button
             class="login-card__submit"
             type="primary"
-            size="large"
+            size="small"
             block
             html-type="submit"
             :loading="submitting"
@@ -127,8 +128,10 @@ const handleLogin = async (credentials) => {
 .login-page {
   display: flex;
   width: 100%;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: auto;
   background: var(--app-canvas);
 
   &__intro {
@@ -250,6 +253,8 @@ const handleLogin = async (credentials) => {
 
   &__panel {
     display: grid;
+    min-width: 0;
+    min-height: 100%;
     padding: 32px;
     background:
       radial-gradient(circle at 75% 14%, rgba(37, 99, 235, 0.08), transparent 18rem),
@@ -339,6 +344,7 @@ const handleLogin = async (credentials) => {
     }
 
     &__panel {
+      min-height: 100dvh;
       padding: 20px;
     }
   }

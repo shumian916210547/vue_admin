@@ -6,7 +6,7 @@
       </template>
       <template #fallback>
         <div class="pageLoading">
-          <a-spin tip="loading..." size="large" />
+          <a-spin tip="正在加载..." size="small" />
         </div>
       </template>
     </suspense>

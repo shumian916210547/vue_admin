@@ -4,6 +4,8 @@
       v-model:collapsed="collapsed"
       :trigger="null"
       :theme="props.systemOptions.theme"
+      breakpoint="md"
+      :collapsed-width="64"
       collapsible
     >
       <slot name="layout-menu"></slot>
@@ -67,7 +69,7 @@ const toggleCollapsed = () => {
 <style lang="scss">
 .left-layout__header {
   z-index: 1;
-  padding: 0;
+  padding: 0 !important;
   color: var(--app-text) !important;
   background: var(--app-glass-surface) !important;
   border-bottom: 1px solid var(--app-glass-border);
@@ -116,5 +118,20 @@ const toggleCollapsed = () => {
 .left-layout--dark .trigger:hover {
   color: var(--app-primary);
   background: var(--app-primary-soft);
+}
+
+@media (max-width: 768px) {
+  .left-layout__header {
+    padding: 0 !important;
+  }
+
+  .left-layout__header-main {
+    min-width: 0;
+    padding: 0 8px;
+  }
+
+  .left-layout > .ant-layout {
+    min-width: 0;
+  }
 }
 </style>

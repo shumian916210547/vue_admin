@@ -1,8 +1,12 @@
 <template>
-  <router-view />
+  <a-config-provider :component-size="'small'" :locale="locale">
+    <router-view />
+  </a-config-provider>
 </template>
 
 <script setup>
+import locale from "ant-design-vue/es/locale/zh_CN";
+
 document.title = sessionStorage.getItem("systemTitle") || "后台管理系统";
 </script>
 

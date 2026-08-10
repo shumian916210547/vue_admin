@@ -1,32 +1,29 @@
 <template>
   <a-modal
+    class="common-form-modal"
     v-model:visible="visible"
     @ok="handleOk"
     :width="modalWidth"
     ref="modalRef"
-    style="position: relative"
   >
     <template #title>
-      <div ref="modalTitleRef" style="width: 100%; cursor: move">
+      <div ref="modalTitleRef" class="common-form-modal__title">
         {{ modalType[type] + " " + className }}
       </div>
     </template>
 
     <div
-      :style="{
-        position: 'relative',
-        height: '100%',
-        width: formWidth,
-        height: formHeight,
-      }"
+      class="common-form-modal__body"
+      :style="{ '--common-form-width': formWidth, '--common-form-height': formHeight }"
     >
       <a-form
+        class="common-form-modal__form"
         :model="formState"
+        size="small"
         autocomplete="off"
         labelAlign="left"
         ref="form1"
         v-if="visible"
-        style="position: relative"
       >
         <a-form-item
           v-for="(key, index) in Object.keys(fields).filter((key) => {
@@ -37,19 +34,12 @@
           :rules="[
             {
               required: fields[key].required,
-              message: fields[key].componentOption.placeholder,
+              message: getFieldPlaceholder(fields[key], key),
             },
           ]"
-          :style="
-            fields[key].editComponent == 'RichTextEditor'
-              ? {
-                  position: 'absolute',
-                  left: '420px',
-                  width: '1000px',
-                  top: 0,
-                }
-              : {}
-          "
+          :class="{
+            'common-form-modal__rich-text-item': fields[key].editComponent == 'RichTextEditor',
+          }"
           :key="index"
           :labelCol="
             fields[key].editComponent == 'RichTextEditor'
@@ -68,6 +58,7 @@
               fields[key].isPointer
             "
             v-model:value="formState[key]"
+            size="small"
             style="width: 100%"
             :tree-data="
               treeSelectLabel(
@@ -76,7 +67,7 @@
             "
             tree-checkable
             :allowClear="fields[key].componentOption.allowClear"
-            :placeholder="fields[key].componentOption.placeholder"
+            :placeholder="getFieldPlaceholder(fields[key], key, true)"
             tree-node-filter-prop="label"
             :disabled="fields[key].componentOption.disabled"
             :fieldNames="{
@@ -105,6 +96,7 @@
           <component
             v-else-if="fields[key].editComponent == 'ATreeSelect'"
             v-model:value="formState[key]"
+            size="small"
             style="width: 100%"
             :tree-data="
               treeSelectLabel(
@@ -113,7 +105,7 @@
             "
             tree-checkable
             :allowClear="fields[key].componentOption.allowClear"
-            :placeholder="fields[key].componentOption.placeholder"
+            :placeholder="getFieldPlaceholder(fields[key], key, true)"
             tree-node-filter-prop="label"
             :disabled="fields[key].componentOption.disabled"
             :fieldNames="{
@@ -131,7 +123,8 @@
               fields[key].componentOption.selectTable == 'AntdIcon'
             "
             v-model:value="formState[key]"
-            :placeholder="fields[key].componentOption.placeholder"
+            size="small"
+            :placeholder="getFieldPlaceholder(fields[key], key, true)"
             :disabled="fields[key].componentOption.disabled"
             :allowClear="fields[key].componentOption.allowClear"
             :mode="fields[key].componentOption.mode"
@@ -157,7 +150,8 @@
               fields[key].editComponent == 'ASelect' && fields[key].isPointer
             "
             v-model:value="formState[key]"
-            :placeholder="fields[key].componentOption.placeholder"
+            size="small"
+            :placeholder="getFieldPlaceholder(fields[key], key, true)"
             :disabled="fields[key].componentOption.disabled"
             :allowClear="fields[key].componentOption.allowClear"
             :mode="fields[key].componentOption.mode"
@@ -183,12 +177,14 @@
             :maxLength="fields[key].componentOption.maxLength"
             :disabled="fields[key].componentOption.disabled"
             :fileType="fields[key].componentOption.fileType"
+            :placeholder="getFieldPlaceholder(fields[key], key)"
             :is="Upload"
           ></component>
 
           <component
             v-else-if="fields[key].editComponent == 'ASwitch'"
             v-model:checked="formState[key]"
+            size="small"
             :disabled="fields[key].componentOption.disabled"
             :is="fields[key].editComponent"
           ></component>
@@ -198,7 +194,7 @@
             ref="richTextRef"
             v-model:value="formState[key]"
             :disabled="fields[key].componentOption.disabled"
-            :placeholder="fields[key].componentOption.placeholder"
+            :placeholder="getFieldPlaceholder(fields[key], key)"
             minHeight="320px"
             :is="RichTextEditor"
           ></component>
@@ -206,7 +202,8 @@
           <component
             v-else
             v-model:value="formState[key]"
-            :placeholder="fields[key].componentOption.placeholder"
+            size="small"
+            :placeholder="getFieldPlaceholder(fields[key], key)"
             :disabled="fields[key].componentOption.disabled"
             :allowClear="fields[key].componentOption.allowClear"
             :mode="fields[key].componentOption.mode"
@@ -272,14 +269,28 @@ const props = defineProps({
   },
 });
 const modalType = {
-  add: "add",
-  edit: "edit",
+  add: "新增",
+  edit: "修改",
 };
 const modalWidth = ref("600px");
 const formWidth = ref("100%");
 const formHeight = ref("auto");
 const richTextRef = ref();
 const form1 = ref();
+
+/**
+ * 为动态表单字段生成中文占位提示，并兼容旧 Schema 缺少组件配置的情况。
+ * @param {{chineseName?: string, componentOption?: {placeholder?: string}, editComponent?: string} | undefined} field 字段元数据。
+ * @param {string} fieldName 字段键名，用于中文名称缺失时兜底。
+ * @param {boolean} isSelect 是否为选择类控件；选择类使用“请选择”。
+ * @returns {string} 动态控件可直接使用的 placeholder 文案。
+ */
+const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
+  const configured = field?.componentOption?.placeholder;
+  if (typeof configured === "string" && configured.trim()) return configured;
+  const label = field?.chineseName || fieldName || "该字段";
+  return `${isSelect ? "请选择" : "请输入"}${label}`;
+};
 watch(
   () => props.modalVisible,
   (n) => {
@@ -569,6 +580,28 @@ const down = (e) => {
 </script>
 
 <style lang="scss" scoped>
+.common-form-modal__title {
+  width: 100%;
+  cursor: move;
+}
+
+.common-form-modal__body {
+  position: relative;
+  width: var(--common-form-width, 100%);
+  min-height: var(--common-form-height, auto);
+}
+
+.common-form-modal__form {
+  position: relative;
+}
+
+.common-form-modal__rich-text-item {
+  position: absolute;
+  top: 0;
+  left: 420px;
+  width: 1000px;
+}
+
 .bar {
   cursor: col-resize;
   width: 24px;
@@ -579,5 +612,19 @@ const down = (e) => {
   right: 0px;
   top: 0;
   height: 100%;
+}
+
+@media (max-width: 900px) {
+  .common-form-modal__body {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .common-form-modal__rich-text-item {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: 100%;
+  }
 }
 </style>

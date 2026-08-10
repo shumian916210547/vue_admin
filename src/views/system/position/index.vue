@@ -2,16 +2,16 @@
   <section class="position-page management-page" :aria-busy="loading">
     <header class="management-page__heading">
       <div>
-        <span class="management-page__eyebrow">POSITION-BASED ACCESS CONTROL</span>
+        <span class="management-page__eyebrow">岗位访问控制</span>
         <h1>岗位管理</h1>
         <p>为岗位选择可访问的业务页面，并在每个页面内细分查询、新建、编辑、删除等按钮权限。</p>
       </div>
-      <div class="position-page__heading-actions">
-        <a-button :loading="loading" @click="reloadPositionPage">
+      <div class="position-page__heading-actions management-page__heading-actions">
+        <a-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadPositionPage">
           <template #icon><ReloadOutlined /></template>
           刷新配置
         </a-button>
-        <a-button type="primary" @click="openPositionModal('create')">
+        <a-button size="small" v-auth="['permission:insert', permissions]" type="primary" @click="openPositionModal('create')">
           <template #icon><PlusOutlined /></template>
           新增岗位
         </a-button>
@@ -31,8 +31,9 @@
       <template #title>
         <span class="management-page__card-title"><SafetyCertificateOutlined /> 岗位与页面权限</span>
       </template>
-      <p class="position-page__tip">系统管理页面仅对系统管理员开放，不会出现在可下放页面中。删除岗位前须先为引用该岗位的成员重新分配岗位。</p>
+      <p class="position-page__tip">首页、系统管理和业务页面均可按岗位分配；保存后还会同步校验页面内按钮权限。删除岗位前须先为引用该岗位的成员重新分配岗位。</p>
       <a-table
+        size="small"
         class="position-page__table"
         :columns="positionColumns"
         :data-source="positions"
@@ -47,14 +48,14 @@
           </template>
           <template v-else-if="column.key === 'actions'">
             <div class="position-page__row-actions">
-              <a-button type="link" @click="openPositionModal('edit', record.objectId)">编辑权限</a-button>
+              <a-button size="small" v-auth="['permission:edit', permissions]" type="link" @click="openPositionModal('edit', record.objectId)">编辑权限</a-button>
               <a-popconfirm
                 title="删除岗位会同步删除其页面和按钮权限；此操作不可恢复，确认继续吗？"
                 ok-text="删除"
                 cancel-text="取消"
                 @confirm="handleDeletePosition(record)"
               >
-                <a-button danger type="link">删除</a-button>
+                <a-button size="small" v-auth="['permission:remove', permissions]" danger type="link">删除</a-button>
               </a-popconfirm>
             </div>
           </template>
@@ -72,9 +73,9 @@
       @ok="submitPosition"
       @cancel="closePositionModal"
     >
-      <a-form ref="positionFormRef" :model="positionForm" :rules="positionRules" layout="vertical">
+      <a-form size="small" ref="positionFormRef" :model="positionForm" :rules="positionRules" layout="vertical">
         <a-form-item label="岗位名称" name="name" extra="一个成员只能分配一个岗位；岗位名称在当前企业内唯一。">
-          <a-input v-model:value="positionForm.name" placeholder="例如：区域运营专员" :maxlength="100" />
+          <a-input size="small" v-model:value="positionForm.name" placeholder="例如：区域运营专员" :maxlength="100" />
         </a-form-item>
         <section class="position-page__permission-section" aria-label="页面与按钮权限">
           <div class="position-page__permission-heading">
@@ -84,26 +85,33 @@
             </div>
             <a-tag color="blue">{{ selectedPageCount }} 个页面已选</a-tag>
           </div>
-          <a-empty v-if="!groupedRoutes.length" description="暂无可下放的业务页面，请先在模块管理中配置业务路由。" />
-          <div v-else class="position-page__permission-groups app-scrollbar">
-            <section v-for="group in groupedRoutes" :key="group.name" class="position-page__permission-group">
-              <h3>{{ group.name }}</h3>
-              <article v-for="page in group.pages" :key="page.routeId" class="position-page__permission-card">
-                <div class="position-page__permission-card-header">
-                  <a-checkbox v-model:checked="page.enabled" @change="togglePage(page)">
-                    <strong>{{ page.name }}</strong>
-                  </a-checkbox>
-                  <span>{{ page.path ? `/${page.path}` : "未配置路径" }}</span>
+          <a-empty v-if="!permissionTreeData.length" description="暂无可配置页面；系统目录会自动补齐，业务页面请先在模块管理中创建并关联路由。" />
+          <div v-else class="position-page__permission-tree app-scrollbar">
+            <a-tree
+              checkable
+              check-strictly
+              block-node
+              default-expand-all
+              :tree-data="permissionTreeData"
+              :checked-keys="permissionTreeCheckedKeys"
+              @check="handlePermissionTreeCheck"
+            >
+              <template #title="{ dataRef }">
+                <div
+                  class="position-page__tree-title"
+                  :class="`position-page__tree-title--${dataRef.nodeType}`"
+                >
+                  <strong v-if="dataRef.nodeType === 'module'">{{ dataRef.title }}</strong>
+                  <template v-else-if="dataRef.nodeType === 'page'">
+                    <strong>{{ dataRef.title }}</strong>
+                    <span class="position-page__tree-path">
+                      {{ dataRef.path ? `/${dataRef.path}` : "未配置路径" }}
+                    </span>
+                  </template>
+                  <span v-else>{{ dataRef.title }}</span>
                 </div>
-                <a-checkbox-group
-                  v-model:value="page.permissions"
-                  :options="buttonPermissionOptions"
-                  :disabled="!page.enabled"
-                  class="position-page__button-permissions"
-                  @change="handlePagePermissionChange(page)"
-                />
-              </article>
-            </section>
+              </template>
+            </a-tree>
           </div>
         </section>
       </a-form>
@@ -120,6 +128,7 @@ import {
 import { computed, onMounted, reactive, ref } from "vue";
 import { notification } from "ant-design-vue";
 
+import { Mixins } from "@/mixins";
 import {
   createPosition,
   deletePosition,
@@ -131,7 +140,7 @@ import {
 const positionColumns = [
   { title: "岗位名称", dataIndex: "name", key: "name", width: 220 },
   { title: "可访问页面", key: "pages", width: 360 },
-  { title: "操作", key: "actions", width: 180, fixed: "right" },
+  { title: "操作", key: "actions", width: 150, fixed: "right", className: "table-operation-column" },
 ];
 /** 按钮权限代码的中文说明；由 BFF 返回的代码只在此白名单中展示。 */
 const buttonPermissionLabels = {
@@ -145,6 +154,8 @@ const buttonPermissionLabels = {
   "permission:insertField": "新增字段",
   "permission:editField": "编辑字段",
   "permission:removeField": "删除字段",
+  "permission:forceLogout": "强制下线",
+  "permission:freeze": "冻结账号",
 };
 const loading = ref(false);
 const loadError = ref("");
@@ -154,28 +165,92 @@ const buttonPermissions = ref([]);
 const positionFormRef = ref();
 const positionModal = reactive({ visible: false, mode: "create", submitting: false });
 const positionForm = reactive({ objectId: "", name: "", pages: [] });
+const { queryPermission } = Mixins();
+const permissions = await queryPermission();
 
 /** 岗位名称表单校验规则；页面权限可为空，用于创建暂未下放业务页面的预设岗位。 */
 const positionRules = {
   name: [{ required: true, message: "请输入岗位名称", trigger: "blur" }],
 };
-const buttonPermissionOptions = computed(() =>
-  buttonPermissions.value.map((permission) => ({
-    value: permission,
-    label: buttonPermissionLabels[permission] || permission,
-    // 页面选中后必须可查看数据，否则路由虽可进入但业务数据请求会被 BFF 正确拒绝。
-    disabled: permission === "permission:query",
-  }))
-);
-const groupedRoutes = computed(() => {
+
+/**
+ * 生成页面权限树节点的稳定 key，避免模块名称或权限代码变化造成勾选状态错位。
+ * @param {string} routeId 页面 Route 的 objectId。
+ * @returns {string} 页面树节点 key。
+ */
+const getPageTreeKey = (routeId) => `page:${routeId}`;
+
+/**
+ * 生成页面下按钮权限树节点的稳定 key。
+ * @param {string} routeId 页面 Route 的 objectId。
+ * @param {string} permission 按钮权限 Code。
+ * @returns {string} 按钮权限树节点 key。
+ */
+const getPermissionTreeKey = (routeId, permission) => `permission:${routeId}:${permission}`;
+
+/**
+ * 读取页面真实可用的按钮权限；新 BFF 返回逐页白名单，旧 BFF 未返回时才回退到兼容全局列表。
+ * @param {Record<string, unknown>} page 页面权限草稿或 Route 目录项。
+ * @returns {string[]} 当前页面可展示和提交的按钮权限 Code，始终包含页面读取权限。
+ */
+const getAvailablePagePermissions = (page) => {
+  const configuredPermissions = Array.isArray(page?.availablePermissions) && page.availablePermissions.length
+    ? page.availablePermissions
+    : buttonPermissions.value;
+  return [...new Set(["permission:query", ...configuredPermissions])];
+};
+
+/**
+ * 将模块、页面和页面按钮权限转换为 Ant Design Vue Tree 所需的三级树结构。
+ * @returns {Array<Record<string, unknown>>} 模块树节点；页面和按钮节点携带业务定位字段供勾选事件使用。
+ */
+const permissionTreeData = computed(() => {
   const groups = new Map();
   for (const page of positionForm.pages) {
     const groupName = page.moduleName || "未分组页面";
-    const group = groups.get(groupName) || { name: groupName, pages: [] };
-    group.pages.push(page);
-    groups.set(groupName, group);
+    const groupKey = `module:${groupName}`;
+    const group = groups.get(groupKey) || {
+      key: groupKey,
+      title: groupName,
+      nodeType: "module",
+      disableCheckbox: true,
+      children: [],
+    };
+    group.children.push({
+      key: getPageTreeKey(page.routeId),
+      title: page.name,
+      path: page.path,
+      routeId: page.routeId,
+      nodeType: "page",
+      children: getAvailablePagePermissions(page).map((permission) => ({
+        key: getPermissionTreeKey(page.routeId, permission),
+        title: buttonPermissionLabels[permission] || permission,
+        routeId: page.routeId,
+        permission,
+        nodeType: "permission",
+        // 查询权限由页面启用状态自动维护，其他按钮必须先启用页面才能配置。
+        disableCheckbox: permission === "permission:query" || !page.enabled,
+      })),
+    });
+    groups.set(groupKey, group);
   }
   return [...groups.values()];
+});
+/**
+ * 计算权限树的受控勾选状态；模块只用于分组，页面和按钮节点独立勾选。
+ * @returns {{checked: string[], halfChecked: string[]}} Ant Design Vue Tree 的严格模式勾选对象。
+ */
+const permissionTreeCheckedKeys = computed(() => {
+  const checked = [];
+  for (const page of positionForm.pages) {
+    if (!page.enabled) continue;
+    const availablePermissions = new Set(getAvailablePagePermissions(page));
+    checked.push(getPageTreeKey(page.routeId));
+    for (const permission of page.permissions) {
+      if (availablePermissions.has(permission)) checked.push(getPermissionTreeKey(page.routeId, permission));
+    }
+  }
+  return { checked, halfChecked: [] };
 });
 const selectedPageCount = computed(() => positionForm.pages.filter((page) => page.enabled).length);
 
@@ -183,18 +258,22 @@ const selectedPageCount = computed(() => positionForm.pages.filter((page) => pag
  * 构建表单使用的单个页面权限草稿；已授权页面默认保留已有按钮权限，新增页面默认带“查看数据”。
  * @param {Record<string, unknown>} route BFF 返回的可配置业务页面。
  * @param {string[]} selectedPermissions 编辑岗位时已有的按钮权限；新增岗位时为空数组。
- * @returns {{routeId: string, name: string, path: string, moduleName: string, enabled: boolean, permissions: string[]}} 可直接绑定的页面表单项。
+ * @returns {{routeId: string, name: string, path: string, moduleName: string, availablePermissions: string[], enabled: boolean, permissions: string[]}} 可直接绑定的页面表单项。
  */
 const createPagePermissionDraft = (route, selectedPermissions = []) => {
+  const availablePermissions = getAvailablePagePermissions(route);
+  const allowedPermissions = new Set(availablePermissions);
   const enabled = selectedPermissions.length > 0;
+  const safeSelectedPermissions = selectedPermissions.filter((permission) => allowedPermissions.has(permission));
   const permissions = enabled
-    ? [...new Set(["permission:query", ...selectedPermissions])]
+    ? [...new Set(["permission:query", ...safeSelectedPermissions])]
     : ["permission:query"];
   return {
     routeId: route.objectId,
     name: route.name || "未命名页面",
     path: route.path || "",
     moduleName: route.moduleName || "未分组页面",
+    availablePermissions,
     enabled,
     permissions,
   };
@@ -304,13 +383,49 @@ const handlePagePermissionChange = (page) => {
 };
 
 /**
+ * 处理权限树的页面或按钮勾选事件；页面节点控制访问开关，按钮节点只修改当前页面的权限 Code。
+ * @param {string[] | {checked: string[], halfChecked: string[]}} checkedKeys Tree 当前受控勾选值，用于兼容严格模式事件返回格式。
+ * @param {{checked?: boolean, node?: {key?: string, dataRef?: Record<string, unknown>}}} info Tree 勾选事件信息，包含节点业务数据与本次勾选结果。
+ * @returns {void} 更新岗位表单中的页面启用状态和按钮权限，不直接发起接口请求。
+ */
+const handlePermissionTreeCheck = (checkedKeys, info) => {
+  const node = info?.node?.dataRef || {};
+  const nodeKey = info?.node?.key;
+  const checkedList = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys?.checked || [];
+  const checked = typeof info?.checked === "boolean" ? info.checked : checkedList.includes(nodeKey);
+  const page = positionForm.pages.find((item) => item.routeId === node.routeId);
+
+  if (!page || node.nodeType === "module") return;
+
+  if (node.nodeType === "page") {
+    page.enabled = checked;
+    togglePage(page);
+    return;
+  }
+
+  if (node.nodeType !== "permission" || !page.enabled) return;
+
+  const permissions = new Set(page.permissions);
+  if (checked) permissions.add(node.permission);
+  else permissions.delete(node.permission);
+  page.permissions = [...permissions];
+  handlePagePermissionChange(page);
+};
+
+/**
  * 将岗位页面草稿整理为 BFF 需要的逐页授权请求体，未勾选页面不会发送。
  * @returns {Array<{routeId: string, permissions: string[]}>} 已选页面的安全授权数组。
  */
 const selectedPagePermissions = () =>
   positionForm.pages
     .filter((page) => page.enabled)
-    .map((page) => ({ routeId: page.routeId, permissions: [...new Set(page.permissions)] }));
+    .map((page) => {
+      const availablePermissions = new Set(getAvailablePagePermissions(page));
+      return {
+        routeId: page.routeId,
+        permissions: [...new Set(page.permissions.filter((permission) => availablePermissions.has(permission)))],
+      };
+    });
 
 /**
  * 提交岗位新增或编辑。BFF 会二次验证租户、页面归属与所有按钮权限代码。
@@ -388,15 +503,14 @@ onMounted(() => {
 
 .position-page__heading-actions,
 .position-page__row-actions,
-.position-page__permission-heading,
-.position-page__permission-card-header {
+.position-page__permission-heading {
   display: flex;
   align-items: center;
 }
 
 .position-page__heading-actions,
 .position-page__row-actions {
-  gap: 8px;
+  gap: 4px;
 }
 
 .position-page__heading-actions {
@@ -437,6 +551,7 @@ onMounted(() => {
 }
 
 .position-page__row-actions {
+  flex-wrap: nowrap;
   justify-content: center;
 }
 
@@ -465,55 +580,64 @@ onMounted(() => {
   line-height: 1.6;
 }
 
-.position-page__permission-groups {
+.position-page__permission-tree {
   max-height: min(50vh, 470px);
+  overflow-y: auto;
   padding-right: 4px;
 }
 
-.position-page__permission-group + .position-page__permission-group {
-  margin-top: 16px;
-}
-
-.position-page__permission-group h3 {
-  margin: 0 0 8px;
-  color: var(--app-ink);
-  font-size: 14px;
-}
-
-.position-page__permission-card {
-  padding: 12px;
+.position-page__permission-tree :deep(.ant-tree) {
+  padding: 8px 10px;
   border: 1px solid var(--app-border);
   border-radius: 10px;
   background: var(--app-glass-strong);
 }
 
-.position-page__permission-card + .position-page__permission-card {
-  margin-top: 8px;
+.position-page__permission-tree :deep(.ant-tree-treenode) {
+  width: 100%;
+  padding: 4px 0;
 }
 
-.position-page__permission-card-header {
-  justify-content: space-between;
-  gap: 12px;
+.position-page__permission-tree :deep(.ant-tree-node-content-wrapper) {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
-.position-page__permission-card-header strong {
+.position-page__tree-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.position-page__tree-title strong {
+  overflow: hidden;
   color: var(--app-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.position-page__permission-card-header > span {
+.position-page__tree-title--module {
+  font-size: 14px;
+}
+
+.position-page__tree-title--page {
+  font-size: 13px;
+}
+
+.position-page__tree-title--permission {
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.position-page__tree-path {
   max-width: 46%;
   overflow: hidden;
   color: var(--app-muted);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.position-page__button-permissions {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  gap: 8px 16px;
 }
 
 @media (max-width: 768px) {
@@ -525,13 +649,12 @@ onMounted(() => {
     justify-content: flex-start;
   }
 
-  .position-page__permission-heading,
-  .position-page__permission-card-header {
+  .position-page__permission-heading {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .position-page__permission-card-header > span {
+  .position-page__tree-path {
     max-width: 100%;
   }
 }

@@ -8,7 +8,7 @@ import "./registerServiceWorker";
 import "ant-design-vue/dist/antd.css";
 import "./assets/scss/global.scss";
 
-import Parse from "@/service/parse-client";
+import Parse, { getCurrentAuthContext } from "@/service/parse-client";
 import { restoreVisualThemePreference } from "@/utils/theme";
 
 // Parse is now an API adapter. Credentials and Parse Server access remain on
@@ -23,7 +23,31 @@ restoreVisualThemePreference();
  * @returns {boolean} 指定权限存在时返回 true；服务端仍会执行最终授权校验。
  */
 const hasPermission = (value, arr) => {
-  return arr.includes(value);
+  if (getCurrentAuthContext()?.isAdmin) return true;
+  return Array.isArray(arr) && arr.includes(value);
+};
+
+/**
+ * 解析 v-auth/v-permission 的绑定值，兼容“权限代码 + 当前页面权限数组”的旧调用格式。
+ * @param {unknown} value 指令绑定值，可以是字符串或 [code, permissions] 数组。
+ * @returns {{code: string, permissions: string[]}} 规范化后的按钮权限输入。
+ */
+const normalizeDirectiveValue = (value) => {
+  if (Array.isArray(value)) return { code: value[0], permissions: value[1] };
+  if (typeof value === "string") return { code: value, permissions: [] };
+  return { code: "", permissions: [] };
+};
+
+/**
+ * 根据当前认证上下文更新按钮可见性；服务端仍是最终授权边界，指令只改善前端体验。
+ * @param {HTMLElement} el 需要隐藏或恢复的 DOM 元素。
+ * @param {unknown} value 指令绑定值，支持字符串或权限数组。
+ * @returns {void} 更新元素 display 样式，不发起请求或改变服务端权限。
+ */
+const updateAuthVisibility = (el, value) => {
+  const { code, permissions } = normalizeDirectiveValue(value);
+  if (!el.dataset.authOriginalDisplay) el.dataset.authOriginalDisplay = el.style.display || "";
+  el.style.display = hasPermission(code, permissions) ? el.dataset.authOriginalDisplay : "none";
 };
 
 const app = createApp(App).use(store).use(router).use(Antd);
@@ -41,14 +65,17 @@ const notifyServiceWorkerUpdate = () => {
 };
 
 window.addEventListener("shumian-service-worker-updated", notifyServiceWorkerUpdate);
-app.directive("permission", {
+const permissionDirective = {
   mounted(el, binding) {
-    const { value } = binding;
-    if (value && !hasPermission(value[0], value[1])) {
-      el.style.display = "none";
-    }
+    updateAuthVisibility(el, binding.value);
   },
-});
+  updated(el, binding) {
+    updateAuthVisibility(el, binding.value);
+  },
+};
+
+app.directive("permission", permissionDirective);
+app.directive("auth", permissionDirective);
 
 /**
  * 统一处理未被组件捕获的前端异常，向用户提供可操作的反馈而不泄露内部错误细节。

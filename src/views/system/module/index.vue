@@ -2,95 +2,65 @@
   <section class="module-page">
     <header class="module-page__heading">
       <div>
-        <span class="module-page__eyebrow">NAVIGATION & PERMISSIONS</span>
+        <span class="module-page__eyebrow">导航与权限</span>
         <h1>模块管理</h1>
         <p>维护后台菜单模块及其子路由，路由可关联到已配置的数据表页面或组件。</p>
       </div>
     </header>
 
-  <CommonPage
-    ref="commonPage"
-    :className="'Module'"
-    @add="handleAdd"
-    :innerContainer="true"
-    innerContainerTitle="新增"
-  >
-    <!-- 路由列表 -->
-    <template #innerContainer="{ record }">
-      <a-table
-        class="module-page__route-table"
-        :columns="columns"
-        :data-source="formattingData(record.routes)"
-        :pagination="false"
-        rowKey="objectId"
-      >
-        <template #bodyCell="{ column, index }">
-          <template v-if="column.key === 'operation'">
-                <div class="module-page__row-actions">
-              <span class="table-operation">
-                <a-button
-                  @click="handleEdit(record, index)"
-                  v-permission="['permission:edit', permissions]"
-                >
-                  修改
-                </a-button>
-                <a-divider type="vertical" />
-                <a-popconfirm
-                  title="删除路由后不可恢复，确定继续吗？"
-                  ok-text="删除"
-                  cancel-text="取消"
-                  @confirm="handleDelete(record, index)"
-                  @cancel="() => {}"
-                >
-                  <a-button
-                    type="danger"
-                    v-permission="['permission:remove', permissions]"
-                  >
-                    删除
+    <CommonPage ref="commonPage" :className="'Module'" @add="handleAdd" :innerContainer="true" innerContainerTitle="新增">
+      <!-- 路由列表 -->
+      <template #innerContainer="{ record }">
+        <a-table size="small" class="module-page__route-table" :columns="columns" :data-source="formattingData(record.routes)"
+          :pagination="false" rowKey="objectId">
+          <template #bodyCell="{ column, index }">
+            <template v-if="column.key === 'operation'">
+              <div class="module-page__row-actions">
+                <span class="table-operation">
+                  <a-button size="small" @click="handleEdit(record, index)" v-permission="['permission:edit', permissions]">
+                    修改
                   </a-button>
-                </a-popconfirm>
-              </span>
-            </div>
-          </template>
-          <template v-else>
-            <a-tooltip placement="top" arrowPointAtCenter>
-              <template #title>
-                <span>
-                  {{
-                    record.routes[index][column.key]?.name ||
-                    record.routes[index][column.key]
-                  }}
+                  <a-divider type="vertical" />
+                  <a-popconfirm title="删除路由后不可恢复，确定继续吗？" ok-text="删除" cancel-text="取消"
+                    @confirm="handleDelete(record, index)" @cancel="() => { }">
+                    <a-button size="small" type="danger" v-permission="['permission:remove', permissions]">
+                      删除
+                    </a-button>
+                  </a-popconfirm>
                 </span>
-              </template>
-              <p
-                style="
+              </div>
+            </template>
+            <template v-else>
+              <a-tooltip placement="top" arrowPointAtCenter>
+                <template #title>
+                  <span>
+                    {{
+                      record.routes[index][column.key]?.name ||
+                      record.routes[index][column.key]
+                    }}
+                  </span>
+                </template>
+                <p style="
                   max-width: 200px;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap;
-                "
-              >
-                {{
-                  record.routes[index][column.key]?.name ||
-                  record.routes[index][column.key]
-                }}
-              </p>
-            </a-tooltip>
+                ">
+                  {{
+                    record.routes[index][column.key]?.name ||
+                    record.routes[index][column.key]
+                  }}
+                </p>
+              </a-tooltip>
+            </template>
           </template>
-        </template>
-      </a-table>
-    </template>
-  </CommonPage>
+        </a-table>
+      </template>
+    </CommonPage>
 
-  <!-- 路由编辑 -->
-  <CommonForm
-    :className="'Route'"
-    :fields="formFields"
-    :editState="editState"
-    :type="modalState.type"
-    v-model:modalVisible="modalState.show"
-    @onOk="handleSubmit"
-  ></CommonForm>
+    <!-- 路由编辑 -->
+    <CommonForm :className="'Route'" :fields="formFields" :editState="editState" :type="modalState.type"
+      v-model:modalVisible="modalState.show" @onOk="handleSubmit"></CommonForm>
   </section>
 </template>
 
@@ -224,7 +194,8 @@ const loadFields = async () => {
     dataIndex: "operation",
     key: "operation",
     fixed: "right",
-    width: 230,
+    width: 128,
+    className: "table-operation-column",
   });
 };
 
@@ -245,6 +216,13 @@ await findAll("Route");
 </script>
 
 <style lang="scss" scoped>
+.module-page {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .module-page__heading {
   margin-bottom: 22px;
   padding-bottom: 20px;
@@ -282,6 +260,7 @@ await findAll("Route");
 .module-page__row-actions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 4px;
 }
 </style>

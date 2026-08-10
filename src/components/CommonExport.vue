@@ -18,10 +18,11 @@
       }"
     >
       <a-table
+        size="small"
         :row-selection="rowSelection"
         :columns="
           tableColumns.filter((column) => {
-            return column.key != 'operation';
+            return !['operation', 'status'].includes(column.key);
           })
         "
         :data-source="dataList"
