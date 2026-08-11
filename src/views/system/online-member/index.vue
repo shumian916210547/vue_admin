@@ -6,115 +6,124 @@
         <h1>在线成员</h1>
         <p>查看当前企业的有效管理端会话；强制下线会撤销该成员的全部会话，冻结会同时阻止新登录。</p>
       </div>
-      <a-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadOnlineMembers">
-        <template #icon><ReloadOutlined /></template>
+      <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadOnlineMembers">
+        <template #icon><el-icon><Refresh /></el-icon></template>
         刷新列表
-      </a-button>
+      </el-button>
     </header>
 
-    <a-alert
+    <el-alert
       v-if="loadError"
       class="management-page__alert"
       type="error"
       show-icon
-      :message="loadError"
-      description="请确认当前账号为系统管理员，并检查服务端 AdminSession 配置是否已完成迁移。"
-    />
+      :title="loadError"
+    >请确认当前账号为系统管理员，并检查服务端会话配置是否已完成迁移。</el-alert>
 
-    <a-card class="online-member-page__card" :bordered="false">
-      <template #title>
-        <span class="management-page__card-title"><TeamOutlined /> 在线会话</span>
-      </template>
-      <template #extra>
-        <a-tag color="blue">{{ sessions.length }} 个在线会话</a-tag>
+    <el-card class="online-member-page__card">
+      <template #header>
+        <div class="management-page__card-header">
+          <span class="management-page__card-title"><el-icon><UserFilled /></el-icon> 在线会话</span>
+          <el-tag size="small" type="primary">{{ sessions.length }} 个在线会话</el-tag>
+        </div>
       </template>
       <p class="online-member-page__tip">在线时长按会话首次建立时间计算；设备信息来自登录请求的 User-Agent 分类，不保存完整请求头。</p>
-      <a-table
+      <el-table
         size="small"
         class="online-member-page__table"
-        :columns="columns"
-        :data-source="sessions"
-        :loading="loading"
-        :pagination="false"
-        :scroll="{ x: 980 }"
+        width="100%"
+        :data="sessions"
+        v-loading="loading"
         row-key="objectId"
       >
-        <template #bodyCell="{ column, record }">
+        <el-table-column
+          v-for="column in columns"
+          :key="column.key"
+          :prop="column.dataIndex"
+          :label="column.title"
+          :width="column.width"
+            :min-width="column.minWidth || (column.width ? undefined : 140)"
+          :fixed="column.fixed"
+          :class-name="column.className"
+        >
+        <template #default="{ row }">
           <template v-if="column.key === 'member'">
             <div class="online-member-page__member">
-              <strong>{{ record.name || record.username }}</strong>
-              <span>{{ record.username }}</span>
+              <strong>{{ row.name || row.username }}</strong>
+              <span>{{ row.username }}</span>
             </div>
           </template>
           <template v-else-if="column.key === 'duration'">
-            {{ formatOnlineDuration(record.onlineAt, currentTime) }}
+            {{ formatOnlineDuration(row.onlineAt, currentTime) }}
           </template>
           <template v-else-if="column.key === 'onlineAt'">
-            {{ formatDateTime(record.onlineAt) }}
+            {{ formatDateTime(row.onlineAt) }}
           </template>
           <template v-else-if="column.key === 'lastSeenAt'">
-            {{ formatDateTime(record.lastSeenAt) }}
+            {{ formatDateTime(row.lastSeenAt) }}
           </template>
           <template v-else-if="column.key === 'operation'">
             <div class="online-member-page__actions">
-              <a-popconfirm
+              <el-popconfirm
                 title="强制下线会撤销该成员的全部在线会话，确认继续吗？"
-                ok-text="确认下线"
-                cancel-text="取消"
-                @confirm="handleForceLogout(record)"
+                confirm-button-text="确认下线"
+                cancel-button-text="取消"
+                @confirm="handleForceLogout(row)"
               >
-                <a-button size="small" v-auth="['permission:forceLogout', permissions]" danger type="link">强制下线</a-button>
-              </a-popconfirm>
-              <a-button size="small" v-auth="['permission:freeze', permissions]" type="link" @click="openFreezeModal(record)">冻结账号</a-button>
+                <template #reference>
+                  <el-button size="small" v-auth="['permission:forceLogout', permissions]" type="danger" link>强制下线</el-button>
+                </template>
+              </el-popconfirm>
+              <el-button size="small" v-auth="['permission:freeze', permissions]" type="primary" link @click="openFreezeModal(row)">冻结账号</el-button>
             </div>
           </template>
+          <span v-else>{{ row[column.dataIndex] }}</span>
         </template>
-      </a-table>
-      <a-empty v-if="!loading && !sessions.length" description="当前没有在线成员" />
-    </a-card>
+        </el-table-column>
+      </el-table>
+      <el-empty v-if="!loading && !sessions.length" description="当前没有在线成员" />
+    </el-card>
 
-    <a-modal
-      v-model:visible="freezeModal.visible"
+    <el-dialog
+      v-model="freezeModal.visible"
       title="冻结账号"
-      :confirm-loading="freezeModal.submitting"
-      ok-text="确认冻结"
-      cancel-text="取消"
-      @ok="submitFreeze"
-      @cancel="closeFreezeModal"
+      @close="closeFreezeModal"
     >
-      <a-form size="small" ref="freezeFormRef" :model="freezeForm" :rules="freezeRules" layout="vertical">
-        <a-form-item label="目标成员">
-          <a-input size="small" :value="freezeForm.memberLabel" disabled placeholder="当前目标成员" />
-        </a-form-item>
-        <a-form-item label="常用时长" name="preset">
-          <a-select size="small" v-model:value="freezeForm.preset" placeholder="请选择常用冻结时长" @change="handleFreezePresetChange">
-            <a-select-option v-for="option in freezePresets" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </a-select-option>
-            <a-select-option value="custom">自定义时长</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="冻结时长" name="durationMinutes" extra="单位为分钟，范围 1 至 43200 分钟（30 天）。">
-          <a-input-number
+      <el-form size="small" ref="freezeFormRef" :model="freezeForm" :rules="freezeRules" label-position="top">
+        <el-form-item label="目标成员">
+          <el-input size="small" v-model="freezeForm.memberLabel" disabled placeholder="当前目标成员" />
+        </el-form-item>
+        <el-form-item label="常用时长" prop="preset">
+          <el-select size="small" v-model="freezeForm.preset" placeholder="请选择常用冻结时长" @change="handleFreezePresetChange">
+            <el-option v-for="option in freezePresets" :key="option.value" :value="option.value" :label="option.label" />
+            <el-option value="custom" label="自定义时长" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="冻结时长" prop="durationMinutes">
+          <el-input-number
             size="small"
-            v-model:value="freezeForm.durationMinutes"
+            v-model="freezeForm.durationMinutes"
             placeholder="请输入冻结分钟数"
             :min="1"
             :max="43200"
             :precision="0"
-            addon-after="分钟"
             class="online-member-page__duration-input"
-          />
-        </a-form-item>
-        <a-alert type="warning" show-icon message="冻结后，该成员现有会话会立即失效，冻结截止前无法重新登录。" />
-      </a-form>
-    </a-modal>
+          ><template #suffix>分钟</template></el-input-number>
+          <p class="form-item-help">单位为分钟，范围 1 至 43200 分钟（30 天）。</p>
+        </el-form-item>
+        <el-alert type="warning" show-icon title="冻结后，该成员现有会话会立即失效，冻结截止前无法重新登录。" />
+      </el-form>
+      <template #footer>
+        <el-button size="small" @click="closeFreezeModal">取消</el-button>
+        <el-button size="small" type="primary" :loading="freezeModal.submitting" @click="submitFreeze">确认冻结</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <script setup>
-import { ReloadOutlined, TeamOutlined } from "@ant-design/icons-vue";
-import { notification } from "ant-design-vue";
+import { Refresh, UserFilled } from "@element-plus/icons-vue";
+import { ElNotification } from "element-plus";
 import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
 
 import { Mixins } from "@/mixins";
@@ -127,11 +136,11 @@ import {
 /** 在线会话表格列；时间和操作列通过 bodyCell 插槽格式化。 */
 const columns = [
   { title: "成员", key: "member", width: 190, fixed: "left" },
-  { title: "手机号", dataIndex: "phone", key: "phone", width: 150 },
-  { title: "上线时间", key: "onlineAt", width: 180 },
-  { title: "在线时长", key: "duration", width: 150 },
-  { title: "最后活动", key: "lastSeenAt", width: 180 },
-  { title: "登录设备", dataIndex: "deviceInfo", key: "deviceInfo", width: 220 },
+  { title: "手机号", dataIndex: "phone", key: "phone", minWidth: 150 },
+  { title: "上线时间", key: "onlineAt", minWidth: 180 },
+  { title: "在线时长", key: "duration", minWidth: 150 },
+  { title: "最后活动", key: "lastSeenAt", minWidth: 180 },
+  { title: "登录设备", dataIndex: "deviceInfo", key: "deviceInfo", minWidth: 220 },
   { title: "操作", key: "operation", width: 176, fixed: "right", className: "table-operation-column" },
 ];
 /** 冻结弹窗中可直接选择的常用时长，value 单位为分钟。 */
@@ -258,12 +267,12 @@ const submitFreeze = async () => {
     await freezeFormRef.value?.validate?.();
     freezeModal.submitting = true;
     await freezeOnlineMember(freezeForm.userId, freezeForm.durationMinutes);
-    notification.success({ message: "在线成员", description: "账号已冻结，现有会话已全部失效。" });
+    ElNotification.success({ title: "在线成员", message: "账号已冻结，现有会话已全部失效。" });
     closeFreezeModal();
     await reloadOnlineMembers();
   } catch (error) {
     if (error?.errorFields) return;
-    notification.error({ message: "冻结失败", description: error?.message || "账号未能冻结，请稍后重试。" });
+    ElNotification.error({ title: "冻结失败", message: error?.message || "账号未能冻结，请稍后重试。" });
   } finally {
     freezeModal.submitting = false;
   }
@@ -277,10 +286,10 @@ const submitFreeze = async () => {
 const handleForceLogout = async (record) => {
   try {
     await forceLogoutOnlineMember(record.userId);
-    notification.success({ message: "在线成员", description: `成员“${record.name || "未命名成员"}”已强制下线。` });
+    ElNotification.success({ title: "在线成员", message: `成员“${record.name || "未命名成员"}”已强制下线。` });
     await reloadOnlineMembers();
   } catch (error) {
-    notification.error({ message: "强制下线失败", description: error?.message || "会话未能撤销，请稍后重试。" });
+    ElNotification.error({ title: "强制下线失败", message: error?.message || "会话未能撤销，请稍后重试。" });
   }
 };
 
@@ -317,14 +326,6 @@ onBeforeUnmount(() => {
   flex-direction: column;
 }
 
-.online-member-page__card :deep(.ant-card-body) {
-  display: flex;
-  min-height: 0;
-  gap: 14px;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
 .online-member-page__tip {
   margin: 0;
   color: var(--app-muted);
@@ -355,12 +356,6 @@ onBeforeUnmount(() => {
   flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
-}
-
-.online-member-page__actions > .ant-btn,
-.online-member-page__actions .ant-popconfirm > .ant-btn {
-  min-width: 0;
-  margin: 0;
 }
 
 .online-member-page__duration-input {

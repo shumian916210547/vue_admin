@@ -2,10 +2,9 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import store from "./store";
-import Antd from "ant-design-vue";
-import { notification } from "ant-design-vue";
+import ElementPlus, { ElNotification } from "element-plus";
 import "./registerServiceWorker";
-import "ant-design-vue/dist/antd.css";
+import "element-plus/dist/index.css";
 import "./assets/scss/global.scss";
 
 import Parse, { getCurrentAuthContext } from "@/service/parse-client";
@@ -50,16 +49,19 @@ const updateAuthVisibility = (el, value) => {
   el.style.display = hasPermission(code, permissions) ? el.dataset.authOriginalDisplay : "none";
 };
 
-const app = createApp(App).use(store).use(router).use(Antd);
+const app = createApp(App)
+  .use(store)
+  .use(router)
+  .use(ElementPlus, { size: "small" });
 
 /**
  * 提示用户已有可用的新前端版本；不会自动刷新，以免中断当前正在编辑的业务数据。
  * @returns {void} 显示一次可操作的版本更新通知。
  */
 const notifyServiceWorkerUpdate = () => {
-  notification.info({
-    message: "发现新版本",
-    description: "系统已在后台下载最新版本，完成当前操作后刷新页面即可使用。",
+  ElNotification.info({
+    title: "发现新版本",
+    message: "系统已在后台下载最新版本，完成当前操作后刷新页面即可使用。",
     duration: 0,
   });
 };
@@ -88,9 +90,9 @@ app.config.errorHandler = (err, vm, info) => {
   void err;
   void vm;
   void info;
-  notification.error({
-    message: "页面运行异常",
-    description: "请刷新页面后重试；若问题持续出现，请联系系统管理员。",
+  ElNotification.error({
+    title: "页面运行异常",
+    message: "请刷新页面后重试；若问题持续出现，请联系系统管理员。",
   });
 };
 

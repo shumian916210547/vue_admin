@@ -2,7 +2,7 @@
   <main class="login-page">
     <section class="login-page__intro" aria-label="产品简介">
       <div class="login-page__brand">
-        <span class="login-page__brand-mark"><SafetyCertificateOutlined /></span>
+        <span class="login-page__brand-mark"><el-icon><CircleCheck /></el-icon></span>
         <span>{{ systemTitle }}</span>
       </div>
 
@@ -27,58 +27,60 @@
           <span>请输入管理员账号与密码继续操作</span>
         </div>
 
-        <a-form
+        <el-form
           ref="form"
           :model="formState"
           size="small"
-          layout="vertical"
+          label-position="top"
           autocomplete="on"
-          @finish="handleLogin"
+          @submit.prevent="handleLogin"
         >
-          <a-form-item
+          <el-form-item
             label="账号"
-            name="username"
-            :rules="[{ required: true, message: '请输入账号' }]"
+            prop="username"
+            :rules="[{ required: true, message: '请输入账号', trigger: 'blur' }]"
           >
-            <a-input
-              v-model:value="formState.username"
+            <el-input
+              v-model="formState.username"
               size="small"
               autocomplete="username"
               placeholder="请输入账号"
             >
-              <template #prefix><UserOutlined /></template>
-            </a-input>
-          </a-form-item>
+              <template #prefix><el-icon><User /></el-icon></template>
+            </el-input>
+          </el-form-item>
 
-          <a-form-item
+          <el-form-item
             label="密码"
-            name="password"
-            :rules="[{ required: true, message: '请输入密码' }]"
+            prop="password"
+            :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]"
           >
-            <a-input-password
-              v-model:value="formState.password"
+            <el-input
+              v-model="formState.password"
+              type="password"
+              show-password
               size="small"
               autocomplete="current-password"
               placeholder="请输入密码"
             >
-              <template #prefix><LockOutlined /></template>
-            </a-input-password>
-          </a-form-item>
+              <template #prefix><el-icon><Lock /></el-icon></template>
+            </el-input>
+          </el-form-item>
 
-          <a-button
+          <el-button
             class="login-card__submit"
             type="primary"
             size="small"
             block
-            html-type="submit"
+            native-type="submit"
             :loading="submitting"
           >
             登录
-          </a-button>
-        </a-form>
+          </el-button>
+        </el-form>
 
         <p class="login-card__hint">
-          <SafetyCertificateOutlined /> 账户验证通过后将建立受保护的浏览器会话。
+          <el-icon class="login-card__hint-icon"><CircleCheck /></el-icon> 账户验证通过后将建立受保护的浏览器会话。
         </p>
       </div>
     </section>
@@ -86,8 +88,8 @@
 </template>
 
 <script setup>
-import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons-vue";
-import { notification } from "ant-design-vue";
+import { CircleCheck, Lock, User } from "@element-plus/icons-vue";
+import { ElNotification } from "element-plus";
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 
@@ -100,23 +102,29 @@ const formState = reactive({
   username: "",
   password: "",
 });
+const form = ref();
 
 document.title = `登录 | ${systemTitle}`;
 
 /**
- * 提交已通过 Ant Design Vue 表单校验的登录凭据，并由 BFF 建立受保护的浏览器会话。
- * @param {{username: string, password: string}} credentials 表单收集的账号和密码；只通过 Parse 兼容适配层发送到同源 API。
- * @returns {Promise<void>} 登录成功后替换到首页；失败时显示统一错误提示并恢复按钮状态。
+ * 提交已通过 Element Plus 表单校验的登录凭据，并由 BFF 建立受保护的浏览器会话。
+ * @returns {Promise<void>} 登录成功后替换到首页；校验或登录失败时显示统一提示并恢复按钮状态。
  */
-const handleLogin = async (credentials) => {
+const handleLogin = async () => {
+  try {
+    await form.value.validate();
+  } catch {
+    return;
+  }
+  const credentials = { ...formState };
   submitting.value = true;
   try {
     await Parse.User.logIn(credentials.username, credentials.password);
     await router.replace("/");
   } catch (error) {
-    notification.error({
-      message: "登录失败",
-      description: error?.message || "请检查账号、密码和网络连接后重试。",
+    ElNotification.error({
+      title: "登录失败",
+      message: error?.message || "请检查账号、密码和网络连接后重试。",
     });
   } finally {
     submitting.value = false;
@@ -300,26 +308,8 @@ const handleLogin = async (credentials) => {
     }
   }
 
-  :deep(.ant-form-item) {
-    margin-bottom: 20px;
-  }
-
-  :deep(.ant-form-item-label > label) {
-    color: var(--app-text);
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  :deep(.ant-input-affix-wrapper-lg) {
-    padding-top: 7px;
-    padding-bottom: 7px;
-  }
-
   &__submit {
-    height: 46px;
     margin-top: 4px;
-    border-radius: 10px;
-    font-size: 15px;
   }
 
   &__hint {
@@ -330,7 +320,7 @@ const handleLogin = async (credentials) => {
     line-height: 1.6;
     align-items: flex-start;
 
-    .anticon {
+    &-icon {
       margin: 3px 6px 0 0;
       color: var(--app-primary);
     }

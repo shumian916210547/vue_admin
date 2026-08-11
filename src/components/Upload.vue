@@ -1,14 +1,15 @@
 <template>
   <div class="clearfix">
-    <a-upload
-      v-model:file-list="fileList"
+    <el-upload
+      size="small"
+      :file-list="fileList"
       name="file"
-      :list-type="fileType == 'image/*' ? 'picture-card' : ''"
+      :list-type="fileType == 'image/*' ? 'picture-card' : 'text'"
       class="avatar-uploader"
       :show-upload-list="true"
       :action="uploadServer"
       :headers="uploadHeaders"
-      :withCredentials="true"
+      :with-credentials="true"
       :before-upload="beforeUpload"
       @change="handleChange"
       @remove="handleRemove"
@@ -18,22 +19,21 @@
     >
       <template v-if="fileType == 'image/*'">
         <div v-if="fileList.length < props.maxLength">
-          <plus-outlined />
+          <el-icon><Plus /></el-icon>
           <div class="upload-control__hint">{{ placeholder }}</div>
         </div>
       </template>
       <template v-else>
-        <a-button v-if="fileList.length < props.maxLength" size="small">
-          <upload-outlined></upload-outlined>
+        <el-button v-if="fileList.length < props.maxLength" size="small">
+          <el-icon><Upload /></el-icon>
           选择文件
-        </a-button>
+        </el-button>
       </template>
-    </a-upload>
-    <a-modal
-      :visible="previewVisible"
+    </el-upload>
+    <el-dialog
+      v-model="previewVisible"
       :title="previewTitle"
-      :footer="null"
-      @cancel="handleCancel"
+      @close="handleCancel"
       width="800px"
     >
       <template v-if="fileType == 'image/*'">
@@ -73,16 +73,16 @@
           style="height: 400px"
         />
       </template>
-    </a-modal>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { PlusOutlined, UploadOutlined } from "@ant-design/icons-vue";
+import { Plus, Upload } from "@element-plus/icons-vue";
 import { computed, ref } from "vue";
 import { getCsrfToken } from "@/service/api-client";
 const props = defineProps({
-  files: {
+  modelValue: {
     type: [String, Array],
     default: new Array(),
   },
@@ -103,7 +103,7 @@ const uploadHeaders = computed(() => ({
   "X-CSRF-Token": getCsrfToken() || "",
 }));
 
-const emit = defineEmits(["update:files", "change"]);
+const emit = defineEmits(["update:modelValue", "change"]);
 function getBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -117,9 +117,9 @@ const previewVisible = ref(false);
 const previewUrl = ref("");
 const previewTitle = ref("");
 const fileList = ref([]);
-if (typeof props.files == "string") {
-  if (props.files.length > 0) {
-    props.files.split(",").forEach((url) => {
+if (typeof props.modelValue == "string") {
+  if (props.modelValue.length > 0) {
+    props.modelValue.split(",").forEach((url) => {
       fileList.value.push({
         uid: new Date().getMilliseconds(),
         name: url,
@@ -131,10 +131,10 @@ if (typeof props.files == "string") {
     fileList.value = [];
   }
 } else {
-  fileList.value = props.files;
+  fileList.value = props.modelValue;
 }
 /**
- * 在文件发送到服务端前保留 Ant Design Vue 的默认上传流程。
+ * 在文件发送到服务端前保留 Element Plus 的默认上传流程。
  * @param {File} file 待上传的浏览器文件对象；文件类型和大小由 BFF 继续进行最终校验。
  * @returns {boolean} 返回 true 允许上传组件继续发送请求。
  */
@@ -168,13 +168,14 @@ const handleChange = ({ file }) => {
         }),
       ];
     }
-    emit("update:files", fileList.value);
+    emit("update:modelValue", fileList.value);
     emit("change");
   }
 };
 
-const handleRemove = (ev) => {
-  emit("update:files", fileList.value);
+const handleRemove = (file, uploadFiles) => {
+  fileList.value = uploadFiles;
+  emit("update:modelValue", fileList.value);
   emit("change");
   return true;
 };
@@ -287,16 +288,6 @@ const autoSelectComponent = (info) => {
 </script>
 
 <style lang="scss" scoped>
-.ant-upload-select-picture-card i {
-  font-size: 32px;
-  color: var(--app-muted);
-}
-
-.ant-upload-select-picture-card .ant-upload-text {
-  margin-top: 8px;
-  color: var(--app-text);
-}
-
 .upload-control__hint {
   margin-top: 8px;
   color: var(--app-muted);

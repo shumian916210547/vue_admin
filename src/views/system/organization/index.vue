@@ -7,163 +7,171 @@
         <p>维护企业总部、区域、地方公司和部门的层级关系；成员关联与组织数据权限请在“成员管理”中配置。</p>
       </div>
       <div class="management-page__heading-actions">
-        <a-button size="small" v-auth="['permission:query', permissions]" type="primary" :loading="loading" @click="refreshOrganizationPage">
-          <template #icon><ReloadOutlined /></template>
+        <el-button size="small" v-auth="['permission:query', permissions]" type="primary" :loading="loading" @click="refreshOrganizationPage">
+          <template #icon><el-icon><Refresh /></el-icon></template>
           刷新组织
-        </a-button>
+        </el-button>
       </div>
     </header>
 
-    <a-alert
+    <el-alert
       v-if="loadError"
       class="management-page__alert"
       type="error"
       show-icon
-      :message="loadError"
-      description="请确认当前账号是系统管理员，并检查后端服务是否可用。"
-    />
+      :title="loadError"
+    >请确认当前账号是系统管理员，并检查后端服务是否可用。</el-alert>
 
-    <a-row :gutter="[20, 20]" class="organization-page__layout">
-      <a-col :xs="24" :xl="10">
-        <a-card class="organization-page__tree-card" :bordered="false">
-          <template #title>
-            <span class="management-page__card-title"><ApartmentOutlined /> 企业组织树</span>
-          </template>
-          <template #extra>
-            <a-button size="small" v-auth="['permission:insert', permissions]" type="link" @click="openOrganizationModal('create', null)">
-              <template #icon><PlusOutlined /></template>
-              新建根组织
-            </a-button>
-          </template>
-          <div class="organization-page__tree app-scrollbar">
-            <a-tree
-              v-if="organizationTreeData.length"
-              :tree-data="organizationTreeData"
-              :selected-keys="selectedOrganizationId ? [selectedOrganizationId] : []"
-              default-expand-all
-              block-node
-              @select="handleOrganizationSelect"
-            >
-              <template #title="{ title, dataRef }">
-                <span class="organization-page__tree-node">
-                  <span class="organization-page__tree-node-title">{{ title }}</span>
-                  <a-tag v-if="dataRef.isActive === false" color="default">已停用</a-tag>
-                </span>
-              </template>
-            </a-tree>
-            <a-empty v-else description="暂无组织节点，请从总部开始创建" />
-          </div>
-        </a-card>
-      </a-col>
-
-      <a-col :xs="24" :xl="14">
-        <a-card class="organization-page__detail-card" :bordered="false">
-          <template #title>
-            <span class="management-page__card-title"><SettingOutlined /> {{ selectedOrganization ? "组织节点详情" : "组织配置说明" }}</span>
-          </template>
-          <template v-if="selectedOrganization">
-            <a-descriptions :column="{ xs: 1, sm: 2 }" bordered size="small">
-              <a-descriptions-item label="组织名称">{{ selectedOrganization.name }}</a-descriptions-item>
-              <a-descriptions-item label="组织编码">{{ selectedOrganization.code || "未设置" }}</a-descriptions-item>
-              <a-descriptions-item label="组织类型">{{ organizationTypeLabel(selectedOrganization.type) }}</a-descriptions-item>
-              <a-descriptions-item label="状态">
-                <a-tag :color="selectedOrganization.isActive ? 'success' : 'default'">
-                  {{ selectedOrganization.isActive ? "启用" : "已停用" }}
-                </a-tag>
-              </a-descriptions-item>
-              <a-descriptions-item label="上级组织">
-                {{ organizationName(selectedOrganization.parentId) || "企业根节点" }}
-              </a-descriptions-item>
-              <a-descriptions-item label="排序">{{ selectedOrganization.rank }}</a-descriptions-item>
-              <a-descriptions-item label="备注" :span="1">{{ selectedOrganization.remark || "暂无备注" }}</a-descriptions-item>
-            </a-descriptions>
-            <div class="organization-page__detail-actions">
-              <a-button size="small" v-auth="['permission:insertChildren', permissions]" type="primary" @click="openOrganizationModal('create', selectedOrganization.objectId)">
-                <template #icon><PlusOutlined /></template>
-                新建下级组织
-              </a-button>
-              <a-button size="small" v-auth="['permission:edit', permissions]" @click="openOrganizationModal('edit', selectedOrganization.objectId)">
-                <template #icon><EditOutlined /></template>
-                编辑节点
-              </a-button>
-              <a-popconfirm
-                title="仅可删除没有下级节点、未被成员或业务数据引用的空组织，确认继续吗？"
-                ok-text="删除"
-                cancel-text="取消"
-                @confirm="handleDeleteOrganization"
-              >
-                <a-button size="small" v-auth="['permission:remove', permissions]" danger>
-                  <template #icon><DeleteOutlined /></template>
-                  删除空组织
-                </a-button>
-              </a-popconfirm>
+    <el-row :gutter="20" class="organization-page__layout">
+      <el-col :xs="24" :xl="10">
+        <el-card class="organization-page__tree-card">
+          <template #header>
+            <div class="management-page__card-header">
+              <span class="management-page__card-title"><el-icon><OfficeBuilding /></el-icon> 企业组织树</span>
+              <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" link @click="openOrganizationModal('create', null)">
+                <template #icon><el-icon><Plus /></el-icon></template>
+                新建根组织
+              </el-button>
             </div>
           </template>
-          <a-empty v-else description="从左侧选择组织节点，或创建企业根组织" />
-        </a-card>
-      </a-col>
-    </a-row>
+          <div class="organization-page__tree app-scrollbar">
+            <el-tree
+              v-if="organizationTreeData.length"
+              :data="organizationTreeData"
+              node-key="key"
+              :current-node-key="selectedOrganizationId"
+              :props="{ label: 'title', children: 'children' }"
+              highlight-current
+              default-expand-all
+              @node-click="handleOrganizationSelect"
+            >
+              <template #default="{ data }">
+                <span class="organization-page__tree-node">
+                  <span class="organization-page__tree-node-title">{{ data.title }}</span>
+                  <el-tag v-if="data.isActive === false" size="small" type="info">已停用</el-tag>
+                </span>
+              </template>
+            </el-tree>
+            <el-empty v-else description="暂无组织节点，请从总部开始创建" />
+          </div>
+        </el-card>
+      </el-col>
 
-    <a-modal
-      v-model:visible="organizationModal.visible"
+      <el-col :xs="24" :xl="14">
+        <el-card class="organization-page__detail-card">
+          <template #header>
+            <span class="management-page__card-title"><el-icon><Setting /></el-icon> {{ selectedOrganization ? "组织节点详情" : "组织配置说明" }}</span>
+          </template>
+          <template v-if="selectedOrganization">
+            <el-descriptions :column="2" border size="small">
+              <el-descriptions-item label="组织名称">{{ selectedOrganization.name }}</el-descriptions-item>
+              <el-descriptions-item label="组织编码">{{ selectedOrganization.code || "未设置" }}</el-descriptions-item>
+              <el-descriptions-item label="组织类型">{{ organizationTypeLabel(selectedOrganization.type) }}</el-descriptions-item>
+              <el-descriptions-item label="状态">
+                <el-tag size="small" :type="selectedOrganization.isActive ? 'success' : 'info'">
+                  {{ selectedOrganization.isActive ? "启用" : "已停用" }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="上级组织">
+                {{ organizationName(selectedOrganization.parentId) || "企业根节点" }}
+              </el-descriptions-item>
+              <el-descriptions-item label="排序">{{ selectedOrganization.rank }}</el-descriptions-item>
+              <el-descriptions-item label="备注" :span="2">{{ selectedOrganization.remark || "暂无备注" }}</el-descriptions-item>
+            </el-descriptions>
+            <div class="organization-page__detail-actions">
+              <el-button size="small" v-auth="['permission:insertChildren', permissions]" type="primary" @click="openOrganizationModal('create', selectedOrganization.objectId)">
+                <template #icon><el-icon><Plus /></el-icon></template>
+                新建下级组织
+              </el-button>
+              <el-button size="small" v-auth="['permission:edit', permissions]" @click="openOrganizationModal('edit', selectedOrganization.objectId)">
+                <template #icon><el-icon><Edit /></el-icon></template>
+                编辑节点
+              </el-button>
+              <el-popconfirm
+                title="仅可删除没有下级节点、未被成员或业务数据引用的空组织，确认继续吗？"
+                confirm-button-text="删除"
+                cancel-button-text="取消"
+                @confirm="handleDeleteOrganization"
+              >
+                <template #reference>
+                <el-button size="small" v-auth="['permission:remove', permissions]" type="danger">
+                  <template #icon><el-icon><Delete /></el-icon></template>
+                  删除空组织
+                </el-button>
+                </template>
+              </el-popconfirm>
+            </div>
+          </template>
+          <el-empty v-else description="从左侧选择组织节点，或创建企业根组织" />
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-dialog
+      v-model="organizationModal.visible"
       :title="organizationModal.mode === 'create' ? '新建组织节点' : '编辑组织节点'"
-      :confirm-loading="organizationModal.submitting"
-      ok-text="保存"
-      cancel-text="取消"
-      @ok="submitOrganization"
-      @cancel="closeOrganizationModal"
+      @close="closeOrganizationModal"
     >
-      <a-form size="small" ref="organizationFormRef" :model="organizationForm" :rules="organizationRules" layout="vertical">
-        <a-form-item label="组织名称" name="name">
-          <a-input size="small" v-model:value="organizationForm.name" placeholder="例如：华北区域公司" :maxlength="100" />
-        </a-form-item>
-        <a-form-item label="组织编码" name="code" extra="同一企业内编码唯一；不填写时仅按名称管理。">
-          <a-input size="small" v-model:value="organizationForm.code" placeholder="例如：CN-NORTH" :maxlength="64" />
-        </a-form-item>
-        <a-row :gutter="[12, 0]">
-          <a-col :span="12">
-            <a-form-item label="组织类型" name="type">
-              <a-select size="small" v-model:value="organizationForm.type" :options="organizationTypeOptions" placeholder="请选择组织类型" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="排序" name="rank">
-              <a-input-number size="small" v-model:value="organizationForm.rank" placeholder="请输入排序数字" :min="0" :max="999999" class="organization-page__full-control" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-form-item label="上级组织" name="parentId">
-          <a-tree-select
+      <el-form size="small" ref="organizationFormRef" :model="organizationForm" :rules="organizationRules" label-position="top">
+        <el-form-item label="组织名称" prop="name">
+          <el-input size="small" v-model="organizationForm.name" placeholder="例如：华北区域公司" maxlength="100" />
+        </el-form-item>
+        <el-form-item label="组织编码" prop="code">
+          <el-input size="small" v-model="organizationForm.code" placeholder="例如：CN-NORTH" maxlength="64" />
+          <p class="form-item-help">同一企业内编码唯一；不填写时仅按名称管理。</p>
+        </el-form-item>
+        <el-row :gutter="12">
+          <el-col :span="12">
+            <el-form-item label="组织类型" prop="type">
+              <el-select size="small" v-model="organizationForm.type" placeholder="请选择组织类型">
+                <el-option v-for="option in organizationTypeOptions" :key="option.value" v-bind="option" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="排序" prop="rank">
+              <el-input-number size="small" v-model="organizationForm.rank" placeholder="请输入排序数字" :min="0" :max="999999" class="organization-page__full-control" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="上级组织" prop="parentId">
+          <el-tree-select
             size="small"
-            v-model:value="organizationForm.parentId"
-            :tree-data="organizationSelectTree"
-            allow-clear
-            tree-default-expand-all
+            v-model="organizationForm.parentId"
+            :data="organizationSelectTree"
+            node-key="key"
+            :props="{ label: 'title', value: 'value', children: 'children' }"
+            clearable
+            default-expand-all
             placeholder="不选择则作为企业根组织"
           />
-        </a-form-item>
-        <a-form-item v-if="organizationModal.mode === 'edit'" label="启用状态" name="isActive">
-          <a-switch size="small" v-model:checked="organizationForm.isActive" checked-children="启用" un-checked-children="停用" />
-        </a-form-item>
-        <a-form-item label="备注" name="remark">
-          <a-textarea size="small" v-model:value="organizationForm.remark" :rows="3" placeholder="填写适用业务范围、负责人或管理说明" :maxlength="500" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+        </el-form-item>
+        <el-form-item v-if="organizationModal.mode === 'edit'" label="启用状态" prop="isActive">
+          <el-switch size="small" v-model="organizationForm.isActive" active-text="启用" inactive-text="停用" />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input type="textarea" size="small" v-model="organizationForm.remark" :rows="3" placeholder="填写适用业务范围、负责人或管理说明" maxlength="500" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button size="small" @click="closeOrganizationModal">取消</el-button>
+        <el-button size="small" type="primary" :loading="organizationModal.submitting" @click="submitOrganization">保存</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <script setup>
 import {
-  ApartmentOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SettingOutlined,
-} from "@ant-design/icons-vue";
+  Delete,
+  Edit,
+  OfficeBuilding,
+  Plus,
+  Refresh,
+  Setting,
+} from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, ref } from "vue";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 
 import { Mixins } from "@/mixins";
 import {
@@ -201,7 +209,7 @@ const organizationForm = reactive({
 const { queryPermission } = Mixins();
 const permissions = await queryPermission();
 
-/** 组织编辑表单的 Ant Design Vue 校验规则。 */
+/** 组织编辑表单的 Element Plus 校验规则。 */
 const organizationRules = {
   name: [{ required: true, message: "请输入组织名称", trigger: "blur" }],
   type: [{ required: true, message: "请选择组织类型", trigger: "change" }],
@@ -209,7 +217,7 @@ const organizationRules = {
 };
 
 /**
- * 将 BFF 组织树转换为 Ant Tree 和 TreeSelect 需要的节点结构。
+ * 将 BFF 组织树转换为 Element Plus Tree 和 TreeSelect 需要的节点结构。
  * @param {Array<Record<string, unknown>>} nodes 服务端返回的组织树节点数组。
  * @returns {Array<Record<string, unknown>>} 含 title、key、value、children 的组件节点数组。
  */
@@ -295,11 +303,12 @@ const refreshOrganizationPage = async () => {
 
 /**
  * 处理组织树选择事件，切换右侧详情面板的当前节点。
- * @param {string[]} selectedKeys Ant Tree 返回的已选择 key 数组。
+ * @param {Record<string, unknown> | undefined} data Element Plus Tree 当前节点数据。
+ * @param {{key?: string} | undefined} node Element Plus Tree 当前节点实例。
  * @returns {void} 更新 selectedOrganizationId；未选择节点时清空详情。
  */
-const handleOrganizationSelect = (selectedKeys) => {
-  selectedOrganizationId.value = selectedKeys[0] || "";
+const handleOrganizationSelect = (data, node) => {
+  selectedOrganizationId.value = data?.key || data?.value || node?.key || "";
 };
 
 /**
@@ -349,30 +358,30 @@ const submitOrganization = async () => {
     };
     if (organizationModal.mode === "create") await createOrganization(payload);
     else await updateOrganization(organizationForm.objectId, payload);
-    notification.success({ message: "组织管理", description: "组织节点已保存。" });
+    ElNotification.success({ title: "组织管理", message: "组织节点已保存。" });
     closeOrganizationModal();
     await reloadOverview();
   } catch (error) {
     if (error?.errorFields) return;
-    notification.error({ message: "保存失败", description: error?.message || "组织节点未能保存，请检查输入后重试。" });
+    ElNotification.error({ title: "保存失败", message: error?.message || "组织节点未能保存，请检查输入后重试。" });
   } finally {
     organizationModal.submitting = false;
   }
 };
 
 /**
- * 删除当前选中的空组织节点；前置确认由模板中的 a-popconfirm 提供，BFF 会再次校验成员与业务引用。
+ * 删除当前选中的空组织节点；前置确认由模板中的 Element Plus Popconfirm 提供，BFF 会再次校验成员与业务引用。
  * @returns {Promise<void>} 删除成功后刷新组织树；失败时展示服务端可读错误。
  */
 const handleDeleteOrganization = async () => {
   if (!selectedOrganization.value) return;
   try {
     await deleteOrganization(selectedOrganization.value.objectId);
-    notification.success({ message: "组织管理", description: "空组织节点已删除。" });
+    ElNotification.success({ title: "组织管理", message: "空组织节点已删除。" });
     selectedOrganizationId.value = "";
     await reloadOverview();
   } catch (error) {
-    notification.error({ message: "删除失败", description: error?.message || "该组织仍被引用，暂时不能删除。" });
+    ElNotification.error({ title: "删除失败", message: error?.message || "该组织仍被引用，暂时不能删除。" });
   }
 };
 
@@ -412,9 +421,9 @@ onMounted(() => {
 }
 
 .organization-page__tree-node-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .organization-page__detail-actions {

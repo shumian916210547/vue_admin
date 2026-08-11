@@ -1,13 +1,13 @@
 <template>
   <component
-    :AntdIcon="AntdIcon"
+    :iconMap="iconMap"
     :systemOptions="systemOptions"
     :is="LayoutComponents[systemOptions.layout]"
     :key="systemOptions.showTags"
     :class="['app-shell', { 'app-shell--top': systemOptions.layout === 'TopLayout' }]"
   >
     <template #layout-content>
-      <a-layout-content
+      <el-main
         :class="['app-content', 'app-scrollbar', { 'app-content--top': systemOptions.layout === 'TopLayout' }]"
       >
         <router-view v-slot="{ Component, route }">
@@ -17,12 +17,15 @@
             </template>
             <template #fallback>
               <div class="page-loading">
-                <a-spin tip="页面加载中..." size="small" />
+                <span class="page-loading__indicator" aria-label="页面加载中">
+                  <el-icon class="is-loading"><Loading /></el-icon>
+                  页面加载中...
+                </span>
               </div>
             </template>
           </suspense>
         </router-view>
-      </a-layout-content>
+      </el-main>
     </template>
 
     <template #layout-menu>
@@ -37,27 +40,28 @@
           class="app-brand__logo"
         />
         <span v-else class="app-brand__mark">
-          <component :is="AntdIcon['AppstoreOutlined']" />
+          <el-icon><component :is="iconMap['AppstoreOutlined']" /></el-icon>
         </span>
         <span class="app-brand__copy">
           <span class="app-brand__title">{{ systemTitle }}</span>
           <span class="app-brand__caption">低代码管理控制台</span>
         </span>
       </div>
-      <a-menu
-        v-model:openKeys="openKeys"
-        v-model:selectedKeys="selectedKeys"
+      <el-menu
+        :default-openeds="openKeys"
+        :default-active="selectedKeys[0]"
         :theme="systemOptions.theme"
         :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'inline'"
         class="app-menu"
-        @openChange="openChange"
+        @open="handleMenuOpen"
+        @close="handleMenuClose"
       >
         <template v-for="item in modules">
           <template v-if="item.children">
-            <a-sub-menu :key="'sub' + item.objectId" :hidden="!item.menu">
+            <el-sub-menu :index="'sub' + item.objectId" :disabled="!item.menu">
               <template #title>
                 <span>
-                  <component :is="AntdIcon[item.meta.icon]"></component>
+                  <el-icon><component :is="iconMap[item.meta.icon]" /></el-icon>
                   <span>{{ item.name }}</span>
                 </span>
               </template>
@@ -65,8 +69,9 @@
                 v-for="chil in item.children"
                 :key="'chil' + chil.objectId"
               >
-                <a-menu-item
-                  :hidden="!chil.menu"
+                <el-menu-item
+                  :index="'chil' + chil.objectId"
+                  :disabled="!chil.menu"
                   @click="
                     toPage(
                       '/' + item.path + '/' + chil.path,
@@ -76,88 +81,72 @@
                   "
                 >
                   {{ chil.name }}
-                </a-menu-item>
+                </el-menu-item>
               </template>
-            </a-sub-menu>
+            </el-sub-menu>
           </template>
           <template v-else>
-            <a-menu-item
-              :key="item.objectId"
+            <el-menu-item
+              :index="item.objectId"
               @click="toPage('/' + item.path, item.objectId, item.name)"
               v-if="item.menu"
             >
-              <component :is="AntdIcon[item?.meta?.icon]"></component>
+              <el-icon><component :is="iconMap[item?.meta?.icon]" /></el-icon>
               <span>{{ item.name }}</span>
-            </a-menu-item>
+            </el-menu-item>
           </template>
         </template>
-      </a-menu>
+      </el-menu>
     </template>
 
     <template #layout-header-right>
       <div class="header-actions">
         <!-- 主题配置 -->
-        <a-tooltip placement="bottom">
-          <template #title>
-            <span>主题配置</span>
-          </template>
-          <component
-            :is="AntdIcon['SkinOutlined']"
+        <el-tooltip content="主题配置" placement="bottom">
+          <el-icon
             class="header-action-icon"
             @click="openThemeSettings"
-          ></component>
-        </a-tooltip>
+          ><component :is="iconMap['SkinOutlined']" /></el-icon>
+        </el-tooltip>
 
         <template v-if="systemOptions.fullScreen">
           <!-- 全屏 -->
-          <a-tooltip placement="bottom" v-if="!isFullScreen">
-            <template #title>
-              <span>全屏</span>
-            </template>
-            <component
-              :is="AntdIcon['ExpandOutlined']"
+          <el-tooltip content="全屏" placement="bottom" v-if="!isFullScreen">
+            <el-icon
               class="header-action-icon"
               @click="zoomPage"
-            ></component>
-          </a-tooltip>
+            ><component :is="iconMap['ExpandOutlined']" /></el-icon>
+          </el-tooltip>
 
           <!-- 退出全屏 -->
-          <a-tooltip placement="bottom" v-else>
-            <template #title>
-              <span>退出全屏</span>
-            </template>
-            <component
-              :is="AntdIcon['CompressOutlined']"
+          <el-tooltip content="退出全屏" placement="bottom" v-else>
+            <el-icon
               class="header-action-icon"
               @click="zoomPage"
-            ></component>
-          </a-tooltip>
+            ><component :is="iconMap['CompressOutlined']" /></el-icon>
+          </el-tooltip>
         </template>
 
         <!-- 刷新按钮 -->
-        <a-tooltip placement="bottom" v-if="systemOptions.refresh">
-          <template #title>
-            <span>刷新</span>
-          </template>
-          <component
-              :is="AntdIcon['ReloadOutlined']"
+        <el-tooltip v-if="systemOptions.refresh" content="刷新" placement="bottom">
+          <el-icon
               class="header-action-icon"
             @click="pageReload"
-          ></component>
-        </a-tooltip>
+          ><component :is="iconMap['ReloadOutlined']" /></el-icon>
+        </el-tooltip>
 
-        <a-popover placement="bottomRight">
+        <el-popover placement="bottom-end" trigger="click">
           <template #content>
             <div class="user-popover">
-              <a-button
+              <el-button
                 size="small"
                 @click="openPersonalCenter"
               >
                 个人中心
-              </a-button>
-              <a-button size="small" @click="loginOut">
+              </el-button>
+              <el-button size="small" @click="loginOut">
                 退出登录
-              </a-button>
+              </el-button>
             </div>
           </template>
           <div class="header-right">
@@ -167,18 +156,14 @@
               :alt="`${userDisplayName} 的头像`"
               class="header-avatar"
             />
-            <component
+            <el-icon
               v-else
-              :is="AntdIcon['UserOutlined']"
               class="header-avatar header-avatar--placeholder"
-            ></component>
+            ><component :is="iconMap['UserOutlined']" /></el-icon>
             <span class="header-user-name">{{ userDisplayName }}</span>
-            <component
-              :is="AntdIcon['DownOutlined']"
-              class="header-user-chevron"
-            ></component>
+            <el-icon class="header-user-chevron"><component :is="iconMap['DownOutlined']" /></el-icon>
           </div>
-        </a-popover>
+        </el-popover>
       </div>
     </template>
 
@@ -191,7 +176,8 @@
         }"
       >
         <template v-for="(item, index) in historyPage" :key="item.pageKey">
-          <a-tag
+          <el-tag
+            size="small"
             :class="[
               'tags-view__tag',
               { 'tags-view__tag--active': item.pageKey == selectedKeys[0] },
@@ -203,56 +189,53 @@
             @close="removeHistoryRoute(index)"
           >
             {{ item.pageName }}
-          </a-tag>
+          </el-tag>
         </template>
       </div>
     </template>
   </component>
 
   <!-- 设置弹窗 -->
-  <a-drawer
-    v-model:visible="systemModal.show"
+  <el-drawer
+    v-model="systemModal.show"
     title="主题配置"
-    placement="right"
+    direction="rtl"
     width="390"
     class="system-settings"
   >
-    <a-form
+    <el-form
       :model="systemOptions"
-      name="basic"
-      :label-col="{ span: 10 }"
-      :wrapper-col="{ span: 14 }"
       autocomplete="off"
       size="small"
-      labelAlign="left"
+      label-position="left"
     >
-      <a-form-item label="布局方式">
-        <a-select
-          v-model:value="systemOptions.layout"
+      <el-form-item label="布局方式">
+        <el-select
+          v-model="systemOptions.layout"
           size="small"
           placeholder="请选择布局方式"
           @change="handleSystemOptionChange"
           class="system-settings__select"
         >
-          <a-select-option value="LeftLayout">纵向</a-select-option>
-          <a-select-option value="TopLayout">横向</a-select-option>
-        </a-select>
-      </a-form-item>
+          <el-option value="LeftLayout" label="纵向" />
+          <el-option value="TopLayout" label="横向" />
+        </el-select>
+      </el-form-item>
 
-      <a-form-item label="界面模式">
-        <a-select
-          v-model:value="systemOptions.theme"
+      <el-form-item label="界面模式">
+        <el-select
+          v-model="systemOptions.theme"
           size="small"
           placeholder="请选择界面模式"
           @change="handleSystemOptionChange"
           class="system-settings__select"
         >
-          <a-select-option value="light">明亮</a-select-option>
-          <a-select-option value="dark">深色</a-select-option>
-        </a-select>
-      </a-form-item>
+          <el-option value="light" label="明亮" />
+          <el-option value="dark" label="深色" />
+        </el-select>
+      </el-form-item>
 
-      <a-form-item label="主题预设" class="system-settings__wide-item">
+      <el-form-item label="主题预设" class="system-settings__wide-item">
         <div class="theme-preset-grid" role="group" aria-label="主题预设">
           <button
             v-for="preset in themePresets"
@@ -275,9 +258,9 @@
             </span>
           </button>
         </div>
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="颜色微调" class="system-settings__wide-item">
+      <el-form-item label="颜色微调" class="system-settings__wide-item">
         <div class="theme-color-grid">
           <label v-for="colorField in colorFields" :key="colorField.field" class="theme-color-control">
             <span>{{ colorField.label }}</span>
@@ -292,86 +275,86 @@
             </span>
           </label>
         </div>
-        <a-button class="theme-color-reset" size="small" @click="resetThemeColors">
+        <el-button class="theme-color-reset" size="small" @click="resetThemeColors">
           恢复当前预设颜色
-        </a-button>
-      </a-form-item>
+        </el-button>
+      </el-form-item>
 
-      <a-form-item label="毛玻璃" class="system-settings__wide-item">
-        <a-switch
-          v-model:checked="systemOptions.glassEffect"
+      <el-form-item label="毛玻璃" class="system-settings__wide-item">
+        <el-switch
+          v-model="systemOptions.glassEffect"
           size="small"
-          checked-children="开启"
-          un-checked-children="关闭"
+          active-text="开启"
+          inactive-text="关闭"
           @change="handleSystemOptionChange"
         />
         <p class="system-settings__hint">开启后，页面容器、导航和弹窗会使用半透明磨砂层与背景柔化效果。</p>
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="图标">
-        <a-switch
-          v-model:checked="systemOptions.showLogo"
+      <el-form-item label="图标">
+        <el-switch
+          v-model="systemOptions.showLogo"
           size="small"
-          checked-children="开"
-          un-checked-children="关"
+          active-text="开"
+          inactive-text="关"
           @change="handleSystemOptionChange"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="资源" v-if="systemOptions.showLogo">
+      <el-form-item label="资源" v-if="systemOptions.showLogo">
         <component
-          v-model:files="systemOptions.logoURL"
-          :maxLength="1"
+          v-model="systemOptions.logoURL"
+          :max-length="1"
           @change="handleSystemOptionChange"
           fileType="image/*"
           placeholder="请选择系统 Logo"
           :is="Upload"
         ></component>
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="标签">
-        <a-switch
-          v-model:checked="systemOptions.showTags"
+      <el-form-item label="标签">
+        <el-switch
+          v-model="systemOptions.showTags"
           size="small"
-          checked-children="开"
-          un-checked-children="关"
+          active-text="开"
+          inactive-text="关"
           @change="handleSystemOptionChange"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="刷新">
-        <a-switch
-          v-model:checked="systemOptions.refresh"
+      <el-form-item label="刷新">
+        <el-switch
+          v-model="systemOptions.refresh"
           size="small"
-          checked-children="开"
-          un-checked-children="关"
+          active-text="开"
+          inactive-text="关"
           @change="handleSystemOptionChange"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item label="全屏">
-        <a-switch
-          v-model:checked="systemOptions.fullScreen"
+      <el-form-item label="全屏">
+        <el-switch
+          v-model="systemOptions.fullScreen"
           size="small"
-          checked-children="开"
-          un-checked-children="关"
+          active-text="开"
+          inactive-text="关"
           @change="handleSystemOptionChange"
         />
-      </a-form-item>
-    </a-form>
+      </el-form-item>
+    </el-form>
     <p class="system-settings__status" aria-live="polite">
       <span v-if="systemOptionsSaveState === 'saving'">正在保存主题配置…</span>
       <span v-else-if="systemOptionsSaveState === 'dirty'">配置已修改，等待保存</span>
       <span v-else-if="systemOptionsSaveState === 'error'">保存失败，请重试或检查网络连接</span>
       <span v-else-if="systemOptionsSaveState === 'saved'">主题配置已保存</span>
     </p>
-  </a-drawer>
+  </el-drawer>
 </template>
 
 
 <script setup>
-import * as AntdIcon from "@ant-design/icons-vue";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
+import { Loading } from "@element-plus/icons-vue";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -387,6 +370,7 @@ import {
   THEME_PRESETS,
 } from "@/utils/theme";
 import { arrayImgsToString } from "@/utils/utils";
+import { elementIconMap } from "@/utils/element";
 
 import LeftLayout from "./LeftLayout.vue";
 import TopLayout from "./TopLayout.vue";
@@ -395,6 +379,7 @@ import Upload from "./Upload.vue";
 const router = useRouter();
 const { toPage, historyPage, removeHistoryRoute } = Mixins();
 const LayoutComponents = { LeftLayout, TopLayout };
+const iconMap = elementIconMap;
 const themePresets = THEME_PRESETS;
 
 /**
@@ -461,12 +446,23 @@ let hasQueuedSystemOptionSave = false;
 const systemOptionsSaveState = ref("idle");
 
 /**
- * 保存导航展开项和当前页签选择，以便刷新或切换布局后恢复原有工作上下文。
- * @param {string[]} keys Ant Design Vue 菜单当前展开的 key 数组。
- * @returns {void} 仅写入会话级浏览器存储。
+ * 响应 Element Plus 菜单打开子菜单事件并持久化展开项。
+ * @param {string} index 被打开的菜单索引。
+ * @returns {void} 更新 openKeys 并写入会话级浏览器存储。
  */
-const openChange = (keys) => {
-  sessionStorage.setItem("openKeys", JSON.stringify(keys));
+const handleMenuOpen = (index) => {
+  if (!openKeys.value.includes(index)) openKeys.value.push(index);
+  sessionStorage.setItem("openKeys", JSON.stringify(openKeys.value));
+};
+
+/**
+ * 响应 Element Plus 菜单关闭子菜单事件并持久化剩余展开项。
+ * @param {string} index 被关闭的菜单索引。
+ * @returns {void} 更新 openKeys 并写入会话存储。
+ */
+const handleMenuClose = (index) => {
+  openKeys.value = openKeys.value.filter((key) => key !== index);
+  sessionStorage.setItem("openKeys", JSON.stringify(openKeys.value));
 };
 
 /**
@@ -502,9 +498,9 @@ const persistSystemOptions = async () => {
     systemOptionsSaveState.value = "saved";
   } catch {
     systemOptionsSaveState.value = "error";
-    notification.error({
-      message: "主题配置保存失败",
-      description: "当前页面的主题仍可继续使用，请稍后重试或检查网络连接。",
+    ElNotification.error({
+      title: "主题配置保存失败",
+      message: "当前页面的主题仍可继续使用，请稍后重试或检查网络连接。",
     });
   } finally {
     isSavingSystemOptions = false;
@@ -628,9 +624,9 @@ const zoomPage = async () => {
       throw new Error("FULLSCREEN_UNSUPPORTED");
     }
   } catch {
-    notification.warning({
-      message: "无法切换全屏",
-      description: "当前浏览器或页面权限不支持全屏操作。",
+    ElNotification.warning({
+      title: "无法切换全屏",
+      message: "当前浏览器或页面权限不支持全屏操作。",
     });
   }
 };
@@ -728,7 +724,7 @@ onUnmounted(() => {
 }
 
 .header-action-icon {
-  display: flex !important;
+  display: inline-flex;
   width: 36px;
   height: 36px;
   margin-right: 0;
@@ -764,7 +760,7 @@ onUnmounted(() => {
 }
 
 .header-avatar {
-  display: flex !important;
+  display: inline-flex;
   justify-content: center;
   width: 32px;
   height: 32px;
@@ -814,28 +810,9 @@ onUnmounted(() => {
   overflow-x: auto;
   transition: var(--app-transition);
 
-  .ant-tag {
-    height: 28px;
-    margin: 0 4px 0 0;
-    padding: 0 9px;
-    display: flex;
-    align-items: center;
-    color: var(--app-text);
-    background: var(--app-glass-strong);
-    border-color: var(--app-glass-border);
-    border-radius: 7px;
+  &__tag {
+    margin-right: 4px;
     cursor: pointer;
-    box-shadow: 0 2px 7px rgba(var(--app-primary-rgb), 0.07);
-  }
-
-  .tags-view__tag--active {
-    color: var(--app-primary-contrast) !important;
-    border-color: var(--app-primary) !important;
-    box-shadow: 0 4px 10px rgba(var(--app-primary-rgb), 0.18);
-  }
-
-  .tags-view__tag--active .anticon-close {
-    color: currentColor !important;
   }
 }
 
@@ -849,16 +826,6 @@ onUnmounted(() => {
 }
 
 .system-settings .system-settings__wide-item {
-  display: block;
-}
-
-.system-settings .system-settings__wide-item .ant-form-item-label,
-.system-settings .system-settings__wide-item .ant-form-item-control {
-  flex: 0 0 100%;
-  max-width: 100%;
-}
-
-.system-settings .system-settings__wide-item .ant-form-item-control-input-content {
   display: block;
 }
 
@@ -1008,14 +975,9 @@ onUnmounted(() => {
   color: var(--app-primary);
 }
 
-.ant-menu-inline {
+.app-menu {
   overflow-y: auto;
   flex: 1;
-}
-
-.ant-layout-sider-children {
-  display: flex;
-  flex-direction: column;
 }
 
 @media (max-width: 768px) {

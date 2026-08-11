@@ -1,4 +1,4 @@
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 
 import Parse from "@/service/parse-client";
 
@@ -13,9 +13,9 @@ export const handleParseError = (error) => {
     error?.status === 401 ||
     error?.status === 403;
 
-  notification.error({
-    message: isSessionError ? "会话已失效" : "操作未完成",
-    description: isSessionError
+  ElNotification.error({
+    title: isSessionError ? "会话已失效" : "操作未完成",
+    message: isSessionError
       ? "当前登录状态已失效，请重新登录后继续操作。"
       : "服务暂时无法完成此操作，请检查输入或稍后重试。",
     duration: 3,

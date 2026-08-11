@@ -18,7 +18,7 @@
       frameborder="0"
       class="operations-dashboard__frame"
     ></iframe>
-    <a-empty v-else class="operations-dashboard__empty" description="内部运维看板仅在受控网络中提供，请通过运维入口访问。" />
+    <el-empty v-else class="operations-dashboard__empty" description="内部运维看板仅在受控网络中提供，请通过运维入口访问。" />
   </section>
 </template>
 
@@ -37,9 +37,9 @@ const url = window.__SHUMIAN_CONFIG__?.dashboardUrl || process.env.VUE_APP_DASHB
 .operations-dashboard__heading {
   display: flex;
   flex: 0 0 auto;
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--app-border);
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
@@ -95,8 +95,9 @@ const url = window.__SHUMIAN_CONFIG__?.dashboardUrl || process.env.VUE_APP_DASHB
 .operations-dashboard__frame {
   width: 100%;
   min-height: 0;
-  border: 1px solid var(--app-glass-border);
+  border: 0;
   border-radius: var(--app-radius);
+  background: var(--app-surface);
   box-shadow: var(--app-shadow-soft);
   flex: 1 1 auto;
 }

@@ -8,54 +8,53 @@
       </div>
     </header>
 
-  <a-tabs v-model:activeKey="activeKey" class="profile-page__card" size="small">
-    <a-tab-pane key="1" tab="基本信息">
-      <a-form
+  <el-tabs v-model="activeKey" class="profile-page__card" size="small">
+    <el-tab-pane name="1" label="基本信息">
+      <el-form
+        ref="profileFormRef"
         :model="userInfo"
-        name="basic"
-        :label-col="{ span: 3 }"
-        :wrapper-col="{ span: 5 }"
+        label-width="90px"
         class="profile-page__form"
         size="small"
         autocomplete="off"
-        labelAlign="left"
-        @finish="onFinish"
+        label-position="left"
+        @submit.prevent="onFinish"
       >
-        <a-form-item label="头像" name="avatar">
+        <el-form-item label="头像" prop="avatar">
           <component
-            v-model:files="userInfo.avatar"
-            :maxLength="1"
+            v-model="userInfo.avatar"
+            :max-length="1"
             fileType="image/*"
             :is="Upload"
           ></component>
-        </a-form-item>
+        </el-form-item>
 
-        <a-form-item
+        <el-form-item
           label="昵称"
-          name="username"
-          :rules="[{ required: true, message: '请输入你的昵称' }]"
+          prop="username"
+          :rules="[{ required: true, message: '请输入你的昵称', trigger: 'blur' }]"
         >
-          <a-input v-model:value="userInfo.username" disabled placeholder="登录账号不可修改" size="small" />
-        </a-form-item>
+          <el-input v-model="userInfo.username" disabled placeholder="登录账号不可修改" size="small" />
+        </el-form-item>
 
-        <a-form-item
+        <el-form-item
           label="姓名"
-          name="name"
-          :rules="[{ required: true, message: '请输入你的姓名' }]"
+          prop="name"
+          :rules="[{ required: true, message: '请输入你的姓名', trigger: 'blur' }]"
         >
-          <a-input v-model:value="userInfo.name" placeholder="请输入姓名" size="small" />
-        </a-form-item>
+          <el-input v-model="userInfo.name" placeholder="请输入姓名" size="small" />
+        </el-form-item>
 
-        <a-form-item label="邮箱" name="email" :rules="[{ type: 'email' }]">
-          <a-input v-model:value="userInfo.email" placeholder="请输入邮箱地址" size="small" />
-        </a-form-item>
+        <el-form-item label="邮箱" prop="email" :rules="[{ type: 'email', message: '请输入有效邮箱地址', trigger: 'blur' }]">
+          <el-input v-model="userInfo.email" placeholder="请输入邮箱地址" size="small" />
+        </el-form-item>
 
-        <a-form-item :wrapper-col="{ offset: 4, span: 16 }">
-          <a-button size="small" type="primary" html-type="submit" :loading="submitting">更新</a-button>
-        </a-form-item>
-      </a-form>
-    </a-tab-pane>
-  </a-tabs>
+        <el-form-item>
+          <el-button size="small" type="primary" native-type="submit" :loading="submitting">更新</el-button>
+        </el-form-item>
+      </el-form>
+    </el-tab-pane>
+  </el-tabs>
   </section>
 </template>
 
@@ -63,20 +62,25 @@
 import Parse from "@/service/parse-client";
 import Upload from "@/components/Upload.vue";
 import { reactive, ref } from "vue";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 import { arrayImgsToString } from "@/utils/utils";
 
 const activeKey = ref("1");
 const userInfo = reactive(Parse.User.current().toJSON());
 const submitting = ref(false);
+const profileFormRef = ref();
 
 /**
  * 提交已经通过表单校验的个人资料。
- * @param {{avatar?: unknown, username?: string, name?: string, email?: string}} values 基本资料表单的字段值。
- * @returns {Promise<void>} 保存完成或失败通知显示后结束。
+ * @returns {Promise<void>} 校验成功后提交当前资料；校验失败时由 Element Plus 保留字段提示。
  */
-const onFinish = async (values) => {
-  await updateUserInfo(values);
+const onFinish = async () => {
+  try {
+    await profileFormRef.value.validate();
+    await updateUserInfo({ ...userInfo });
+  } catch {
+    // Element Plus 已在表单项中展示校验信息，校验失败时不重复弹窗。
+  }
 };
 
 /**
@@ -87,7 +91,7 @@ const onFinish = async (values) => {
 const updateUserInfo = async (values) => {
   const user = Parse.User.current();
   if (!user) {
-    notification.error({ message: "会话已失效", description: "请重新登录后再更新个人资料。" });
+    ElNotification.error({ title: "会话已失效", message: "请重新登录后再更新个人资料。" });
     return;
   }
 
@@ -107,15 +111,15 @@ const updateUserInfo = async (values) => {
       user.set(key, attributes[key]);
     });
     const success = await user.save({ fields: Object.keys(attributes) });
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("username")) + "更新成功",
     });
   } catch {
-    notification.error({
-      message: "更新失败",
-      description: "个人资料未能保存，请检查网络连接后重试。",
+    ElNotification.error({
+      title: "更新失败",
+      message: "个人资料未能保存，请检查网络连接后重试。",
     });
   } finally {
     submitting.value = false;
@@ -165,21 +169,10 @@ const updateUserInfo = async (values) => {
   padding-top: 18px;
 }
 
-:deep(.profile-page__card .ant-tabs-nav) {
-  margin-bottom: 22px;
-}
-
-:deep(.profile-page__card .ant-tabs-tab) {
-  font-weight: 600;
-}
-
 @media (max-width: 576px) {
   .profile-page__card {
     padding: 4px 14px 18px;
   }
 
-  :deep(.profile-page__form .ant-form-item-label) {
-    text-align: left;
-  }
 }
 </style>

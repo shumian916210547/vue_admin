@@ -1,251 +1,177 @@
 <template>
-  <a-modal
+  <el-dialog
+    v-model="visible"
     class="common-form-modal"
-    v-model:visible="visible"
-    @ok="handleOk"
     :width="modalWidth"
-    ref="modalRef"
+    draggable
+    destroy-on-close
   >
-    <template #title>
-      <div ref="modalTitleRef" class="common-form-modal__title">
+    <template #header>
+      <div class="common-form-modal__title">
         {{ modalType[type] + " " + className }}
       </div>
     </template>
 
     <div
+      v-if="visible"
       class="common-form-modal__body"
       :style="{ '--common-form-width': formWidth, '--common-form-height': formHeight }"
     >
-      <a-form
+      <el-form
+        ref="formRef"
         class="common-form-modal__form"
         :model="formState"
+        label-position="left"
+        label-width="120px"
         size="small"
         autocomplete="off"
-        labelAlign="left"
-        ref="form1"
-        v-if="visible"
       >
-        <a-form-item
-          v-for="(key, index) in Object.keys(fields).filter((key) => {
-            return fields[key].editComponent;
-          })"
-          :label="fields[key].chineseName"
-          :name="key"
-          :rules="[
-            {
-              required: fields[key].required,
-              message: getFieldPlaceholder(fields[key], key),
-            },
-          ]"
-          :class="{
-            'common-form-modal__rich-text-item': fields[key].editComponent == 'RichTextEditor',
-          }"
+        <el-form-item
+          v-for="(key, index) in formFieldKeys"
           :key="index"
-          :labelCol="
-            fields[key].editComponent == 'RichTextEditor'
-              ? { span: 2 }
-              : { span: 6 }
-          "
-          :wrapperCol="
-            fields[key].editComponent == 'RichTextEditor'
-              ? { span: 22 }
-              : { span: 18 }
-          "
+          :label="fields[key].chineseName"
+          :prop="key"
+          :rules="fieldRules(fields[key], key)"
+          :class="{
+            'common-form-modal__rich-text-item': getEditComponent(fields[key]) === 'RichTextEditor',
+          }"
         >
-          <component
-            v-if="
-              fields[key].editComponent == 'ATreeSelect' &&
-              fields[key].isPointer
-            "
-            v-model:value="formState[key]"
+          <el-tree-select
+            v-if="getEditComponent(fields[key]) === 'ElTreeSelect'"
+            v-model="formState[key]"
             size="small"
-            style="width: 100%"
-            :tree-data="
-              treeSelectLabel(
-                selectoptions[fields[key].componentOption.selectTable]
-              ) || []
-            "
-            tree-checkable
-            :allowClear="fields[key].componentOption.allowClear"
+            class="common-form-modal__control"
+            :data="treeSelectLabel(selectoptions[componentOption(key).selectTable])"
+            node-key="objectId"
+            :props="treeProps(key)"
+            :show-checkbox="treeIsMultiple(key)"
+            :multiple="treeIsMultiple(key)"
+            :check-strictly="true"
+            :default-expand-all="true"
+            :clearable="componentOption(key).allowClear !== false"
+            filterable
             :placeholder="getFieldPlaceholder(fields[key], key, true)"
-            tree-node-filter-prop="label"
-            :disabled="fields[key].componentOption.disabled"
-            :fieldNames="{
-              children: fields[key].componentOption.fieldNames,
-              label: 'name',
-              value: 'objectId',
-            }"
-            :is="fields[key].editComponent"
-            @change="
-              treeSelectChange(
-                formState[key],
-                fields[key],
-                selectoptions[fields[key].componentOption.selectTable],
-                {
-                  children: fields[key].componentOption.fieldNames,
-                  label: fields[key].componentOption.labelKey,
-                  value: fields[key].componentOption.valueKey,
-                  key,
-                  page: true,
-                }
-              )
-            "
-            @select="treeSelect"
-          ></component>
+            :disabled="componentOption(key).disabled"
+            @change="handleTreeSelectChange(key, $event)"
+          />
 
-          <component
-            v-else-if="fields[key].editComponent == 'ATreeSelect'"
-            v-model:value="formState[key]"
+          <el-select
+            v-else-if="getEditComponent(fields[key]) === 'ElSelect'"
+            v-model="formState[key]"
+            class="common-form-modal__control"
             size="small"
-            style="width: 100%"
-            :tree-data="
-              treeSelectLabel(
-                selectoptions[fields[key].componentOption.selectTable]
-              )
-            "
-            tree-checkable
-            :allowClear="fields[key].componentOption.allowClear"
+            filterable
             :placeholder="getFieldPlaceholder(fields[key], key, true)"
-            tree-node-filter-prop="label"
-            :disabled="fields[key].componentOption.disabled"
-            :fieldNames="{
-              children: fields[key].componentOption.fieldNames,
-              label: 'name',
-              value: 'objectId',
-            }"
-            :is="fields[key].editComponent"
+            :disabled="componentOption(key).disabled"
+            :clearable="componentOption(key).allowClear !== false"
+            :multiple="isMultiple(fields[key])"
           >
-          </component>
-
-          <component
-            v-else-if="
-              fields[key].editComponent == 'ASelect' &&
-              fields[key].componentOption.selectTable == 'AntdIcon'
-            "
-            v-model:value="formState[key]"
-            size="small"
-            :placeholder="getFieldPlaceholder(fields[key], key, true)"
-            :disabled="fields[key].componentOption.disabled"
-            :allowClear="fields[key].componentOption.allowClear"
-            :mode="fields[key].componentOption.mode"
-            :is="fields[key].editComponent"
-          >
-            <a-select-option
-              v-for="(item, index) in selectoptions[
-                fields[key].componentOption.selectTable
-              ]"
-              :key="index"
-              :label="item.name"
-              :value="item.name"
+            <el-option
+              v-for="(item, optionIndex) in selectOptions(key)"
+              :key="item.objectId || item.value || item.name || optionIndex"
+              :label="getOptionLabel(item, fields[key])"
+              :value="getOptionValue(item, fields[key])"
             >
-              <component
-                :is="AntdIcon[item[fields[key].componentOption.labelKey]]"
-              ></component>
-              {{ item[fields[key].componentOption.labelKey] }}
-            </a-select-option>
-          </component>
+              <span v-if="componentOption(key).selectTable === 'ElementIcon'" class="form-option">
+                <el-icon><component :is="getElementIcon(item[componentOption(key).labelKey])" /></el-icon>
+                <span>{{ item[componentOption(key).labelKey] }}</span>
+              </span>
+            </el-option>
+          </el-select>
 
-          <component
-            v-else-if="
-              fields[key].editComponent == 'ASelect' && fields[key].isPointer
-            "
-            v-model:value="formState[key]"
-            size="small"
-            :placeholder="getFieldPlaceholder(fields[key], key, true)"
-            :disabled="fields[key].componentOption.disabled"
-            :allowClear="fields[key].componentOption.allowClear"
-            :mode="fields[key].componentOption.mode"
-            :fieldNames="{
-              label: fields[key].componentOption.labelKey,
-              value: fields[key].componentOption.valueKey,
-            }"
-            :options="
-              treeSelectLabel(
-                selectoptions[fields[key].componentOption.selectTable],
-                {
-                  label: fields[key].componentOption.labelKey,
-                  value: fields[key].componentOption.valueKey,
-                }
-              )
-            "
-            :is="fields[key].editComponent"
-          ></component>
-
-          <component
-            v-else-if="fields[key].editComponent == 'AUpload'"
-            v-model:files="formState[key]"
-            :maxLength="fields[key].componentOption.maxLength"
-            :disabled="fields[key].componentOption.disabled"
-            :fileType="fields[key].componentOption.fileType"
+          <Upload
+            v-else-if="getEditComponent(fields[key]) === 'ElUpload'"
+            v-model="formState[key]"
+            :max-length="componentOption(key).maxLength"
+            :disabled="componentOption(key).disabled"
+            :file-type="componentOption(key).fileType"
             :placeholder="getFieldPlaceholder(fields[key], key)"
-            :is="Upload"
-          ></component>
+          />
 
-          <component
-            v-else-if="fields[key].editComponent == 'ASwitch'"
-            v-model:checked="formState[key]"
+          <el-switch
+            v-else-if="getEditComponent(fields[key]) === 'ElSwitch'"
+            v-model="formState[key]"
             size="small"
-            :disabled="fields[key].componentOption.disabled"
-            :is="fields[key].editComponent"
-          ></component>
+            :disabled="componentOption(key).disabled"
+            :active-text="componentOption(key).activeText || '是'"
+            :inactive-text="componentOption(key).inactiveText || '否'"
+          />
 
-          <component
-            v-else-if="fields[key].editComponent == 'RichTextEditor'"
-            ref="richTextRef"
-            v-model:value="formState[key]"
-            :disabled="fields[key].componentOption.disabled"
+          <RichTextEditor
+            v-else-if="getEditComponent(fields[key]) === 'RichTextEditor'"
+            v-model="formState[key]"
+            :disabled="componentOption(key).disabled"
             :placeholder="getFieldPlaceholder(fields[key], key)"
-            minHeight="320px"
-            :is="RichTextEditor"
-          ></component>
+            min-height="320px"
+          />
 
-          <component
+          <el-input-number
+            v-else-if="getEditComponent(fields[key]) === 'ElInputNumber'"
+            v-model="formState[key]"
+            class="common-form-modal__control"
+            size="small"
+            controls-position="right"
+            :disabled="componentOption(key).disabled"
+            :placeholder="getFieldPlaceholder(fields[key], key)"
+          />
+
+          <el-date-picker
+            v-else-if="getEditComponent(fields[key]) === 'ElDatePicker'"
+            v-model="formState[key]"
+            class="common-form-modal__control"
+            size="small"
+            type="datetime"
+            :placeholder="getFieldPlaceholder(fields[key], key)"
+            :disabled="componentOption(key).disabled"
+            :clearable="componentOption(key).allowClear !== false"
+          />
+
+          <el-date-picker
+            v-else-if="getEditComponent(fields[key]) === 'ElDateRangePicker'"
+            v-model="formState[key]"
+            class="common-form-modal__control"
+            size="small"
+            type="datetimerange"
+            :start-placeholder="`${getFieldPlaceholder(fields[key], key)}开始`"
+            :end-placeholder="`${getFieldPlaceholder(fields[key], key)}结束`"
+            :disabled="componentOption(key).disabled"
+            :clearable="componentOption(key).allowClear !== false"
+          />
+
+          <el-input
             v-else
-            v-model:value="formState[key]"
+            v-model="formState[key]"
+            class="common-form-modal__control"
             size="small"
+            :type="getEditComponent(fields[key]) === 'ElInputPassword' ? 'password' : 'text'"
+            :show-password="getEditComponent(fields[key]) === 'ElInputPassword'"
             :placeholder="getFieldPlaceholder(fields[key], key)"
-            :disabled="fields[key].componentOption.disabled"
-            :allowClear="fields[key].componentOption.allowClear"
-            :mode="fields[key].componentOption.mode"
-            :fieldNames="{
-              label: fields[key].componentOption.labelKey,
-              value: fields[key].componentOption.valueKey,
-            }"
-            :options="
-              treeSelectLabel(
-                selectoptions[fields[key].componentOption.selectTable],
-                {
-                  label: fields[key].componentOption.labelKey,
-                  value: fields[key].componentOption.valueKey,
-                }
-              )
-            "
-            :is="fields[key].editComponent"
-          >
-          </component>
-        </a-form-item>
-      </a-form>
+            :disabled="componentOption(key).disabled"
+            :clearable="componentOption(key).allowClear !== false"
+          />
+        </el-form-item>
+      </el-form>
     </div>
-    <div class="bar" @mousedown="down($event)" ref="bar"></div>
-    <template #modalRender="{ originVNode }">
-      <div :style="transformStyle">
-        <component :is="originVNode" />
-      </div>
+    <template #footer>
+      <el-button size="small" @click="visible = false">取消</el-button>
+      <el-button size="small" type="primary" @click="handleOk">确认</el-button>
     </template>
-  </a-modal>
+  </el-dialog>
 </template>
 
 <script setup>
+import { ElNotification } from "element-plus";
+import { computed, reactive, ref, watch } from "vue";
+
 import { findAll } from "@/service/base.service";
 import { isSelected } from "@/service/treeSelect.service";
-import { reactive, watch, ref, watchEffect, computed } from "vue";
-import * as AntdIcon from "@ant-design/icons-vue";
-import Upload from "./Upload.vue";
 import { deepClone, dataDefault } from "@/utils/utils";
-import { useDraggable } from "@vueuse/core";
-import { notification } from "ant-design-vue";
+import { getElementIcon, normalizeEditComponent } from "@/utils/element";
+
 import RichTextEditor from "./RichTextEditor.vue";
-const emit = defineEmits(["update:modalVisible", "onOk"]);
+import Upload from "./Upload.vue";
+
+const emit = defineEmits(["update:modelValue", "onOk"]);
 const props = defineProps({
   className: {
     required: true,
@@ -259,15 +185,16 @@ const props = defineProps({
     required: true,
     type: String,
   },
-  modalVisible: {
+  modelValue: {
     type: Boolean,
     default: false,
   },
   editState: {
     type: Object,
-    default: () => new Object(),
+    default: () => ({}),
   },
 });
+
 const modalType = {
   add: "新增",
   edit: "修改",
@@ -275,15 +202,35 @@ const modalType = {
 const modalWidth = ref("600px");
 const formWidth = ref("100%");
 const formHeight = ref("auto");
-const richTextRef = ref();
-const form1 = ref();
+const formRef = ref();
+const visible = ref(props.modelValue);
+const formState = reactive({});
+const selectoptions = reactive({});
+const selectoptionsCopy = reactive({});
+const formFieldKeys = computed(() =>
+  Object.keys(props.fields || {}).filter((key) => props.fields[key]?.editComponent)
+);
 
 /**
- * 为动态表单字段生成中文占位提示，并兼容旧 Schema 缺少组件配置的情况。
- * @param {{chineseName?: string, componentOption?: {placeholder?: string}, editComponent?: string} | undefined} field 字段元数据。
+ * 读取并规范化字段的编辑组件标识，保证旧 Schema 也只进入 Element Plus 渲染分支。
+ * @param {{editComponent?: unknown} | undefined} field Schema 字段配置。
+ * @returns {string} Element Plus 组件标识或未知原始标识。
+ */
+const getEditComponent = (field) => normalizeEditComponent(field?.editComponent);
+
+/**
+ * 读取字段的可选组件配置，避免历史 Schema 缺少 componentOption 时渲染异常。
+ * @param {string} key Schema 字段键名。
+ * @returns {Record<string, unknown>} 规范化后的字段组件配置。
+ */
+const componentOption = (key) => props.fields[key]?.componentOption || {};
+
+/**
+ * 为动态表单字段生成中文占位提示。
+ * @param {{chineseName?: string, componentOption?: {placeholder?: string}} | undefined} field 字段元数据。
  * @param {string} fieldName 字段键名，用于中文名称缺失时兜底。
- * @param {boolean} isSelect 是否为选择类控件；选择类使用“请选择”。
- * @returns {string} 动态控件可直接使用的 placeholder 文案。
+ * @param {boolean} isSelect 是否为选择类控件。
+ * @returns {string} Element Plus 控件使用的 placeholder 文案。
  */
 const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
   const configured = field?.componentOption?.placeholder;
@@ -291,291 +238,293 @@ const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
   const label = field?.chineseName || fieldName || "该字段";
   return `${isSelect ? "请选择" : "请输入"}${label}`;
 };
-watch(
-  () => props.modalVisible,
-  (n) => {
-    if (n && props.type == "edit") {
-      Object.keys(props.editState).forEach((key) => {
-        if (
-          props.fields[key] &&
-          props.fields[key].editComponent &&
-          props.fields[key].editComponent == "AUpload" &&
-          props.fields[key].componentOption.maxLength == 1
-        ) {
-          formState[key] = [
-            {
-              uid: new Date().getMilliseconds(),
-              name: props.editState[key].match(/\upload\/(.*)/)[1],
-              status: "done",
-              url: props.editState[key],
-            },
-          ];
-        } else {
-          formState[key] = props.editState[key];
-        }
-      });
-    }
-    visible.value = n;
-  }
-);
-const visible = ref(props.modalVisible);
-watch(visible, (n, o) => {
-  if (!n) {
-    form1.value.resetFields();
-    Object.keys(props.fields).forEach((key) => {
-      formState[key] =
-        props.fields[key].defaultValue || dataDefault(props.fields[key].type);
-    });
-  } else {
-    Object.keys(props.fields).forEach((key) => {
-      /* 获取下拉组件数据 */
-      if (props.fields[key].componentOption.selectTable) {
-        loadSelectOptions(props.fields[key].componentOption.selectTable);
-      }
-    });
-  }
-  emit("update:modalVisible", n);
+
+/**
+ * 判断选择字段是否支持多选。
+ * @param {{componentOption?: {mode?: string}, type?: string, isPointer?: boolean}} field Schema 字段配置。
+ * @returns {boolean} 多选模式或 Pointer 数组字段返回 true。
+ */
+const isMultiple = (field) =>
+  ["multiple", "tags"].includes(field?.componentOption?.mode) ||
+  (field?.isPointer && field?.type === "Array");
+
+/**
+ * 返回指定字段的下拉选项。
+ * @param {string} key Schema 字段键名。
+ * @returns {Array<Record<string, unknown>>} 关联数据源的选项数组。
+ */
+const selectOptions = (key) => selectoptions[componentOption(key).selectTable] || [];
+
+/**
+ * 从关联记录中读取下拉显示文本。
+ * @param {Record<string, unknown>} option 关联数据源记录。
+ * @param {{componentOption?: {labelKey?: string}}} field 字段配置。
+ * @returns {string} 下拉项显示文本。
+ */
+const getOptionLabel = (option, field) =>
+  String(option?.[field?.componentOption?.labelKey || "name"] ?? option?.label ?? option?.name ?? "");
+
+/**
+ * 从关联记录中读取下拉值。
+ * @param {Record<string, unknown>} option 关联数据源记录。
+ * @param {{componentOption?: {valueKey?: string}}} field 字段配置。
+ * @returns {string | number | boolean | undefined} 下拉项值。
+ */
+const getOptionValue = (option, field) =>
+  option?.[field?.componentOption?.valueKey || "objectId"] ?? option?.value;
+
+/**
+ * 为 Element Plus TreeSelect 生成节点字段映射。
+ * @param {string} key Schema 字段键名。
+ * @returns {{children: string, label: string, value: string}} 树节点字段配置。
+ */
+const treeProps = (key) => ({
+  children: componentOption(key).fieldNames || "children",
+  label: "name",
+  value: "objectId",
 });
 
-const selectoptions = reactive({});
-const selectoptions_copy = reactive({});
+/**
+ * 判断树选择器是否为多选树，并同步显示复选框。
+ * @param {string} key Schema 字段键名。
+ * @returns {boolean} Pointer 数组或显式多选模式返回 true。
+ */
+const treeIsMultiple = (key) =>
+  isMultiple(props.fields[key]) || props.fields[key]?.type === "Array";
 
-const loadSelectOptions = async (className) => {
-  if (!className) return [];
-  selectoptions[className] =
-    deepClone(selectoptions_copy[className]) || (await findAll(className));
-  selectoptions_copy[className] = deepClone(selectoptions[className]);
-  for (const key of Object.keys(props.fields)) {
-    if (props.fields[key].isPointer) {
-      formState[key] =
-        formState[key]?.map((item) =>
-          typeof item == "object" ? item.objectId : item
-        ) || [];
-    }
-    if (props.fields[key].isSole && props.fields[key].isPointer) {
-      treeSelectChange(
-        formState[key],
-        props.fields[key],
-        selectoptions[props.fields[key].componentOption.selectTable],
-        {
-          children: props.fields[key].componentOption.fieldNames,
-          skey: key,
-        }
-      );
+/**
+ * 将树节点深拷贝并把备注拼接到名称，避免直接修改服务端缓存对象。
+ * @param {Array<Record<string, unknown>> | undefined} origin 原始树节点数组。
+ * @param {{label?: string} | undefined} option 可选的自定义标签字段。
+ * @returns {Array<Record<string, unknown>>} Element Plus TreeSelect 可消费的节点数组。
+ */
+const treeSelectLabel = (origin, option = undefined) => {
+  if (!Array.isArray(origin)) return [];
+  return deepClone(origin).map((item) => {
+    const labelKey = option?.label || "name";
+    const originalLabel = item[labelKey] || item.name || item.objectId || "";
+    item[labelKey] = `${originalLabel}${item.remark ? `(${item.remark})` : ""}`;
+    return item;
+  });
+};
+
+/**
+ * 将父组件的弹窗状态同步到 Element Plus Dialog，并回填编辑数据。
+ * @param {boolean} nextVisible 父组件传入的最新可见状态。
+ * @returns {void} 更新表单状态或重置字段，不发起额外的弹窗请求。
+ */
+watch(
+  () => props.modelValue,
+  (nextVisible) => {
+    visible.value = nextVisible;
+    if (nextVisible) {
+      if (props.type === "edit") fillEditState();
+      void loadAllSelectOptions();
     }
   }
+);
+
+/**
+ * 将 Dialog 的可见状态同步回父组件 v-model。
+ * @param {boolean} nextVisible Element Plus Dialog 的最新状态。
+ * @returns {void} 发出 update:modelValue 事件。
+ */
+watch(visible, (nextVisible) => {
+  if (!nextVisible) resetFormState();
+  if (nextVisible !== props.modelValue) emit("update:modelValue", nextVisible);
+});
+
+/**
+ * 初始化新增表单或清理关闭后的旧值。
+ * @returns {void} 按 Schema 默认值重建 formState。
+ */
+const resetFormState = () => {
+  formRef.value?.resetFields?.();
+  formFieldKeys.value.forEach((key) => {
+    const configuredDefault = props.fields[key]?.defaultValue;
+    formState[key] = configuredDefault ?? dataDefault(props.fields[key]?.type);
+  });
 };
-const formState = reactive({});
+
+/**
+ * 将编辑对象回填到表单，单文件上传会转换为 Upload 组件需要的文件数组。
+ * @returns {void} 更新 formState，不修改父组件的 editState。
+ */
+const fillEditState = () => {
+  formFieldKeys.value.forEach((key) => {
+    const field = props.fields[key];
+    const value = props.editState[key];
+    if (getEditComponent(field) === "ElUpload" && componentOption(key).maxLength === 1 && value) {
+      const url = String(value);
+      formState[key] = [
+        {
+          uid: `${key}-${Date.now()}`,
+          name: url.split("/").pop() || "已上传文件",
+          status: "done",
+          url,
+        },
+      ];
+    } else {
+      formState[key] = deepClone(value);
+    }
+  });
+};
+
+/**
+ * 读取一个关联数据源并缓存副本，避免重复打开弹窗产生无意义请求。
+ * @param {string} className 关联数据表名；为空时跳过。
+ * @returns {Promise<Array<Record<string, unknown>>>} 关联记录数组。
+ */
+const loadSelectOptions = async (className) => {
+  if (!className) return [];
+  if (!selectoptions[className]) {
+    selectoptions[className] = deepClone(selectoptionsCopy[className]) || (await findAll(className));
+    selectoptionsCopy[className] = deepClone(selectoptions[className]);
+  }
+  return selectoptions[className] || [];
+};
+
+/**
+ * 加载当前表单所有字段的关联数据源，并把 Pointer 对象标准化为 objectId 数组。
+ * @returns {Promise<void>} 所有关联选项加载和 Pointer 标准化完成后兑现。
+ */
+const loadAllSelectOptions = async () => {
+  const classNames = [
+    ...new Set(
+      formFieldKeys.value
+        .map((key) => componentOption(key).selectTable)
+        .filter(Boolean)
+    ),
+  ];
+  await Promise.all(classNames.map((className) => loadSelectOptions(className)));
+  formFieldKeys.value.forEach((key) => {
+    if (props.fields[key]?.isPointer && Array.isArray(formState[key])) {
+      formState[key] = formState[key].map((item) => (typeof item === "object" ? item.objectId : item));
+    }
+  });
+};
+
 watch(
   () => props.fields,
-  (n) => {
-    Object.keys(props.fields).forEach((key) => {
-      if (props.type == "add") {
-        formState[key] =
-          props.fields[key].defaultValue || dataDefault(props.fields[key].type);
-        if (props.fields[key].editComponent == "RichTextEditor") {
-          modalWidth.value = "1480px";
-          formWidth.value = "400px";
-          formHeight.value = 420 + "px";
-        }
-      }
-    });
+  () => {
+    if (props.type === "add") resetFormState();
+    if (formFieldKeys.value.some((key) => getEditComponent(props.fields[key]) === "RichTextEditor")) {
+      modalWidth.value = "1480px";
+      formWidth.value = "400px";
+      formHeight.value = "420px";
+    } else {
+      modalWidth.value = "600px";
+      formWidth.value = "100%";
+      formHeight.value = "auto";
+    }
   },
   { deep: true, immediate: true }
 );
 
 /**
- * 校验通用动态表单并把标准化数据发给父级页面；单文件上传值会转换为其受控 URL。
- * @returns {Promise<void>} 校验成功后触发 onOk；校验失败时保留当前弹窗和字段提示。
+ * 为 Element Plus Form 生成字段验证规则，并明确在失焦时执行必填校验。
+ * @param {{required?: boolean}} field Schema 字段配置。
+ * @param {string} key 字段键名，用于生成中文校验提示。
+ * @returns {Array<Record<string, unknown>>} Element Plus FormItem 规则数组。
+ */
+const fieldRules = (field, key) => [
+  {
+    required: field?.required === true,
+    message: getFieldPlaceholder(field, key),
+    trigger: [
+      "ElSelect",
+      "ElTreeSelect",
+      "ElSwitch",
+      "ElInputNumber",
+      "ElDatePicker",
+      "ElDateRangePicker",
+      "ElUpload",
+    ].includes(getEditComponent(field))
+      ? "change"
+      : "blur",
+  },
+];
+
+/**
+ * 校验通用动态表单并把标准化数据发给父级页面；单文件上传值转换为受控 URL。
+ * @returns {Promise<void>} 校验成功后触发 onOk；失败时保留弹窗和字段提示。
  */
 const handleOk = async () => {
   try {
-    const values = await form1.value.validate();
+    await formRef.value.validate();
+    const values = deepClone(formState);
     const params = deepClone(values);
     Object.keys(values).forEach((key) => {
-      if (
-        props.fields[key] &&
-        props.fields[key].editComponent &&
-        props.fields[key].editComponent == "AUpload" &&
-        props.fields[key].componentOption.maxLength == 1
-      ) {
-        params[key] = params[key]?.[0]?.url;
+      if (getEditComponent(props.fields[key]) === "ElUpload" && componentOption(key).maxLength === 1) {
+        params[key] = params[key]?.[0]?.url || "";
       }
     });
     emit("onOk", params);
   } catch {
-    notification.warning({
-      message: "表单校验未通过",
-      description: "请检查标记的字段后再提交。",
+    ElNotification.warning({
+      title: "表单校验未通过",
+      message: "请检查标记的字段后再提交。",
     });
   }
 };
 
-//treeSelect 事件；不可超出最大可选数字
-const treeSelectChange = async (...args) => {
-  if (!args[0]) return;
-  let arr = [];
-  const className = args[1].componentOption.selectTable;
-  if (args[1].editComponent == "ASelect") {
-    selectoptions[className] = args[2]?.map((parent, pIndex) => {
-      if (args[0].includes(parent.objectId)) {
-        parent.disabled = false;
-      } else {
-        arr.push({
-          searchClassName: props.className,
-          className,
-          classField: args[3].skey,
-          selectId: {
-            __type: "Pointer",
-            className: args[1].targetClass,
-            objectId: parent.objectId,
-          },
-          parentIndex: pIndex,
-        });
-      }
-      return parent;
-    });
-  } else if (args[1].editComponent == "ATreeSelect") {
-    selectoptions[className] = args[2]?.map((parent, pIndex) => {
-      parent[args[3].children]?.map((children, cIndex) => {
-        if (args[0].length < args[1].componentOption.maxCount) {
-          if (args[0].includes(children.objectId)) {
-            children.disabled = false;
-          } else {
-            arr.push({
-              searchClassName: props.className,
-              className,
-              classField: args[3].children,
-              selectId: {
-                __type: "Pointer",
-                className: children.className,
-                objectId: children.objectId,
-              },
-              parentIndex: pIndex,
-              childIndex: cIndex,
-            });
-          }
-        } else {
-          if (args[0].includes(children.objectId)) {
-            children.disabled = false;
-          } else {
-            children.disabled = true;
-          }
-        }
-        return children;
-      });
-      if (
-        args[1].isPointer &&
-        args[1].editComponent == "ATreeSelect" &&
-        args[1].isSole
-      ) {
-        parent.disabled = true;
+/**
+ * 处理树选择器变化，并按历史组织关系规则更新不可重复选择的节点。
+ * @param {string} key 当前字段键名。
+ * @param {string | string[]} value Element Plus TreeSelect 返回的值。
+ * @returns {Promise<void>} 节点状态更新完成后兑现。
+ */
+const handleTreeSelectChange = async (key, value) => {
+  const field = props.fields[key];
+  const options = selectOptions(key);
+  const selectedIds = Array.isArray(value) ? value : value ? [value] : [];
+  const option = componentOption(key);
+  const className = option.selectTable;
+  if (!className || !Array.isArray(options)) return;
+
+  if (field?.isPointer && field?.isSole) {
+    selectoptions[className] = deepClone(options).map((parent, parentIndex) => {
+      const childrenKey = option.fieldNames || "children";
+      if (Array.isArray(parent[childrenKey])) {
+        parent[childrenKey] = parent[childrenKey].map((child, childIndex) => ({
+          ...child,
+          disabled: selectedIds.length < (option.maxCount || Number.MAX_SAFE_INTEGER)
+            ? false
+            : !selectedIds.includes(child.objectId),
+          parentIndex,
+          childIndex,
+        }));
       }
       return parent;
     });
   }
-  if (!args[3].page) disableSelect(arr);
-};
 
-//节点已选则禁用
-const disableSelect = async (arr) => {
-  for (const {
-    searchClassName,
-    className,
-    classField,
-    selectId,
-    parentIndex,
-    childIndex,
-  } of arr) {
-    const result = await isSelected(searchClassName, classField, selectId);
-    if (childIndex >= 0) {
-      selectoptions[className][parentIndex][classField][childIndex].disabled =
-        result ? true : false;
-    } else {
-      selectoptions[className][parentIndex].disabled = result ? true : false;
-    }
+  if (!option.page && field?.isPointer && field?.isSole) {
+    await disableSelect(
+      selectedIds.flatMap((selectedId) => {
+        const node = options.find((item) => item.objectId === selectedId);
+        return node
+          ? [{ searchClassName: props.className, className, classField: key, objectId: selectedId, node }]
+          : [];
+      })
+    );
   }
 };
 
-//格式化treeSelect
-const treeSelectLabel = (origin, option) => {
-  if (!origin) return [];
-  return deepClone(origin).map((item) => {
-    let remark = item.remark ? "(" + item.remark + ")" : "";
-    if (option) {
-      item[option.label] = item[option.label] + remark;
-    } else {
-      item.name = item.name + remark;
-    }
-    return item;
-  });
-};
-
-const modalTitleRef = ref();
-const { x, y, isDragging } = useDraggable(modalTitleRef);
-const startX = ref(0);
-const startY = ref(0);
-const startedDrag = ref(false);
-const transformX = ref(0);
-const transformY = ref(0);
-const preTransformX = ref(0);
-const preTransformY = ref(0);
-const dragRect = ref({
-  left: 0,
-  right: 0,
-  top: 0,
-  bottom: 0,
-});
-watch([x, y], () => {
-  if (!startedDrag.value) {
-    startX.value = x.value;
-    startY.value = y.value;
-    const bodyRect = document.body.getBoundingClientRect();
-    const titleRect = modalTitleRef.value.getBoundingClientRect();
-    dragRect.value.right = bodyRect.width - titleRect.width;
-    dragRect.value.bottom = bodyRect.height - titleRect.height;
-    preTransformX.value = transformX.value;
-    preTransformY.value = transformY.value;
+/**
+ * 查询服务端是否已存在相同 Pointer 关系并禁用已被占用的节点。
+ * @param {Array<{searchClassName: string, className: string, classField: string, objectId: string, node: Record<string, unknown>}>} items 待检查节点。
+ * @returns {Promise<void>} 节点 disabled 状态更新完成后兑现。
+ */
+const disableSelect = async (items) => {
+  for (const item of items) {
+    const result = await isSelected(item.searchClassName, item.classField, {
+      __type: "Pointer",
+      className: item.className,
+      objectId: item.objectId,
+    });
+    item.node.disabled = Boolean(result);
   }
-  startedDrag.value = true;
-});
-watch(isDragging, () => {
-  if (!isDragging) {
-    startedDrag.value = false;
-  }
-});
-watchEffect(() => {
-  if (startedDrag.value) {
-    transformX.value =
-      preTransformX.value +
-      Math.min(Math.max(dragRect.value.left, x.value), dragRect.value.right) -
-      startX.value;
-    transformY.value =
-      preTransformY.value +
-      Math.min(Math.max(dragRect.value.top, y.value), dragRect.value.bottom) -
-      startY.value;
-  }
-});
-const transformStyle = computed(() => {
-  return {
-    transform: `translate(${transformX.value}px, ${transformY.value}px)`,
-  };
-});
-
-const down = (e) => {
-  const startX = e.clientX;
-  const offsetX = e.target.offsetLeft; //元素左边到窗口左边的距离
-  e.target.setCaptrue; //设置鼠标捕获(之后的事件捕获会作用在当前元素上)
-  document.onmousemove = (e) => {
-    const endX = e.clientX;
-    const width = offsetX - (startX - endX);
-    if (width > 600) modalWidth.value = width + "px";
-  };
-  document.onmouseup = (e) => {
-    document.onmousemove = null;
-    document.onmouseup = null;
-    e.target.releaseCaptrue; //释放鼠标捕获
-  };
 };
 </script>
 
@@ -595,6 +544,10 @@ const down = (e) => {
   position: relative;
 }
 
+.common-form-modal__control {
+  width: 100%;
+}
+
 .common-form-modal__rich-text-item {
   position: absolute;
   top: 0;
@@ -602,16 +555,11 @@ const down = (e) => {
   width: 1000px;
 }
 
-.bar {
-  cursor: col-resize;
-  width: 24px;
-  display: inline-block;
-  line-height: 200px;
-  vertical-align: middle;
-  position: absolute;
-  right: 0px;
-  top: 0;
-  height: 100%;
+.form-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: normal;
 }
 
 @media (max-width: 900px) {

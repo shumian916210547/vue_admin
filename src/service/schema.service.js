@@ -1,5 +1,5 @@
 import { Capture, handleParseError } from "@/service/service.config";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 import Parse from "@/service/parse-client";
 export const defaultFields = [
   {
@@ -8,7 +8,7 @@ export const defaultFields = [
     fieldOption: {
       required: false,
       chineseName: "对象ID",
-      editComponent: "AInput",
+      editComponent: "ElInput",
       isTable: false,
       componentOption: {
         disabled: true,
@@ -26,7 +26,7 @@ export const defaultFields = [
       required: true,
       chineseName: "公司",
       targetClass: "Company",
-      editComponent: "ASelect",
+      editComponent: "ElSelect",
       componentOption: {
         mode: "combobox",
         disabled: false,
@@ -44,7 +44,7 @@ export const defaultFields = [
     fieldOption: {
       required: false,
       chineseName: "创建时间",
-      editComponent: "AInput",
+      editComponent: "ElInput",
       isTable: false,
       componentOption: {
         disabled: true,
@@ -59,7 +59,7 @@ export const defaultFields = [
     fieldOption: {
       required: false,
       chineseName: "修改时间",
-      editComponent: "AInput",
+      editComponent: "ElInput",
       isTable: false,
       componentOption: {
         disabled: true,
@@ -73,7 +73,7 @@ export const defaultFields = [
 /**
  * 组织范围业务表的标准字段定义。字段名必须固定为 organization，后端据此识别并执行组织树、
  * 成员管理范围以及启用状态校验；任何改名都会使该表失去组织级数据隔离。
- * @type {{fieldName: "organization", type: "Pointer", fieldOption: {required: boolean, chineseName: string, targetClass: "Organization", editComponent: "ASelect", isFilter: boolean, isTable: boolean, componentOption: Record<string, unknown>}}}
+ * @type {{fieldName: "organization", type: "Pointer", fieldOption: {required: boolean, chineseName: string, targetClass: "Organization", editComponent: "ElSelect", isFilter: boolean, isTable: boolean, componentOption: Record<string, unknown>}}}
  */
 export const organizationScopeField = {
   fieldName: "organization",
@@ -82,7 +82,7 @@ export const organizationScopeField = {
     required: true,
     chineseName: "所属组织",
     targetClass: "Organization",
-    editComponent: "ASelect",
+    editComponent: "ElSelect",
     isFilter: true,
     isTable: true,
     componentOption: {
@@ -237,9 +237,9 @@ const InsertSchema = async (className, nickName, organizationScoped) => {
       return setDefaultFields({ className, ...item });
     })
   );
-  notification.success({
-    message: sessionStorage.getItem("pageName"),
-    description: (success.get("name") || success.get("objectId")) + "添加成功",
+  ElNotification.success({
+    title: sessionStorage.getItem("pageName"),
+    message: (success.get("name") || success.get("objectId")) + "添加成功",
     duration: 0.5,
   });
   return success;
@@ -266,9 +266,9 @@ export const UpdateSchema = async (className, type, fieldName, fieldOption) => {
   };
   schema.set("fields", fields);
   return await Capture(schema.save()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("objectId")) + "更新成功",
       duration: 0.5,
     });
@@ -283,9 +283,9 @@ const RemoveTableField = async (className, fieldName) => {
   delete fields[fieldName];
   schema.set("fields", fields);
   return await Capture(schema.save()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description: "字段" + fieldName + "删除成功",
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message: "字段" + fieldName + "删除成功",
       duration: 0.5,
     });
   });
@@ -296,9 +296,9 @@ const RemoveTable = async (className) => {
   Schema.equalTo("name", className);
   const schema = await Schema.first();
   return await Capture(schema.destroy()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("objectId")) + "删除成功",
       duration: 0.5,
     });

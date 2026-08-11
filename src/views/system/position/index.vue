@@ -7,126 +7,136 @@
         <p>为岗位选择可访问的业务页面，并在每个页面内细分查询、新建、编辑、删除等按钮权限。</p>
       </div>
       <div class="position-page__heading-actions management-page__heading-actions">
-        <a-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadPositionPage">
-          <template #icon><ReloadOutlined /></template>
+        <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadPositionPage">
+          <template #icon><el-icon><Refresh /></el-icon></template>
           刷新配置
-        </a-button>
-        <a-button size="small" v-auth="['permission:insert', permissions]" type="primary" @click="openPositionModal('create')">
-          <template #icon><PlusOutlined /></template>
+        </el-button>
+        <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" @click="openPositionModal('create')">
+          <template #icon><el-icon><Plus /></el-icon></template>
           新增岗位
-        </a-button>
+        </el-button>
       </div>
     </header>
 
-    <a-alert
+    <el-alert
       v-if="loadError"
       class="management-page__alert"
       type="error"
       show-icon
-      :message="loadError"
-      description="请确认当前账号为系统管理员，并检查系统路由配置是否已完成初始化。"
-    />
+      :title="loadError"
+    >请确认当前账号为系统管理员，并检查系统路由配置是否已完成初始化。</el-alert>
 
-    <a-card class="position-page__table-card" :bordered="false">
-      <template #title>
-        <span class="management-page__card-title"><SafetyCertificateOutlined /> 岗位与页面权限</span>
+    <el-card class="position-page__table-card">
+      <template #header>
+        <span class="management-page__card-title"><el-icon><CircleCheck /></el-icon> 岗位与页面权限</span>
       </template>
       <p class="position-page__tip">首页、系统管理和业务页面均可按岗位分配；保存后还会同步校验页面内按钮权限。删除岗位前须先为引用该岗位的成员重新分配岗位。</p>
-      <a-table
+      <el-table
         size="small"
         class="position-page__table"
-        :columns="positionColumns"
-        :data-source="positions"
-        :loading="loading"
-        :pagination="false"
-        :scroll="{ x: 820 }"
+        width="100%"
+        :data="positions"
+        v-loading="loading"
         row-key="objectId"
       >
-        <template #bodyCell="{ column, record }">
+        <el-table-column
+          v-for="column in positionColumns"
+          :key="column.key"
+          :prop="column.dataIndex"
+          :label="column.title"
+          :width="column.width"
+          :min-width="column.minWidth || (column.width ? undefined : 140)"
+          :fixed="column.fixed"
+          :class-name="column.className"
+        >
+        <template #default="{ row }">
           <template v-if="column.key === 'pages'">
-            <span>{{ pageSummary(record.pagePermissions) }}</span>
+            <span>{{ pageSummary(row.pagePermissions) }}</span>
           </template>
           <template v-else-if="column.key === 'actions'">
             <div class="position-page__row-actions">
-              <a-button size="small" v-auth="['permission:edit', permissions]" type="link" @click="openPositionModal('edit', record.objectId)">编辑权限</a-button>
-              <a-popconfirm
+              <el-button size="small" v-auth="['permission:edit', permissions]" type="primary" link @click="openPositionModal('edit', row.objectId)">编辑权限</el-button>
+              <el-popconfirm
                 title="删除岗位会同步删除其页面和按钮权限；此操作不可恢复，确认继续吗？"
-                ok-text="删除"
-                cancel-text="取消"
-                @confirm="handleDeletePosition(record)"
+                confirm-button-text="删除"
+                cancel-button-text="取消"
+                @confirm="handleDeletePosition(row)"
               >
-                <a-button size="small" v-auth="['permission:remove', permissions]" danger type="link">删除</a-button>
-              </a-popconfirm>
+                <template #reference>
+                  <el-button size="small" v-auth="['permission:remove', permissions]" type="danger" link>删除</el-button>
+                </template>
+              </el-popconfirm>
             </div>
           </template>
+          <span v-else>{{ row[column.dataIndex] }}</span>
         </template>
-      </a-table>
-    </a-card>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
-    <a-modal
-      v-model:visible="positionModal.visible"
+    <el-dialog
+      v-model="positionModal.visible"
       :title="positionModal.mode === 'create' ? '新增岗位' : '编辑岗位权限'"
-      :confirm-loading="positionModal.submitting"
       :width="920"
-      ok-text="保存"
-      cancel-text="取消"
-      @ok="submitPosition"
-      @cancel="closePositionModal"
+      @close="closePositionModal"
     >
-      <a-form size="small" ref="positionFormRef" :model="positionForm" :rules="positionRules" layout="vertical">
-        <a-form-item label="岗位名称" name="name" extra="一个成员只能分配一个岗位；岗位名称在当前企业内唯一。">
-          <a-input size="small" v-model:value="positionForm.name" placeholder="例如：区域运营专员" :maxlength="100" />
-        </a-form-item>
+      <el-form size="small" ref="positionFormRef" :model="positionForm" :rules="positionRules" label-position="top">
+        <el-form-item label="岗位名称" prop="name">
+          <el-input size="small" v-model="positionForm.name" placeholder="例如：区域运营专员" maxlength="100" />
+          <p class="form-item-help">一个成员只能分配一个岗位；岗位名称在当前企业内唯一。</p>
+        </el-form-item>
         <section class="position-page__permission-section" aria-label="页面与按钮权限">
           <div class="position-page__permission-heading">
             <div>
               <strong>页面与按钮权限</strong>
               <p>勾选页面后，可在该页面内选择允许执行的按钮操作；“查看数据”为已选页面的必选权限。</p>
             </div>
-            <a-tag color="blue">{{ selectedPageCount }} 个页面已选</a-tag>
+            <el-tag size="small" type="primary">{{ selectedPageCount }} 个页面已选</el-tag>
           </div>
-          <a-empty v-if="!permissionTreeData.length" description="暂无可配置页面；系统目录会自动补齐，业务页面请先在模块管理中创建并关联路由。" />
+          <el-empty v-if="!permissionTreeData.length" description="暂无可配置页面；系统目录会自动补齐，业务页面请先在模块管理中创建并关联路由。" />
           <div v-else class="position-page__permission-tree app-scrollbar">
-            <a-tree
-              checkable
+            <el-tree
+              :key="`${positionModal.mode}-${positionModal.visible}`"
+              show-checkbox
               check-strictly
-              block-node
               default-expand-all
-              :tree-data="permissionTreeData"
-              :checked-keys="permissionTreeCheckedKeys"
+              node-key="key"
+              :data="permissionTreeData"
+              :default-checked-keys="permissionTreeCheckedKeys.checked"
+              :props="{ label: 'title', children: 'children' }"
               @check="handlePermissionTreeCheck"
             >
-              <template #title="{ dataRef }">
+              <template #default="{ data }">
                 <div
                   class="position-page__tree-title"
-                  :class="`position-page__tree-title--${dataRef.nodeType}`"
+                  :class="`position-page__tree-title--${data.nodeType}`"
                 >
-                  <strong v-if="dataRef.nodeType === 'module'">{{ dataRef.title }}</strong>
-                  <template v-else-if="dataRef.nodeType === 'page'">
-                    <strong>{{ dataRef.title }}</strong>
+                  <strong v-if="data.nodeType === 'module'">{{ data.title }}</strong>
+                  <template v-else-if="data.nodeType === 'page'">
+                    <strong>{{ data.title }}</strong>
                     <span class="position-page__tree-path">
-                      {{ dataRef.path ? `/${dataRef.path}` : "未配置路径" }}
+                      {{ data.path ? `/${data.path}` : "未配置路径" }}
                     </span>
                   </template>
-                  <span v-else>{{ dataRef.title }}</span>
+                  <span v-else>{{ data.title }}</span>
                 </div>
               </template>
-            </a-tree>
+            </el-tree>
           </div>
         </section>
-      </a-form>
-    </a-modal>
+      </el-form>
+      <template #footer>
+        <el-button size="small" @click="closePositionModal">取消</el-button>
+        <el-button size="small" type="primary" :loading="positionModal.submitting" @click="submitPosition">保存</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <script setup>
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  SafetyCertificateOutlined,
-} from "@ant-design/icons-vue";
+import { CircleCheck, Plus, Refresh } from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, ref } from "vue";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 
 import { Mixins } from "@/mixins";
 import {
@@ -138,8 +148,8 @@ import {
 
 /** 岗位表格列配置；页面数量和操作列由 bodyCell 插槽渲染。 */
 const positionColumns = [
-  { title: "岗位名称", dataIndex: "name", key: "name", width: 220 },
-  { title: "可访问页面", key: "pages", width: 360 },
+  { title: "岗位名称", dataIndex: "name", key: "name", minWidth: 220 },
+  { title: "可访问页面", key: "pages", minWidth: 360 },
   { title: "操作", key: "actions", width: 150, fixed: "right", className: "table-operation-column" },
 ];
 /** 按钮权限代码的中文说明；由 BFF 返回的代码只在此白名单中展示。 */
@@ -201,7 +211,7 @@ const getAvailablePagePermissions = (page) => {
 };
 
 /**
- * 将模块、页面和页面按钮权限转换为 Ant Design Vue Tree 所需的三级树结构。
+ * 将模块、页面和页面按钮权限转换为 Element Plus Tree 所需的三级树结构。
  * @returns {Array<Record<string, unknown>>} 模块树节点；页面和按钮节点携带业务定位字段供勾选事件使用。
  */
 const permissionTreeData = computed(() => {
@@ -213,7 +223,7 @@ const permissionTreeData = computed(() => {
       key: groupKey,
       title: groupName,
       nodeType: "module",
-      disableCheckbox: true,
+      disabled: true,
       children: [],
     };
     group.children.push({
@@ -229,7 +239,7 @@ const permissionTreeData = computed(() => {
         permission,
         nodeType: "permission",
         // 查询权限由页面启用状态自动维护，其他按钮必须先启用页面才能配置。
-        disableCheckbox: permission === "permission:query" || !page.enabled,
+        disabled: permission === "permission:query" || !page.enabled,
       })),
     });
     groups.set(groupKey, group);
@@ -238,7 +248,7 @@ const permissionTreeData = computed(() => {
 });
 /**
  * 计算权限树的受控勾选状态；模块只用于分组，页面和按钮节点独立勾选。
- * @returns {{checked: string[], halfChecked: string[]}} Ant Design Vue Tree 的严格模式勾选对象。
+ * @returns {{checked: string[], halfChecked: string[]}} Element Plus Tree 的受控勾选对象。
  */
 const permissionTreeCheckedKeys = computed(() => {
   const checked = [];
@@ -384,15 +394,15 @@ const handlePagePermissionChange = (page) => {
 
 /**
  * 处理权限树的页面或按钮勾选事件；页面节点控制访问开关，按钮节点只修改当前页面的权限 Code。
- * @param {string[] | {checked: string[], halfChecked: string[]}} checkedKeys Tree 当前受控勾选值，用于兼容严格模式事件返回格式。
- * @param {{checked?: boolean, node?: {key?: string, dataRef?: Record<string, unknown>}}} info Tree 勾选事件信息，包含节点业务数据与本次勾选结果。
+ * @param {Record<string, unknown>} data Tree 当前被操作的节点数据。
+ * @param {{checkedKeys?: string[]}} info Tree 勾选事件信息，包含当前受控勾选 key 数组。
  * @returns {void} 更新岗位表单中的页面启用状态和按钮权限，不直接发起接口请求。
  */
-const handlePermissionTreeCheck = (checkedKeys, info) => {
-  const node = info?.node?.dataRef || {};
-  const nodeKey = info?.node?.key;
-  const checkedList = Array.isArray(checkedKeys) ? checkedKeys : checkedKeys?.checked || [];
-  const checked = typeof info?.checked === "boolean" ? info.checked : checkedList.includes(nodeKey);
+const handlePermissionTreeCheck = (data, info) => {
+  const node = data || {};
+  const nodeKey = node.key;
+  const checkedList = Array.isArray(info?.checkedKeys) ? info.checkedKeys : [];
+  const checked = checkedList.includes(nodeKey);
   const page = positionForm.pages.find((item) => item.routeId === node.routeId);
 
   if (!page || node.nodeType === "module") return;
@@ -441,12 +451,12 @@ const submitPosition = async () => {
     };
     if (positionModal.mode === "create") await createPosition(payload);
     else await updatePosition(positionForm.objectId, payload);
-    notification.success({ message: "岗位管理", description: "岗位页面与按钮权限已保存。" });
+    ElNotification.success({ title: "岗位管理", message: "岗位页面与按钮权限已保存。" });
     closePositionModal();
     await reloadOverview();
   } catch (error) {
     if (error?.errorFields) return;
-    notification.error({ message: "保存失败", description: error?.message || "岗位权限未能保存，请检查配置后重试。" });
+    ElNotification.error({ title: "保存失败", message: error?.message || "岗位权限未能保存，请检查配置后重试。" });
   } finally {
     positionModal.submitting = false;
   }
@@ -462,17 +472,17 @@ const closePositionModal = () => {
 };
 
 /**
- * 删除一个岗位。模板中的 popconfirm 已向管理员展示不可逆影响，BFF 仍会阻止删除被成员使用的岗位。
+ * 删除一个岗位。模板中的 Popconfirm 已向管理员展示不可逆影响，BFF 仍会阻止删除被成员使用的岗位。
  * @param {{objectId: string, name: string}} position 待删除岗位 DTO。
  * @returns {Promise<void>} 删除成功后刷新岗位列表；失败时展示服务端反馈。
  */
 const handleDeletePosition = async (position) => {
   try {
     await deletePosition(position.objectId);
-    notification.success({ message: "岗位管理", description: `岗位“${position.name}”已删除。` });
+    ElNotification.success({ title: "岗位管理", message: `岗位“${position.name}”已删除。` });
     await reloadOverview();
   } catch (error) {
-    notification.error({ message: "删除失败", description: error?.message || "该岗位可能仍被成员使用，暂时不能删除。" });
+    ElNotification.error({ title: "删除失败", message: error?.message || "该岗位可能仍被成员使用，暂时不能删除。" });
   }
 };
 
@@ -521,18 +531,6 @@ onMounted(() => {
 .position-page__table-card {
   display: flex;
   min-height: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
-.position-page__table-card :deep(.ant-card-head) {
-  flex: 0 0 auto;
-}
-
-.position-page__table-card :deep(.ant-card-body) {
-  display: flex;
-  min-height: 0;
-  gap: 14px;
   flex: 1 1 auto;
   flex-direction: column;
 }
@@ -586,23 +584,6 @@ onMounted(() => {
   padding-right: 4px;
 }
 
-.position-page__permission-tree :deep(.ant-tree) {
-  padding: 8px 10px;
-  border: 1px solid var(--app-border);
-  border-radius: 10px;
-  background: var(--app-glass-strong);
-}
-
-.position-page__permission-tree :deep(.ant-tree-treenode) {
-  width: 100%;
-  padding: 4px 0;
-}
-
-.position-page__permission-tree :deep(.ant-tree-node-content-wrapper) {
-  min-width: 0;
-  flex: 1 1 auto;
-}
-
 .position-page__tree-title {
   display: flex;
   min-width: 0;
@@ -612,10 +593,9 @@ onMounted(() => {
 }
 
 .position-page__tree-title strong {
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: var(--app-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .position-page__tree-title--module {
@@ -632,12 +612,11 @@ onMounted(() => {
 }
 
 .position-page__tree-path {
-  max-width: 46%;
-  overflow: hidden;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   color: var(--app-muted);
   font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 @media (max-width: 768px) {

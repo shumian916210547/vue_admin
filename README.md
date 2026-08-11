@@ -2,11 +2,11 @@
 
 [![Web CI](https://github.com/shumian916210547/vue_admin/actions/workflows/ci.yml/badge.svg)](https://github.com/shumian916210547/vue_admin/actions/workflows/ci.yml)
 
-一个使用 **Vue 3 + Vue Router + Vuex + Ant Design Vue** 构建的低代码管理端。它通过 Schema、Module、Route 和权限元数据动态生成管理菜单、数据列表和编辑表单，并通过 Express BFF 安全访问后端数据。
+一个使用 **Vue 3 + Vue Router + Vuex + Element Plus** 构建的低代码管理端。它通过 Schema、Module、Route 和权限元数据动态生成管理菜单、数据列表和编辑表单，并通过 Express BFF 安全访问后端数据。
 
-> English: A Vue 3 low-code admin frontend for schema-driven CRUD, RBAC, multi-tenant organization scopes, customizable themes, and Ant Design Vue.
+> English: A Vue 3 low-code admin frontend for schema-driven CRUD, RBAC, multi-tenant organization scopes, customizable themes, and Element Plus.
 
-**搜索关键词：** Vue 3 Admin、Vue Admin Template、企业后台管理系统、低代码平台、Schema 驱动 CRUD、动态表单、动态路由、RBAC、多租户、组织树、Ant Design Vue、Parse Server、PostgreSQL。
+**搜索关键词：** Vue 3 Admin、Vue Admin Template、企业后台管理系统、低代码平台、Schema 驱动 CRUD、动态表单、动态路由、RBAC、多租户、组织树、Element Plus、Parse Server、PostgreSQL。
 
 ## 核心功能
 
@@ -17,12 +17,12 @@
 - Module/Route 驱动的动态菜单与页面加载。
 - Schema 驱动的动态 CRUD：筛选、分页、查看、新增、编辑、删除、CSV 导出。
 - 数据表建模：表、字段、关联、编辑组件、筛选/列表展示配置、页面路由生成与真实数据类运行状态检测。
-- 统一界面规范：Ant Design Vue 组件统一使用小尺寸，表单控件提供中文占位提示，表格操作列固定在右侧且保持单行操作。
+- 统一界面规范：Element Plus 组件统一使用小尺寸，表单控件提供中文占位提示，表格操作列固定在右侧且保持单行操作。
 - 企业组织、成员与岗位：系统管理员分开维护组织树、成员和岗位；成员页采用组织树 + 成员表左右分栏，可切换直属/包含后代节点筛选；成员可关联多个组织、分配一个岗位，并配置多个组织数据范围。
 - 在线成员管理：查看成员手机号、上线时间、在线时长和设备信息；支持强制下线与按分钟冻结账号。
 - 岗位权限：岗位可配置可访问业务页面，以及页面内查询、新建、编辑、删除、强制下线和冻结等按钮权限；`v-auth`/`v-permission` 只负责显示优化，服务端会再次校验。
 - 系统配置恢复：管理员登录时可幂等补齐模块管理、数据表管理、组织管理、成员管理和岗位管理入口，以及历史 Schema 中缺少的字段元数据，不覆盖已有自定义配置。
-- 数据表组件配置：`ASelect`、`ATreeSelect`、上传、日期、Pointer 等。
+- 数据表组件配置：`ElSelect`、`ElTreeSelect`、`ElUpload`、日期、Pointer 等。
 - 企业级体验：统一操作/搜索工具栏、可见公共滚动条、表格横向滚动、图标居中，以及自定义颜色下的 WCAG 对比度安全回退。
 - 位置服务：高德地图、工具条和比例尺；未配置 Key 时不会阻塞首页其他功能。
 - 可选受控运维看板：仅在配置内部 Dashboard URL 时展示 iframe，默认关闭。
@@ -33,7 +33,7 @@
 | 分类 | 技术 |
 | --- | --- |
 | 框架 | Vue 3、Vue Router 4、Vuex 4、Vue CLI 5 |
-| UI | Ant Design Vue 3、Sass |
+| UI | Element Plus、Sass |
 | 网络 | Axios、同源 `/api` BFF |
 | 地图 | 高德地图 JavaScript API |
 | 后端契约 | Express BFF、Parse Server、PostgreSQL |
@@ -106,14 +106,14 @@ npm run audit:prod
 - [工作区 README](../README.md)：前后端架构、完整目录和开源发布建议。
 - [前端开发约定](AGENTS.md)：组件、样式、安全边界与质量门禁。
 
-若将本前端作为独立仓库发布，请将上述通用文档一并纳入仓库，并在 GitHub/Gitee 设置 `vue3`、`vue-admin`、`low-code`、`rbac`、`ant-design-vue` 等 Topics。
+若将本前端作为独立仓库发布，请将上述通用文档一并纳入仓库，并在 GitHub/Gitee 设置 `vue3`、`vue-admin`、`low-code`、`rbac`、`element-plus` 等 Topics。
 
 ## GitHub 项目主页建议
 
 为方便 GitHub 搜索和技术选型时识别项目定位，建议在仓库 **About** 中使用：
 
-> Vue 3 low-code admin frontend with schema-driven CRUD, RBAC, multi-tenant organization scopes, customizable themes, and Ant Design Vue.
+> Vue 3 low-code admin frontend with schema-driven CRUD, RBAC, multi-tenant organization scopes, customizable themes, and Element Plus.
 
 建议设置以下 Topics（按仓库实际能力维护）：
 
-`vue3`、`vue-admin`、`admin-dashboard`、`admin-template`、`low-code`、`schema-driven`、`dynamic-form`、`dynamic-crud`、`rbac`、`multi-tenant`、`organization-tree`、`ant-design-vue`、`parse-server`、`postgresql`、`enterprise-admin`。
+`vue3`、`vue-admin`、`admin-dashboard`、`admin-template`、`low-code`、`schema-driven`、`dynamic-form`、`dynamic-crud`、`rbac`、`multi-tenant`、`organization-tree`、`element-plus`、`parse-server`、`postgresql`、`enterprise-admin`。

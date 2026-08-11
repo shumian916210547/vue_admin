@@ -1,6 +1,6 @@
 import Parse from "@/service/parse-client";
 import { Capture, FindList, handleParseError } from "@/service/service.config";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 
 /* 搜索数据的方法 */
 /**
@@ -33,7 +33,7 @@ export const findAll = async (
   const table = new Parse.Query(className == "_User" ? Parse.User : className);
   Object.keys(where).forEach((key) => {
     if (
-      className != "AntdIcon" &&
+      className != "ElementIcon" &&
       className != "UserLogs" &&
       className != "_Session" &&
       className != "Permission"
@@ -64,7 +64,7 @@ export const findList = async (query, where = {}) => {
   if (!className) return new FindList();
   const table = new Parse.Query(className == "_User" ? Parse.User : className);
   if (
-    className != "AntdIcon" &&
+    className != "ElementIcon" &&
     className != "UserLogs" &&
     className != "_Session"
   ) {
@@ -132,9 +132,9 @@ export const InsertRow = async ({ className, fields, params }) => {
     });
   }
   return await Capture(table.save()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("objectId")) + "新增成功",
       duration: 0.5,
     });
@@ -179,9 +179,9 @@ export const UpdateById = async ({ className, fields, params }) => {
     });
   }
   return await Capture(table.save()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("objectId")) + "修改成功",
       duration: 0.5,
     });
@@ -194,9 +194,9 @@ export const removeById = async ({ className, objectId }) => {
   Table.equalTo("objectId", objectId);
   const table = await Table.first();
   return await Capture(table.destroy()).then((success) => {
-    notification.success({
-      message: sessionStorage.getItem("pageName"),
-      description:
+    ElNotification.success({
+      title: sessionStorage.getItem("pageName"),
+      message:
         (success.get("name") || success.get("objectId")) + "删除成功",
       duration: 0.5,
     });

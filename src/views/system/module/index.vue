@@ -11,56 +11,61 @@
     <CommonPage ref="commonPage" :className="'Module'" @add="handleAdd" :innerContainer="true" innerContainerTitle="新增">
       <!-- 路由列表 -->
       <template #innerContainer="{ record }">
-        <a-table size="small" class="module-page__route-table" :columns="columns" :data-source="formattingData(record.routes)"
-          :pagination="false" rowKey="objectId">
-          <template #bodyCell="{ column, index }">
+        <el-table size="small" width="100%" class="module-page__route-table" :data="formattingData(record.routes)" row-key="objectId" border>
+          <el-table-column
+            v-for="column in columns"
+            :key="column.key"
+            :prop="column.dataIndex"
+            :label="column.title"
+            :width="column.width"
+            :min-width="column.minWidth || (column.width ? undefined : 140)"
+            :fixed="column.fixed"
+            :class-name="column.className"
+          >
+          <template #default="{ row, $index }">
             <template v-if="column.key === 'operation'">
               <div class="module-page__row-actions">
                 <span class="table-operation">
-                  <a-button size="small" @click="handleEdit(record, index)" v-permission="['permission:edit', permissions]">
+                  <el-button size="small" @click="handleEdit(record, $index)" v-permission="['permission:edit', permissions]">
                     修改
-                  </a-button>
-                  <a-divider type="vertical" />
-                  <a-popconfirm title="删除路由后不可恢复，确定继续吗？" ok-text="删除" cancel-text="取消"
-                    @confirm="handleDelete(record, index)" @cancel="() => { }">
-                    <a-button size="small" type="danger" v-permission="['permission:remove', permissions]">
+                  </el-button>
+                  <el-divider direction="vertical" />
+                  <el-popconfirm title="删除路由后不可恢复，确定继续吗？" confirm-button-text="删除" cancel-button-text="取消"
+                    @confirm="handleDelete(record, $index)">
+                    <template #reference>
+                    <el-button size="small" type="danger" v-permission="['permission:remove', permissions]">
                       删除
-                    </a-button>
-                  </a-popconfirm>
+                    </el-button>
+                    </template>
+                  </el-popconfirm>
                 </span>
               </div>
             </template>
             <template v-else>
-              <a-tooltip placement="top" arrowPointAtCenter>
-                <template #title>
+              <el-tooltip placement="top" :content="String(row[column.key]?.name || row[column.key] || '')">
+                <template #content>
                   <span>
                     {{
-                      record.routes[index][column.key]?.name ||
-                      record.routes[index][column.key]
+                      row[column.key]?.name || row[column.key]
                     }}
                   </span>
                 </template>
-                <p style="
-                  max-width: 200px;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                ">
+                <p class="module-page__cell-text">
                   {{
-                    record.routes[index][column.key]?.name ||
-                    record.routes[index][column.key]
+                    row[column.key]?.name || row[column.key]
                   }}
                 </p>
-              </a-tooltip>
+              </el-tooltip>
             </template>
           </template>
-        </a-table>
+          </el-table-column>
+        </el-table>
       </template>
     </CommonPage>
 
     <!-- 路由编辑 -->
     <CommonForm :className="'Route'" :fields="formFields" :editState="editState" :type="modalState.type"
-      v-model:modalVisible="modalState.show" @onOk="handleSubmit"></CommonForm>
+      v-model="modalState.show" @onOk="handleSubmit"></CommonForm>
   </section>
 </template>
 
@@ -185,7 +190,7 @@ const loadFields = async () => {
         title: fields[key].chineseName,
         dataIndex: key,
         key: key,
-        width: 200,
+        minWidth: 200,
       });
     }
   });
@@ -224,9 +229,9 @@ await findAll("Route");
 }
 
 .module-page__heading {
-  margin-bottom: 22px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--app-border);
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .module-page__eyebrow {
@@ -247,14 +252,12 @@ await findAll("Route");
   margin: 0;
   color: var(--app-muted);
   font-size: 13px;
+  line-height: 1.7;
 }
 
 .module-page__route-table {
-  overflow: hidden;
-  margin: 0 10px 12px;
-  border: 1px solid var(--app-glass-border);
-  border-radius: 10px;
-  background: var(--app-glass-surface);
+  width: 100%;
+  margin-bottom: 12px;
 }
 
 .module-page__row-actions {
@@ -262,5 +265,12 @@ await findAll("Route");
   align-items: center;
   flex-wrap: nowrap;
   gap: 4px;
+}
+
+.module-page__cell-text {
+  max-width: 240px;
+  margin: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 </style>

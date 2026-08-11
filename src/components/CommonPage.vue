@@ -37,13 +37,13 @@
     :fields="formFields"
     :editState="editState"
     :type="formModal.type"
-    v-model:modalVisible="formModal.show"
+    v-model="formModal.show"
     @onOk="handleOk"
   ></CommonForm>
   <CommonPreview
     :className="className"
     :fields="formFields"
-    v-model:modalVisible="previewMap.show"
+    v-model="previewMap.show"
     :dataMap="previewMap.data"
   >
   </CommonPreview>
@@ -62,9 +62,10 @@ import {
 } from "@/service/base.service";
 import { provide, reactive, ref } from "vue";
 import { deepClone } from "@/utils/utils";
+import { normalizeEditComponent } from "@/utils/element";
 import { defaultFields } from "@/service/schema.service";
 import { Mixins } from "@/mixins";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
 const emit = defineEmits(["add"]);
 const props = defineProps({
   className: {
@@ -89,10 +90,6 @@ const queryState = reactive({
   where: {},
   total: 0,
   className: props.className,
-  position: ["bottomRight"],
-  showSizeChanger: true,
-  showTotal: (total) => `共 ${total} 条`,
-  pageSizeOptions: ["10", "20", "50", "100"],
   filterFilds: {},
 });
 
@@ -115,11 +112,15 @@ const loadFields = async (query) => {
   if (!result) return;
 
   Object.keys(result.get("fields")).forEach((key) => {
-    fields[key] = result.get("fields")[key];
+    const field = result.get("fields")[key] || {};
+    fields[key] = {
+      ...field,
+      editComponent: normalizeEditComponent(field.editComponent),
+    };
 
     /* 筛选系统字段，不在新增或者修改表单中展示 */
     if (!systemFields.includes(key)) {
-      formFields[key] = result.get("fields")[key];
+      formFields[key] = fields[key];
     }
   });
   getFilterField(fields).forEach((key) => {
@@ -138,7 +139,7 @@ const loadColumns = async (fields) => {
     dataIndex: key,
     key: key,
     resizable: true,
-    width: 200,
+    minWidth: 200,
   }));
   tableColumns.value = schemaColumns.value.filter((item) => {
     return fields[item.dataIndex].isTable;
@@ -176,9 +177,9 @@ const loadData = async (query) => {
       return a.createdAt - b.createdAt;
     });
   } catch (error) {
-    notification.error({
-      message: "数据加载失败",
-      description: error.message || "请检查网络连接、筛选条件或当前账号权限后重试。",
+    ElNotification.error({
+      title: "数据加载失败",
+      message: error.message || "请检查网络连接、筛选条件或当前账号权限后重试。",
     });
   } finally {
     tableLoading.value = false;
@@ -197,7 +198,7 @@ const handleReset = async () => {
 };
 
 /**
- * 接收 CommonTable 规范化后的分页参数，保持 Ant Design Vue current 与 BFF pageNum 同步。
+ * 接收 CommonTable 规范化后的分页参数，保持 Element Plus 分页器与 BFF pageNum 同步。
  * @param {number} pageNum 当前页码，从 1 开始。
  * @param {number} pageSize 每页记录数。
  * @returns {Promise<void>} 分页状态同步并完成对应页加载后兑现。

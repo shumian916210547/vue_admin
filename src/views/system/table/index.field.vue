@@ -1,492 +1,413 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
+  <el-dialog
+    v-model="visible"
     :title="modalType[props.type]"
-    @ok="handleOk"
     width="600px"
+    destroy-on-close
   >
     <!-- 字段基础信息 -->
-    <a-form
-    :model="formState"
-      size="small"
+    <el-form
       ref="form1"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 20 }"
+      :model="formState"
+      label-position="left"
+      label-width="120px"
+      size="small"
       autocomplete="off"
-      labelAlign="left"
     >
-      <a-form-item
+      <el-form-item
         label="字段名称"
-        name="fieldName"
-        :rules="[{ required: true, message: '请输入字段名称' }]"
+        prop="fieldName"
+        :rules="[{ required: true, message: '请输入字段名称', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="formState.fieldName"
           size="small"
-          v-model:value="formState.fieldName"
-          allowClear
+          clearable
           placeholder="请输入字段名称"
-          :disabled="props.type == 'edit'"
+          :disabled="props.type === 'edit'"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item
+      <el-form-item
         label="字段类型"
-        name="fieldType"
-        :rules="[
-          {
-            required: true,
-            message: '请选择字段类型',
-            trigger: 'change',
-          },
-        ]"
+        prop="fieldType"
+        :rules="[{ required: true, message: '请选择字段类型', trigger: 'change' }]"
       >
-        <a-select
+        <el-select
+          v-model="formState.fieldType"
           size="small"
-          v-model:value="formState.fieldType"
-          show-search
+          filterable
+          clearable
           placeholder="请选择字段类型"
-          allowClear
-          :disabled="props.type == 'edit'"
-          :options="[
-            {
-              label: '布尔值',
-              value: 'Boolean',
-            },
-            {
-              label: '字符串',
-              value: 'String',
-            },
-            {
-              label: '数字',
-              value: 'Number',
-            },
-            {
-              label: '日期',
-              value: 'Date',
-            },
-            {
-              label: '对象',
-              value: 'Object',
-            },
-            {
-              label: '数组',
-              value: 'Array',
-            },
-            {
-              label: '地理坐标',
-              value: 'GeoPoint',
-            },
-            {
-              label: '多边形',
-              value: 'Polygon',
-            },
-            {
-              label: '文件',
-              value: 'File',
-            },
-            {
-              label: '关联指针',
-              value: 'Pointer',
-            },
-            {
-              label: '多对多关系',
-              value: 'Relation',
-            },
-          ]"
-        ></a-select>
-      </a-form-item>
-    </a-form>
+          :disabled="props.type === 'edit'"
+        >
+          <el-option label="布尔值" value="Boolean" />
+          <el-option label="字符串" value="String" />
+          <el-option label="数字" value="Number" />
+          <el-option label="日期" value="Date" />
+          <el-option label="对象" value="Object" />
+          <el-option label="数组" value="Array" />
+          <el-option label="地理坐标" value="GeoPoint" />
+          <el-option label="多边形" value="Polygon" />
+          <el-option label="文件" value="File" />
+          <el-option label="关联指针" value="Pointer" />
+          <el-option label="多对多关系" value="Relation" />
+        </el-select>
+      </el-form-item>
+    </el-form>
 
     <!-- 字段配置 -->
-    <a-form
-      :model="optionState"
-      size="small"
+    <el-form
       ref="form2"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 20 }"
+      :model="optionState"
+      label-position="left"
+      label-width="120px"
+      size="small"
       autocomplete="off"
-      labelAlign="left"
     >
-      <a-form-item
+      <el-form-item
         label="中文名称"
-        name="chineseName"
-        :rules="[
-          { required: true, message: '请输入中文字段名称' },
-        ]"
+        prop="chineseName"
+        :rules="[{ required: true, message: '请输入中文字段名称', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="optionState.chineseName"
           size="small"
-          v-model:value="optionState.chineseName"
-          allowClear
+          clearable
           placeholder="请输入中文字段名称"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item
-        v-if="formState.fieldType == 'Pointer' || optionState.isPointer"
+      <el-form-item
+        v-if="formState.fieldType === 'Pointer' || optionState.isPointer"
         label="指向表名"
-        name="targetClass"
-        :rules="[
-          {
-            required: true,
-            message: '请选择指向表名',
-            trigger: 'change',
-          },
-        ]"
+        prop="targetClass"
+        :rules="[{ required: true, message: '请选择指向表名', trigger: 'change' }]"
       >
-        <a-select
+        <el-select
+          v-model="optionState.targetClass"
           size="small"
-          v-model:value="optionState.targetClass"
-          show-search
+          filterable
+          clearable
           placeholder="请选择指向表名"
-          allowClear
-          :disabled="props.type == 'edit'"
-          :fieldNames="{
-            label: 'name',
-            value: 'name',
-          }"
-          :options="schemas"
+          :disabled="props.type === 'edit'"
           @change="targetClassChange"
-        ></a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="默认值"
-        name="defaultValue"
-        :rules="[{ required: false, message: '请输入字段默认值' }]"
-      >
-        <template v-if="optionState.targetClass">
-          <a-select
-            size="small"
-            v-model:value="optionState.defaultValue"
-            show-search
-            placeholder="请选择默认值"
-            allowClear
-            :disabled="props.type == 'edit'"
-            :fieldNames="{
-              label: 'name',
-              value: 'objectId',
-            }"
-            :options="defaultValueList"
-          ></a-select>
-        </template>
-        <template v-else>
-          <a-input
-            size="small"
-            v-model:value="optionState.defaultValue"
-            allowClear
-            :disabled="props.type == 'edit'"
-            placeholder="请输入字段默认值"
-          />
-        </template>
-      </a-form-item>
-
-      <a-form-item
-        label="字段必填"
-        name="required"
-        style="min-width: 200px"
-        :rules="[
-          {
-            required: true,
-            message: '请选择字段是否必填',
-            trigger: 'change',
-          },
-        ]"
-      >
-        <a-switch
-          size="small"
-          v-model:checked="optionState.required"
-          :disabled="props.type == 'edit'"
-          checked-children="是"
-          un-checked-children="否"
-        />
-      </a-form-item>
-
-      <template v-if="formState.fieldType == 'Array'">
-        <a-form-item
-          label="数组元素类型"
-          name="isPointer"
-          style="min-width: 200px"
         >
-          <a-switch
-            size="small"
-            v-model:checked="optionState.isPointer"
-            checked-children="是"
-            un-checked-children="否"
+          <el-option
+            v-for="schema in schemas"
+            :key="schema.objectId || schema.name || schema.className"
+            :label="schemaName(schema)"
+            :value="schema.name || schema.className"
           />
-        </a-form-item>
-      </template>
+        </el-select>
+      </el-form-item>
 
-      <a-form-item
-        label="编辑组件"
-        name="editComponent"
-        :rules="[
-          {
-            required: false,
-            message: '请选择编辑组件',
-            trigger: 'change',
-          },
-        ]"
+      <el-form-item
+        label="默认值"
+        prop="defaultValue"
+        :rules="[{ required: false, message: '请输入字段默认值', trigger: 'blur' }]"
       >
-        <a-select
+        <el-select
+          v-if="optionState.targetClass"
+          v-model="optionState.defaultValue"
           size="small"
-          v-model:value="optionState.editComponent"
-          show-search
-          allowClear
-          placeholder="请选择编辑组件"
-          :options="antdComponents"
-        ></a-select>
-      </a-form-item>
-
-      <a-form-item label="筛选字段" name="isFilter" style="min-width: 200px">
-        <a-switch
-          size="small"
-          v-model:checked="optionState.isFilter"
-          checked-children="是"
-          un-checked-children="否"
-        />
-      </a-form-item>
-
-      <a-form-item label="表格展示" name="isTable" style="min-width: 200px">
-        <a-switch
-          size="small"
-          v-model:checked="optionState.isTable"
-          checked-children="是"
-          un-checked-children="否"
-        />
-      </a-form-item>
-
-      <template v-if="formState.fieldType == 'Array' && optionState.isPointer">
-        <a-form-item label="不可重复" name="isSole" style="min-width: 200px">
-          <a-switch
-            size="small"
-            v-model:checked="optionState.isSole"
-            checked-children="是"
-            un-checked-children="否"
+          filterable
+          clearable
+          placeholder="请选择默认值"
+          :disabled="props.type === 'edit'"
+        >
+          <el-option
+            v-for="item in defaultValueList"
+            :key="item.objectId"
+            :label="item.name || item.objectId"
+            :value="item.objectId"
           />
-        </a-form-item>
-      </template>
-    </a-form>
+        </el-select>
+        <el-input
+          v-else
+          v-model="optionState.defaultValue"
+          size="small"
+          clearable
+          :disabled="props.type === 'edit'"
+          placeholder="请输入字段默认值"
+        />
+      </el-form-item>
+
+      <el-form-item
+        label="字段必填"
+        prop="required"
+        class="schema-field-form__switch-item"
+        :rules="[{ required: true, message: '请选择字段是否必填', trigger: 'change' }]"
+      >
+        <el-switch
+          v-model="optionState.required"
+          size="small"
+          active-text="是"
+          inactive-text="否"
+          :disabled="props.type === 'edit'"
+        />
+      </el-form-item>
+
+      <el-form-item
+        v-if="formState.fieldType === 'Array'"
+        label="数组元素类型"
+        prop="isPointer"
+        class="schema-field-form__switch-item"
+      >
+        <el-switch
+          v-model="optionState.isPointer"
+          size="small"
+          active-text="指针"
+          inactive-text="普通值"
+        />
+      </el-form-item>
+
+      <el-form-item
+        label="编辑组件"
+        prop="editComponent"
+        :rules="[{ required: false, message: '请选择编辑组件', trigger: 'change' }]"
+      >
+        <el-select
+          v-model="optionState.editComponent"
+          size="small"
+          filterable
+          clearable
+          placeholder="请选择编辑组件"
+        >
+          <el-option
+            v-for="item in componentOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+
+      <el-form-item label="筛选字段" prop="isFilter" class="schema-field-form__switch-item">
+        <el-switch
+          v-model="optionState.isFilter"
+          size="small"
+          active-text="是"
+          inactive-text="否"
+        />
+      </el-form-item>
+
+      <el-form-item label="表格展示" prop="isTable" class="schema-field-form__switch-item">
+        <el-switch
+          v-model="optionState.isTable"
+          size="small"
+          active-text="是"
+          inactive-text="否"
+        />
+      </el-form-item>
+
+      <el-form-item
+        v-if="formState.fieldType === 'Array' && optionState.isPointer"
+        label="不可重复"
+        prop="isSole"
+        class="schema-field-form__switch-item"
+      >
+        <el-switch
+          v-model="optionState.isSole"
+          size="small"
+          active-text="是"
+          inactive-text="否"
+        />
+      </el-form-item>
+    </el-form>
 
     <!-- 组件配置 -->
-    <a-form
-      :model="componentOption"
-      size="small"
+    <el-form
       ref="form3"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 20 }"
+      :model="componentOption"
+      label-position="left"
+      label-width="120px"
+      size="small"
       autocomplete="off"
-      labelAlign="left"
     >
-      <!-- Select 组件配置 -->
-      <template v-if="optionState.editComponent == 'ASelect'">
-        <!-- 模式 -->
-        <a-form-item
+      <!-- 兼容历史 Schema 中的选择组件标识；界面控件本身由 Element Plus 提供。 -->
+      <template v-if="optionState.editComponent === 'ElSelect'">
+        <el-form-item
           label="模式"
-          name="mode"
-          :rules="[{ required: false, message: '请选择选择模式' }]"
+          prop="mode"
+          :rules="[{ required: false, message: '请选择选择模式', trigger: 'change' }]"
         >
-          <a-radio-group v-model:value="componentOption.mode" size="small">
-            <a-radio-button value="multiple">多选</a-radio-button>
-            <a-radio-button value="tags">标签输入</a-radio-button>
-            <a-radio-button value="combobox">可搜索下拉</a-radio-button>
-          </a-radio-group>
-        </a-form-item>
+          <el-radio-group v-model="componentOption.mode" size="small">
+            <el-radio-button label="multiple">多选</el-radio-button>
+            <el-radio-button label="tags">标签输入</el-radio-button>
+            <el-radio-button label="combobox">可搜索下拉</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
 
-        <!-- label key -->
-        <a-form-item
+        <el-form-item
           label="显示字段键名"
-          name="labelKey"
-          :rules="[
-            { required: true, message: '请输入显示字段键名' },
-          ]"
+          prop="labelKey"
+          :rules="[{ required: true, message: '请输入显示字段键名', trigger: 'blur' }]"
         >
-          <a-input
+          <el-input
+            v-model="componentOption.labelKey"
             size="small"
-            v-model:value="componentOption.labelKey"
-            allowClear
+            clearable
             placeholder="例如：name"
           />
-        </a-form-item>
+        </el-form-item>
 
-        <!-- value key -->
-        <a-form-item
+        <el-form-item
           label="值字段键名"
-          name="valueKey"
-          :rules="[
-            { required: true, message: '请输入值字段键名' },
-          ]"
+          prop="valueKey"
+          :rules="[{ required: true, message: '请输入值字段键名', trigger: 'blur' }]"
         >
-          <a-input
+          <el-input
+            v-model="componentOption.valueKey"
             size="small"
-            v-model:value="componentOption.valueKey"
-            allowClear
+            clearable
             placeholder="例如：objectId"
           />
-        </a-form-item>
+        </el-form-item>
       </template>
 
-      <!-- Select、TreeSelect 组件配置 -->
-      <a-form-item
-        v-if="
-          optionState.editComponent == 'ASelect' ||
-          optionState.editComponent == 'ATreeSelect'
-        "
+      <el-form-item
+          v-if="optionState.editComponent === 'ElSelect' || optionState.editComponent === 'ElTreeSelect'"
         label="数据源"
-        name="selectTable"
-        :rules="[{ required: false, message: '请选择数据源' }]"
+        prop="selectTable"
+        :rules="[{ required: false, message: '请选择数据源', trigger: 'change' }]"
       >
-        <a-select
+        <el-select
+          v-model="componentOption.selectTable"
           size="small"
-          v-model:value="componentOption.selectTable"
-          show-search
+          filterable
+          clearable
           placeholder="请选择数据源"
-          allowClear
-          :fieldNames="{
-            label: 'className',
-            value: 'className',
-          }"
-          :options="schemas"
-        ></a-select>
-      </a-form-item>
+        >
+          <el-option
+            v-for="schema in schemas"
+            :key="schema.objectId || schema.name || schema.className"
+            :label="schemaName(schema)"
+            :value="schema.name || schema.className"
+          />
+        </el-select>
+      </el-form-item>
 
-      <!-- TreeSelect 组件配置 -->
-      <a-form-item
-        v-if="optionState.editComponent == 'ATreeSelect'"
+      <el-form-item
+        v-if="optionState.editComponent === 'ElTreeSelect'"
         label="子数据集字段"
-        name="fieldNames"
-        :rules="[
-          { required: true, message: '请输入子数据集字段' },
-        ]"
+        prop="fieldNames"
+        :rules="[{ required: true, message: '请输入子数据集字段', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="componentOption.fieldNames"
           size="small"
-          v-model:value="componentOption.fieldNames"
-          allowClear
+          clearable
           placeholder="例如：children"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item
-        v-if="optionState.editComponent == 'ATreeSelect'"
+      <el-form-item
+        v-if="optionState.editComponent === 'ElTreeSelect'"
         label="最多可选择数量"
-        name="maxCount"
-        :rules="[
-          { required: true, message: '请输入最多可选择数量' },
-        ]"
+        prop="maxCount"
+        :rules="[{ required: true, message: '请输入最多可选择数量', trigger: 'change' }]"
       >
-        <a-input-number
+        <el-input-number
+          v-model="componentOption.maxCount"
           size="small"
-          placeholder="请输入最多可选择数量"
-          allowClear
-          id="inputNumber"
-          v-model:value="componentOption.maxCount"
+          controls-position="right"
           :min="1"
+          placeholder="请输入最多可选择数量"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <!-- Upload 组件配置 -->
-      <template v-if="optionState.editComponent == 'AUpload'">
-        <a-form-item
+      <!-- Element Plus 没有与历史上传配置完全同名的表单组件，此处仅配置 Upload 的业务参数。 -->
+      <template v-if="optionState.editComponent === 'ElUpload'">
+        <el-form-item
           label="文件数量"
-          name="maxLength"
-          :rules="[
-            { required: true, message: '请输入文件数量' },
-          ]"
+          prop="maxLength"
+          :rules="[{ required: true, message: '请输入文件数量', trigger: 'change' }]"
         >
-          <a-input-number
+          <el-input-number
+            v-model="componentOption.maxLength"
             size="small"
-            placeholder="请输入文件数量"
-            allowClear
-            id="inputNumber"
-            v-model:value="componentOption.maxLength"
+            controls-position="right"
             :min="1"
+            placeholder="请输入文件数量"
           />
-        </a-form-item>
-        <a-form-item
+        </el-form-item>
+        <el-form-item
           label="格式限制"
-          name="fileType"
-          :rules="[{ required: false, message: '请选择文件格式限制' }]"
+          prop="fileType"
+          :rules="[{ required: false, message: '请选择文件格式限制', trigger: 'change' }]"
         >
-          <a-radio-group
-            v-model:value="componentOption.fileType"
-            size="small"
-          >
-            <a-radio-button value="*">无</a-radio-button>
-            <a-radio-button value="image/*">图片</a-radio-button>
-            <a-radio-button value="audio/*">音频</a-radio-button>
-            <a-radio-button value="video/*">视频</a-radio-button>
-          </a-radio-group>
-        </a-form-item>
+          <el-radio-group v-model="componentOption.fileType" size="small">
+            <el-radio-button label="*">无</el-radio-button>
+            <el-radio-button label="image/*">图片</el-radio-button>
+            <el-radio-button label="audio/*">音频</el-radio-button>
+            <el-radio-button label="video/*">视频</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
       </template>
 
-      <a-form-item
+      <el-form-item
         label="提示文案"
-        name="placeholder"
-        :rules="[{ required: false, message: '请输入提示文案' }]"
+        prop="placeholder"
+        :rules="[{ required: false, message: '请输入提示文案', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="componentOption.placeholder"
           size="small"
-          v-model:value="componentOption.placeholder"
-          allowClear
+          clearable
           placeholder="请输入提示文案"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item
+      <el-form-item
         label="是否禁用"
-        name="disabled"
-        style="min-width: 200px"
-        :rules="[
-          {
-            required: true,
-            message: '请选择是否禁用',
-            trigger: 'change',
-          },
-        ]"
+        prop="disabled"
+        class="schema-field-form__switch-item"
+        :rules="[{ required: true, message: '请选择是否禁用', trigger: 'change' }]"
       >
-        <a-switch
+        <el-switch
+          v-model="componentOption.disabled"
           size="small"
-          v-model:checked="componentOption.disabled"
-          checked-children="是"
-          un-checked-children="否"
+          active-text="是"
+          inactive-text="否"
         />
-      </a-form-item>
+      </el-form-item>
 
-      <a-form-item
+      <el-form-item
+        v-if="optionState.editComponent !== 'RichTextEditor'"
         label="清除按钮"
-        v-if="optionState.editComponent != 'RichTextEditor'"
-        name="allowClear"
-        style="min-width: 200px"
-        :rules="[
-          {
-            required: true,
-            message: '请选择是否显示清除按钮',
-            trigger: 'change',
-          },
-        ]"
+        prop="allowClear"
+        class="schema-field-form__switch-item"
+        :rules="[{ required: true, message: '请选择是否显示清除按钮', trigger: 'change' }]"
       >
-        <a-switch
+        <el-switch
+          v-model="componentOption.allowClear"
           size="small"
-          v-model:checked="componentOption.allowClear"
-          checked-children="开"
-          un-checked-children="关"
+          active-text="开"
+          inactive-text="关"
         />
-      </a-form-item>
-    </a-form>
-  </a-modal>
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <el-button size="small" @click="visible = false">取消</el-button>
+      <el-button size="small" type="primary" @click="handleOk">确认</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import { deepClone } from "@/utils/utils";
+import { ElNotification } from "element-plus";
 import { computed, reactive, ref, watch } from "vue";
+
 import { findAll } from "@/service/base.service";
-import * as antd from "ant-design-vue";
-import { notification } from "ant-design-vue";
 import store from "@/store";
-const emit = defineEmits(["update:modalVisible", "onSubmit"]);
+import { normalizeEditComponent } from "@/utils/element";
+import { deepClone } from "@/utils/utils";
+
+const emit = defineEmits(["update:modelValue", "onSubmit"]);
 const props = defineProps({
-  modalVisible: {
+  modelValue: {
     type: Boolean,
     default: false,
   },
@@ -497,7 +418,7 @@ const props = defineProps({
   },
   editState: {
     type: Object,
-    default: {},
+    default: () => ({}),
   },
 });
 
@@ -506,140 +427,120 @@ const modalType = {
   add: "新增字段",
 };
 
-const schemas = computed(() => {
-  return store.getters["GET_TABLES"];
-});
-
+const schemas = computed(() => store.getters["GET_TABLES"] || []);
 const defaultValueList = ref([]);
-//targetClass 修改时/触发
-const targetClassChange = async (className) => {
-  if (!className) return;
-  defaultValueList.value = [...(await findAll(className))];
-};
-
 const form1 = ref();
 const form2 = ref();
 const form3 = ref();
-watch(
-  () => props.modalVisible,
-  (n) => {
-    visible.value = n;
-    if (!n)
-      form1.value.resetFields(),
-        form2.value.resetFields(),
-        form3.value.resetFields();
-  }
-);
+const visible = ref(props.modelValue);
+
 /**
- * 校验字段定义的三个表单分区，并将合并后的字段配置提交给父级 Schema 页面。
+ * 返回数据表下拉项的可读名称，兼容 Schema 原始记录和页面标准化记录。
+ * @param {{name?: string, className?: string, nickName?: string}} schema 数据表元数据。
+ * @returns {string} 供 Element Plus Select 展示的名称。
+ */
+const schemaName = (schema) => schema?.name || schema?.className || schema?.nickName || "未命名表";
+
+/**
+ * 根据 Pointer 目标表加载默认值候选记录。
+ * @param {string | undefined} className Parse 数据表名；为空时清空候选项。
+ * @returns {Promise<void>} 候选记录加载完成后兑现；请求错误由统一服务层提示并向上抛出。
+ */
+const targetClassChange = async (className) => {
+  if (!className) {
+    defaultValueList.value = [];
+    return;
+  }
+  defaultValueList.value = [...(await findAll(className))];
+};
+
+/**
+ * 校验三组字段配置并把 Element Plus Form 状态组合成后端 Schema 契约。
  * @returns {Promise<void>} 校验成功时触发 onSubmit；失败时保留弹窗和字段错误状态。
  */
 const handleOk = async () => {
   try {
-    const success = await Promise.all([
+    await Promise.all([
       form1.value.validate(),
       form2.value.validate(),
       form3.value.validate(),
     ]);
-      const { fieldType, fieldName } = success[0];
-      const {
+    const {
+      fieldType,
+      fieldName,
+    } = formState;
+    const {
+      required,
+      chineseName,
+      defaultValue,
+      editComponent,
+      targetClass,
+      isFilter,
+      isTable,
+      isPointer,
+      isSole,
+    } = optionState;
+    const {
+      placeholder,
+      disabled,
+      allowClear,
+      mode,
+      selectTable,
+      fieldNames,
+      valueKey,
+      labelKey,
+      maxLength,
+      fileType,
+      maxCount,
+    } = componentOption;
+    emit("onSubmit", {
+      fieldType,
+      fieldName,
+      fieldOption: {
         required,
+        targetClass,
         chineseName,
         defaultValue,
         editComponent,
-        targetClass,
         isFilter,
         isTable,
         isPointer,
         isSole,
-      } = success[1];
-      const {
-        placeholder,
-        disabled,
-        allowClear,
-        mode,
-        selectTable,
-        fieldNames,
-        valueKey,
-        labelKey,
-        maxLength,
-        fileType,
-        maxCount,
-      } = success[2];
-      const params = {
-        fieldType,
-        fieldName,
-        fieldOption: {
-          required,
-          targetClass,
-          chineseName,
-          defaultValue,
-          editComponent,
-          isFilter,
-          isTable,
-          isPointer,
-          isSole,
-          componentOption: {
-            placeholder,
-            disabled,
-            allowClear,
-            mode,
-            selectTable,
-            fieldNames,
-            valueKey,
-            labelKey,
-            maxLength,
-            fileType,
-            maxCount,
-          },
+        componentOption: {
+          placeholder,
+          disabled,
+          allowClear,
+          mode,
+          selectTable,
+          fieldNames,
+          valueKey,
+          labelKey,
+          maxLength,
+          fileType,
+          maxCount,
         },
-      };
-    emit("onSubmit", params);
+      },
+    });
   } catch {
-    notification.warning({
-      message: "字段配置未完成",
-      description: "请检查必填项和组件配置后再提交。",
+    ElNotification.warning({
+      title: "字段配置未完成",
+      message: "请检查必填项和组件配置后再提交。",
     });
   }
 };
-/** 动态表单实际支持的编辑组件中文名称；value 仍保留组件标识供 CommonForm 渲染。 */
-const componentLabels = {
-  AInput: "单行输入框",
-  AInputNumber: "数字输入框",
-  ASelect: "下拉选择",
-  ATreeSelect: "树形选择",
-  ASwitch: "开关",
-  ADatePicker: "日期选择",
-  ARangePicker: "日期范围选择",
-  AUpload: "文件上传",
-  RichTextEditor: "纯文本编辑器",
-};
 
-const antdComponents = [
-  { value: "RichTextEditor", label: componentLabels.RichTextEditor },
-  ...Object.keys(antd)
-    .map((key) => {
-      return {
-        label: componentLabels[key] || key,
-        value: antd[key].name,
-      };
-    })
-    .filter((item) => {
-      return (
-        item.label != "version" &&
-        item.label != "default" &&
-        item.label != "install"
-      );
-    }),
-].sort((a, b) => {
-  if (a.label < b.label) {
-    return -1;
-  }
-  if (a.label > b.label) {
-    return 1;
-  }
-  return 0;
-});
+/** 动态表单支持的组件标识；实际渲染组件均由 Element Plus 或本地安全组件提供。 */
+const componentOptions = [
+  { value: "ElInput", label: "单行输入框" },
+  { value: "ElInputNumber", label: "数字输入框" },
+  { value: "ElSelect", label: "下拉选择" },
+  { value: "ElTreeSelect", label: "树形选择" },
+  { value: "ElSwitch", label: "开关" },
+  { value: "ElDatePicker", label: "日期选择" },
+  { value: "ElDateRangePicker", label: "日期范围选择" },
+  { value: "ElUpload", label: "文件上传" },
+  { value: "RichTextEditor", label: "纯文本编辑器" },
+];
 
 const state = {
   formState: {
@@ -672,69 +573,60 @@ const state = {
   },
 };
 
-let formState = reactive({
-  fieldType: undefined,
-  fieldName: "",
-});
-let optionState = reactive({
-  required: false,
-  chineseName: "",
-  defaultValue: undefined,
-  editComponent: undefined,
-  targetClass: undefined,
-  isFilter: false,
-  isTable: false,
-  isPointer: false,
-  isSole: false,
-});
-let componentOption = reactive({
-  placeholder: "请输入内容",
-  disabled: false,
-  allowClear: false,
-  mode: "combobox",
-  selectTable: undefined,
-  fieldNames: undefined,
-  valueKey: "objectId",
-  labelKey: "name",
-  maxLength: 8,
-  fileType: "*",
-  maxCount: 1,
-});
+const formState = reactive(deepClone(state.formState));
+const optionState = reactive(deepClone(state.optionState));
+const componentOption = reactive(deepClone(state.componentOption));
 
-const visible = ref(props.modalVisible);
-watch(visible, (n) => {
-  emit("update:modalVisible", n);
-  resetData(deepClone(state));
-  if (props.type == "edit") {
-    resetData(props.editState);
-    targetClassChange(optionState.targetClass);
-  }
-});
-
-const resetData = (arg) => {
-  Object.keys(arg).forEach((state) => {
-    Object.keys(arg[state]).forEach((key) => {
-      switch (state) {
-        case "formState":
-          formState[key] = arg[state][key];
-          break;
-        case "optionState":
-          optionState[key] = arg[state][key];
-          break;
-        case "componentOption":
-          componentOption[key] = arg[state][key];
-          break;
-        default:
-          break;
+/**
+ * 将默认值或编辑值写入三组响应式表单状态。
+ * @param {{formState?: Record<string, unknown>, optionState?: Record<string, unknown>, componentOption?: Record<string, unknown>}} data 要回填的分区数据。
+ * @returns {void} 原地更新表单状态，不发起请求。
+ */
+const resetData = (data = state) => {
+  Object.entries(data || {}).forEach(([section, values]) => {
+    if (!values || typeof values !== "object") return;
+    const target = { formState, optionState, componentOption }[section];
+    if (target) {
+      const nextValues = { ...values };
+      if (section === "optionState" && "editComponent" in nextValues) {
+        nextValues.editComponent = normalizeEditComponent(nextValues.editComponent);
       }
-    });
+      Object.assign(target, nextValues);
+    }
   });
 };
-</script>
 
-<style lang="scss" scoped>
-.ant-form-item {
-  margin-bottom: 10px;
-  min-width: 200px;
-}
-</style>
+/**
+ * 根据父组件的 v-model 初始化新增或编辑状态，并在编辑 Pointer 字段时加载默认值。
+ * @param {boolean} nextVisible 父组件传入的最新弹窗可见状态。
+ * @returns {Promise<void>} 状态初始化完成后兑现。
+ */
+const syncFromParent = async (nextVisible) => {
+  visible.value = nextVisible;
+  if (!nextVisible) {
+    form1.value?.resetFields?.();
+    form2.value?.resetFields?.();
+    form3.value?.resetFields?.();
+    return;
+  }
+  resetData(deepClone(state));
+  if (props.type === "edit") {
+    resetData(deepClone(props.editState));
+    await targetClassChange(optionState.targetClass);
+  } else {
+    defaultValueList.value = [];
+  }
+};
+
+watch(
+  () => props.modelValue,
+  (nextVisible) => {
+    void syncFromParent(nextVisible);
+  },
+  { immediate: true }
+);
+
+watch(visible, (nextVisible) => {
+  if (nextVisible !== props.modelValue) emit("update:modelValue", nextVisible);
+});
+</script>

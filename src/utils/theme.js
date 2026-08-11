@@ -155,7 +155,7 @@ const getThemePreferenceStorageKey = () => {
 /**
  * 将任意主题名规范为系统支持的亮色或深色值。
  * @param {unknown} appearance 原始主题值；允许为空或来自历史配置。
- * @returns {"light" | "dark"} 可用于 CSS 与 Ant Design Vue 菜单的主题值。
+ * @returns {"light" | "dark"} 可用于 CSS 与 Element Plus 菜单的主题值。
  */
 export const normalizeAppearance = (appearance) => (appearance === "dark" ? "dark" : "light");
 
@@ -285,7 +285,7 @@ const ensureContrast = (foreground, backgrounds, minimumRatio) =>
 /**
  * 计算指定用户配置在当前明暗模式下实际生效的主题颜色。
  * @param {Record<string, unknown>} options 用户的 systemOptions 或本地恢复的主题偏好。
- * @returns {{appearance: "light" | "dark", presetKey: string, primary: string, primaryContrast: string, primaryHoverContrast: string, canvas: string, surface: string, ink: string, text: string, muted: string, border: string, success: string, warning: string, danger: string, primaryHover: string, primarySoft: string, primaryRgb: string, surfaceRgb: string, successRgb: string, warningRgb: string, dangerRgb: string}} 完整的可视令牌集合。
+ * @returns {{appearance: "light" | "dark", presetKey: string, primary: string, primaryContrast: string, primaryHoverContrast: string, canvas: string, surface: string, ink: string, text: string, muted: string, border: string, success: string, successContrast: string, warning: string, warningContrast: string, danger: string, dangerContrast: string, primaryHover: string, primarySoft: string, primaryRgb: string, surfaceRgb: string, successRgb: string, warningRgb: string, dangerRgb: string}} 完整的可视令牌集合。
  */
 export const getEffectiveThemeColors = (options = {}) => {
   const appearance = normalizeAppearance(options.theme);
@@ -322,8 +322,11 @@ export const getEffectiveThemeColors = (options = {}) => {
     muted,
     border,
     success,
+    successContrast: bestContrastForeground([success]),
     warning,
+    warningContrast: bestContrastForeground([warning]),
     danger,
+    dangerContrast: bestContrastForeground([danger]),
     primaryHover,
     primarySoft: toRgba(primary, appearance === "dark" ? 0.2 : 0.1),
     primaryRgb: `${primaryRed}, ${primaryGreen}, ${primaryBlue}`,
@@ -335,7 +338,7 @@ export const getEffectiveThemeColors = (options = {}) => {
 };
 
 /**
- * 将主题令牌写入根节点，使静态页面、动态 CRUD 页面和 Ant Design Vue 覆写同步更新。
+ * 将主题令牌写入根节点，使静态页面、动态 CRUD 页面和 Element Plus 覆写同步更新。
  * @param {Record<string, unknown>} options 用户的 systemOptions 或本地恢复的主题偏好。
  * @returns {void} 仅更新浏览器 DOM，不发起网络请求。
  */
@@ -362,18 +365,21 @@ export const applyVisualTheme = (options = {}) => {
   root.style.setProperty("--app-muted", colors.muted);
   root.style.setProperty("--app-border", colors.border);
   root.style.setProperty("--app-success", colors.success);
+  root.style.setProperty("--app-success-contrast", colors.successContrast);
   root.style.setProperty("--app-success-rgb", colors.successRgb);
   root.style.setProperty("--app-warning", colors.warning);
+  root.style.setProperty("--app-warning-contrast", colors.warningContrast);
   root.style.setProperty("--app-warning-rgb", colors.warningRgb);
   root.style.setProperty("--app-danger", colors.danger);
+  root.style.setProperty("--app-danger-contrast", colors.dangerContrast);
   root.style.setProperty("--app-danger-rgb", colors.dangerRgb);
   root.style.setProperty(
     "--app-glass-surface",
-    glassEnabled ? toRgba(colors.surface, colors.appearance === "dark" ? 0.8 : 0.72) : colors.surface
+    glassEnabled ? toRgba(colors.surface, colors.appearance === "dark" ? 0.94 : 0.92) : colors.surface
   );
   root.style.setProperty(
     "--app-glass-strong",
-    glassEnabled ? toRgba(colors.surface, colors.appearance === "dark" ? 0.92 : 0.88) : colors.surface
+    glassEnabled ? toRgba(colors.surface, colors.appearance === "dark" ? 0.98 : 0.98) : colors.surface
   );
   root.style.setProperty(
     "--app-glass-border",
@@ -382,14 +388,14 @@ export const applyVisualTheme = (options = {}) => {
   root.style.setProperty(
     "--app-shadow",
     colors.appearance === "dark"
-      ? "0 18px 42px rgba(0, 0, 0, 0.32)"
-      : "0 18px 42px rgba(20, 38, 74, 0.1)"
+      ? "0 12px 28px rgba(0, 0, 0, 0.24)"
+      : "0 10px 28px rgba(31, 47, 75, 0.06)"
   );
   root.style.setProperty(
     "--app-shadow-soft",
     colors.appearance === "dark"
-      ? "0 6px 20px rgba(0, 0, 0, 0.2)"
-      : "0 5px 18px rgba(20, 38, 74, 0.07)"
+      ? "0 3px 12px rgba(0, 0, 0, 0.18)"
+      : "0 2px 10px rgba(31, 47, 75, 0.05)"
   );
 };
 

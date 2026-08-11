@@ -1,50 +1,31 @@
 .app-shell {
   height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
 }
 
-// Vue 组件上的 class 会合并到 TopLayout / LeftLayout 的根 a-layout，而非额外包一层节点；
+// Vue 组件上的 class 会合并到 TopLayout / LeftLayout 的根容器，而非额外包一层节点；
 // 直接匹配根节点可确保内容区获得可计算高度，从而让 overflow: auto 正常出现滚动条。
-.app-shell.ant-layout {
-  height: 100%;
-  min-height: 0;
-}
 
-.app-shell > .ant-layout {
+.app-shell > .left-layout__main {
   height: 100%;
 }
 
-.app-shell > .ant-layout,
-.app-shell .ant-layout {
+.app-shell .left-layout__main {
   min-height: 0;
-}
-
-.app-shell .ant-layout-content {
-  display: flex;
-  min-height: 0;
-  min-width: 0;
-  // 内容节点本身就是 app-content。此处若设为 hidden，会以更高选择器优先级覆盖
-  // app-content 的 overflow: auto，导致页面超出视口后无法滚动。
-  overflow: auto;
 }
 
 .app-content {
   display: flex;
   flex: 1 1 auto;
+  min-width: 0;
   min-height: 0;
   flex-direction: column;
-  margin: 20px !important;
-  padding: 24px !important;
+  margin: var(--app-page-gutter) var(--app-page-gutter) 0;
+  padding: var(--app-page-padding) 4px 32px;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable both-edges;
-  border: 1px solid var(--app-glass-border);
-  border-radius: var(--app-radius-lg);
-  background: var(--app-glass-surface) !important;
-  box-shadow: var(--app-shadow);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  background: transparent;
 }
 
 .app-content--top {
@@ -64,7 +45,7 @@
   align-items: center;
   min-width: 0;
   height: 64px;
-  padding: 0 18px;
+  padding: 0 20px;
   overflow: hidden;
   color: inherit;
   cursor: pointer;
@@ -93,13 +74,6 @@
   box-shadow: 0 8px 18px rgba(var(--app-primary-rgb), 0.28);
 }
 
-.app-brand__mark .anticon {
-  display: grid;
-  width: 1em;
-  height: 1em;
-  place-items: center;
-}
-
 .app-brand__copy {
   display: flex;
   min-width: 0;
@@ -123,76 +97,45 @@
   font-size: 11px;
 }
 
-.ant-layout-sider-dark .app-brand__title,
+.left-layout--dark .app-brand__title,
 .top-layout--dark .app-brand__title {
   color: var(--app-ink);
 }
 
-.ant-layout-sider-dark .app-brand__caption,
+.left-layout--dark .app-brand__caption,
 .top-layout--dark .app-brand__caption {
   color: var(--app-muted);
 }
 
-.ant-layout-sider-collapsed .app-brand {
+.left-layout--collapsed .app-brand {
   justify-content: center;
   padding: 0;
 }
 
-.ant-layout-sider-collapsed .app-brand__copy {
+.left-layout--collapsed .app-brand__copy {
   display: none;
 }
 
-.app-shell .ant-layout-sider {
+.app-shell .left-layout__aside {
   z-index: 2;
-  border-right: 1px solid var(--app-glass-border);
-  box-shadow: 4px 0 20px rgba(var(--app-primary-rgb), 0.05);
+  border-right: 1px solid var(--app-border-soft);
+  box-shadow: 2px 0 12px rgba(var(--app-primary-rgb), 0.035);
 }
 
-.app-shell .ant-layout-sider-light {
-  background: var(--app-glass-strong) !important;
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+.app-shell .left-layout:not(.left-layout--dark) .left-layout__aside {
+  background: var(--app-surface);
 }
 
-.app-shell .ant-layout-sider-dark {
-  background: var(--app-surface) !important;
+.app-shell .left-layout--dark .left-layout__aside {
+  background: var(--app-surface);
 }
 
-.app-shell .ant-menu-inline,
-.app-shell .ant-menu-vertical,
-.app-shell .ant-menu-horizontal {
-  border-right: 0;
-}
-
-.app-shell .ant-menu-inline > .ant-menu-item,
-.app-shell .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title,
-.app-shell .ant-menu-vertical > .ant-menu-item,
-.app-shell .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title {
-  width: calc(100% - 16px);
-  height: 42px;
-  margin: 4px 8px;
-  line-height: 42px;
-  border-radius: 9px;
-}
-
-.app-shell .ant-menu-sub.ant-menu-inline {
-  background: transparent;
-}
-
-.app-shell .ant-menu-light .ant-menu-item-selected {
-  color: var(--app-primary);
-  background: var(--app-primary-soft);
-}
-
-.app-shell .ant-menu-dark .ant-menu-item-selected {
-  background: rgba(96, 165, 250, 0.2);
-}
-
-.app-shell .ant-layout-header {
-  height: auto !important;
-  // Ant Design 默认给 Header 注入 0 50px 内边距；布局组件已经自行管理横向间距，必须覆盖默认值，
+.app-shell .top-layout__header,
+.app-shell .left-layout__header {
+  height: auto;
+  // 布局组件自行管理横向间距，避免 Header 默认内边距改变导航和页签的可用宽度。
   // 否则横向品牌、菜单、页签和纵向折叠按钮会出现整体错位。
-  padding: 0 !important;
+  padding: 0;
 }
 
 .page-loading {
@@ -207,9 +150,8 @@
   .app-content,
   .app-content--top {
     min-height: 0;
-    margin: 12px !important;
-    padding: 16px !important;
-    border-radius: var(--app-radius);
+    margin: 12px 12px 0;
+    padding: 16px 0 24px;
   }
 
   .app-brand__caption {

@@ -8,31 +8,31 @@
       </div>
       <div class="workspace-dashboard__header-actions">
         <span class="workspace-dashboard__date">{{ currentDateLabel }}</span>
-        <a-button size="small" :loading="refreshing" @click="refreshDashboard">
-          <template #icon><ReloadOutlined /></template>
+        <el-button size="small" :loading="refreshing" @click="refreshDashboard">
+          <template #icon><el-icon><Refresh /></el-icon></template>
           刷新概览
-        </a-button>
+        </el-button>
       </div>
     </header>
 
     <section class="dashboard-hero" aria-label="今日工作摘要">
       <div class="dashboard-hero__content">
         <span class="dashboard-hero__badge">
-          <span class="dashboard-hero__badge-icon" aria-hidden="true"><SafetyCertificateOutlined /></span>
+          <span class="dashboard-hero__badge-icon" aria-hidden="true"><el-icon><CircleCheck /></el-icon></span>
           受保护的工作会话
         </span>
         <h2>让每一次操作，都始于清晰的全局视野。</h2>
         <p>当前会话由服务端认证、HttpOnly Cookie 与 CSRF 校验保护；数据统计仅归属于当前账号与租户。</p>
         <div class="dashboard-hero__meta">
-          <span><FieldTimeOutlined /> {{ lastLoginText }}</span>
-          <span><CheckCircleFilled /> 服务状态正常</span>
+          <span><el-icon><Timer /></el-icon> {{ lastLoginText }}</span>
+          <span><el-icon><CircleCheckFilled /></el-icon> 服务状态正常</span>
         </div>
       </div>
 
       <aside class="weather-card" aria-label="实时天气">
         <div class="weather-card__heading">
-          <span><CloudOutlined /> 实时天气</span>
-          <a-tooltip title="刷新天气">
+          <span><el-icon><Cloudy /></el-icon> 实时天气</span>
+          <el-tooltip content="刷新天气">
             <button
               class="weather-card__refresh"
               type="button"
@@ -40,19 +40,19 @@
               :disabled="weatherLoading"
               @click="loadWeather"
             >
-              <ReloadOutlined :spin="weatherLoading" />
+              <el-icon :class="{ 'is-loading': weatherLoading }"><Refresh /></el-icon>
             </button>
-          </a-tooltip>
+          </el-tooltip>
         </div>
         <div class="weather-card__main">
           <span class="weather-card__icon-wrap" aria-hidden="true">
-            <CloudOutlined class="weather-card__icon" />
+            <el-icon class="weather-card__icon"><Cloudy /></el-icon>
           </span>
           <strong>{{ weather.temperature === null ? "--" : `${weather.temperature}°` }}</strong>
           <span>{{ weather.description }}</span>
         </div>
         <div class="weather-card__details">
-          <span><EnvironmentOutlined /> {{ weather.location }}</span>
+          <span><el-icon><Location /></el-icon> {{ weather.location }}</span>
           <span>风速 {{ weather.windSpeed === null ? "--" : `${weather.windSpeed} km/h` }}</span>
         </div>
         <p v-if="weatherError" class="weather-card__notice">{{ weatherError }}</p>
@@ -83,7 +83,7 @@
       <div class="stat-grid login-stats__metrics">
         <article v-for="statistic in statisticCards" :key="statistic.key" class="stat-card">
           <span :class="['stat-card__icon', `stat-card__icon--${statistic.tone}`]">
-            <component :is="statistic.icon" />
+            <el-icon><component :is="statistic.icon" /></el-icon>
           </span>
           <div class="stat-card__content">
             <span>{{ statistic.label }}</span>
@@ -107,18 +107,18 @@
         </div>
         <div v-else-if="overviewError" class="dashboard-panel__empty-state">
           <p>{{ overviewError }}</p>
-          <a-button size="small" @click="loadOverview">重试</a-button>
+          <el-button size="small" @click="loadOverview">重试</el-button>
         </div>
         <div v-else class="trend-chart" aria-label="登录记录日历">
-          <a-calendar class="login-calendar" :fullscreen="false">
-            <template #dateCellRender="{ current }">
+          <el-calendar class="login-calendar">
+            <template #date-cell="{ data }">
               <span
-                v-if="hasLoginOnDate(calendarDateKey(current))"
+                v-if="hasLoginOnDate(calendarDateKey(data.day))"
                 class="login-calendar__dot"
                 aria-label="当天有登录记录"
               ></span>
             </template>
-          </a-calendar>
+          </el-calendar>
         </div>
         <p class="dashboard-panel__caption">蓝色标点表示当天存在成功登录记录；日历数据由服务端按当前账号汇总，不包含其他成员的会话信息。</p>
       </article>
@@ -131,7 +131,7 @@
             <span class="dashboard-panel__eyebrow">快捷入口</span>
             <h2>常用入口</h2>
           </div>
-          <AppstoreOutlined class="dashboard-panel__header-icon" />
+          <el-icon class="dashboard-panel__header-icon"><Grid /></el-icon>
         </header>
         <div class="quick-action-grid">
           <button
@@ -141,7 +141,7 @@
             type="button"
             @click="goToQuickAction(action)"
           >
-            <span><AppstoreOutlined /></span>
+            <span><el-icon><Grid /></el-icon></span>
             <strong>{{ action.name }}</strong>
             <small>{{ action.description }}</small>
           </button>
@@ -159,22 +159,25 @@
           <span :class="['location-panel__status', { 'location-panel__status--error': mapMessage }]">
             <span></span>{{ mapMessage || (mapLoading ? "正在加载地图" : "地图已就绪") }}
           </span>
-          <a-button size="small" :loading="mapLoading" @click="refreshMap">
-            <template #icon><ReloadOutlined /></template>
+          <el-button size="small" :loading="mapLoading" @click="refreshMap">
+            <template #icon><el-icon><Refresh /></el-icon></template>
             重载地图
-          </a-button>
+          </el-button>
         </div>
       </header>
 
       <div class="location-panel__canvas">
         <div id="dashboardMap" class="location-panel__map"></div>
         <div v-if="mapLoading" class="location-panel__overlay">
-          <a-spin tip="正在加载地图服务..." size="small" />
+          <span class="page-loading__indicator">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            正在加载地图服务...
+          </span>
         </div>
         <div v-else-if="mapMessage" class="location-panel__overlay">
-          <a-empty :description="mapMessage">
-            <template #image><EnvironmentOutlined class="location-panel__empty-icon" /></template>
-          </a-empty>
+          <el-empty :description="mapMessage">
+            <template #image><el-icon class="location-panel__empty-icon"><Location /></el-icon></template>
+          </el-empty>
         </div>
       </div>
     </section>
@@ -183,17 +186,18 @@
 
 <script setup>
 import {
-  AppstoreOutlined,
-  CalendarOutlined,
-  CheckCircleFilled,
-  CloudOutlined,
-  EnvironmentOutlined,
-  FieldTimeOutlined,
-  LoginOutlined,
-  ReloadOutlined,
-  RiseOutlined,
-  SafetyCertificateOutlined,
-} from "@ant-design/icons-vue";
+  Calendar,
+  CircleCheck,
+  CircleCheckFilled,
+  Cloudy,
+  Grid,
+  Loading,
+  Location,
+  Refresh,
+  SwitchButton,
+  Timer,
+  TrendCharts,
+} from "@element-plus/icons-vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 
@@ -439,7 +443,7 @@ const weatherUpdateText = computed(() =>
 const loginDaySet = computed(() => new Set(Array.isArray(overview.value.loginDays) ? overview.value.loginDays : []));
 
 /**
- * 将 Ant Design Calendar 的 moment/dayjs 日期值规范化为本地自然日键。
+ * 将日历组件的 moment/dayjs 日期值规范化为本地自然日键。
  * @param {unknown} value 日历插槽提供的日期对象。
  * @returns {string} YYYY-MM-DD 格式的日期键；无法解析时返回空字符串。
  */
@@ -471,7 +475,7 @@ const statisticCards = computed(() => [
     value: overviewReady.value ? overview.value.loginToday : "--",
     unit: "次",
     description: "成功建立的受保护会话",
-    icon: LoginOutlined,
+    icon: SwitchButton,
     tone: "primary",
   },
   {
@@ -480,7 +484,7 @@ const statisticCards = computed(() => [
     value: overviewReady.value ? overview.value.consecutiveActiveDays : "--",
     unit: "天",
     description: "包含当前已打开的工作日",
-    icon: RiseOutlined,
+    icon: TrendCharts,
     tone: "success",
   },
   {
@@ -489,7 +493,7 @@ const statisticCards = computed(() => [
     value: overviewReady.value ? overview.value.activeDaysLast30 : "--",
     unit: "天",
     description: "用于回顾个人使用节奏",
-    icon: CalendarOutlined,
+    icon: Calendar,
     tone: "warning",
   },
   {
@@ -498,7 +502,7 @@ const statisticCards = computed(() => [
     value: sessionDuration.value,
     unit: "",
     description: "当前受保护会话已持续时长",
-    icon: FieldTimeOutlined,
+    icon: Timer,
     tone: "violet",
   },
 ]);
@@ -536,7 +540,7 @@ onBeforeUnmount(() => {
 .workspace-dashboard {
   display: grid;
   min-width: 0;
-  gap: 20px;
+  gap: 24px;
 }
 
 .workspace-dashboard__header,
@@ -597,16 +601,12 @@ onBeforeUnmount(() => {
 .login-stats {
   display: grid;
   min-width: 0;
-  padding: 20px;
+  padding: 24px;
   gap: 16px;
-  border: 1px solid var(--app-glass-border);
+  border: 0;
   border-radius: var(--app-radius-lg);
-  background:
-    linear-gradient(135deg, rgba(var(--app-primary-rgb), 0.08), transparent 42%),
-    var(--app-glass-surface);
-  box-shadow: var(--app-shadow);
-  backdrop-filter: blur(17px) saturate(135%);
-  -webkit-backdrop-filter: blur(17px) saturate(135%);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-soft);
 }
 
 .login-stats__header {
@@ -626,7 +626,7 @@ onBeforeUnmount(() => {
   color: var(--app-success);
   font-size: 11px;
   font-weight: 650;
-  border: 1px solid rgba(var(--app-success-rgb), 0.2);
+  border: 0;
   border-radius: 999px;
   background: rgba(var(--app-success-rgb), 0.08);
 }
@@ -683,13 +683,13 @@ onBeforeUnmount(() => {
   padding: clamp(24px, 4vw, 38px);
   overflow: hidden;
   color: var(--app-primary-contrast);
-  border: 1px solid rgba(var(--app-primary-rgb), 0.35);
+  border: 0;
   border-radius: var(--app-radius-lg);
   background:
     radial-gradient(circle at 15% 115%, rgba(255, 255, 255, 0.24), transparent 24rem),
     radial-gradient(circle at 102% 0%, rgba(255, 255, 255, 0.2), transparent 20rem),
     linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
-  box-shadow: 0 18px 35px rgba(var(--app-primary-rgb), 0.24);
+  box-shadow: 0 12px 28px rgba(var(--app-primary-rgb), 0.2);
   grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
   gap: 28px;
 }
@@ -719,14 +719,6 @@ onBeforeUnmount(() => {
   height: 18px;
   place-items: center;
   flex: 0 0 18px;
-}
-
-.dashboard-hero__badge-icon .anticon {
-  display: inline-flex;
-  width: 100%;
-  height: 100%;
-  align-items: center;
-  justify-content: center;
 }
 
 .dashboard-hero h2 {
@@ -862,11 +854,9 @@ onBeforeUnmount(() => {
 .stat-card,
 .dashboard-panel,
 .location-panel {
-  border: 1px solid var(--app-glass-border);
-  background: var(--app-glass-surface);
+  border: 0;
+  background: var(--app-surface);
   box-shadow: var(--app-shadow-soft);
-  backdrop-filter: blur(17px) saturate(135%);
-  -webkit-backdrop-filter: blur(17px) saturate(135%);
 }
 
 .stat-card {
@@ -994,30 +984,6 @@ onBeforeUnmount(() => {
   background: transparent;
 }
 
-.login-calendar :deep(.ant-picker-calendar-header) {
-  padding: 0 0 12px;
-}
-
-.login-calendar :deep(.ant-picker-calendar-date) {
-  border-color: transparent;
-}
-
-.login-calendar :deep(.ant-picker-calendar-date:hover),
-.login-calendar :deep(.ant-picker-calendar-date-today) {
-  background: var(--app-primary-soft);
-}
-
-.login-calendar :deep(.ant-picker-calendar-date-value),
-.login-calendar :deep(.ant-picker-content th),
-.login-calendar :deep(.ant-picker-calendar-header .ant-select-selection-item) {
-  color: var(--app-text);
-}
-
-.login-calendar :deep(.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-calendar-date) {
-  color: var(--app-primary-contrast);
-  background: var(--app-primary);
-}
-
 .login-calendar__dot {
   display: block;
   width: 6px;
@@ -1103,9 +1069,9 @@ onBeforeUnmount(() => {
   padding: 13px;
   color: var(--app-text);
   text-align: left;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius-sm);
-  background: rgba(var(--app-primary-rgb), 0.035);
+  background: var(--app-surface-muted);
   cursor: pointer;
   grid-template-columns: 28px minmax(0, 1fr);
   column-gap: 8px;
@@ -1117,7 +1083,7 @@ onBeforeUnmount(() => {
 .quick-action:hover {
   border-color: var(--app-primary);
   background: var(--app-primary-soft);
-  box-shadow: 0 7px 14px rgba(var(--app-primary-rgb), 0.12);
+  box-shadow: var(--app-shadow-soft);
   transform: translateY(-1px);
 }
 
@@ -1153,10 +1119,6 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
-.location-panel__actions > .ant-btn {
-  min-width: 96px;
-}
-
 .location-panel__status {
   display: inline-flex;
   max-width: 330px;
@@ -1187,9 +1149,9 @@ onBeforeUnmount(() => {
   position: relative;
   height: 330px;
   overflow: hidden;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius-sm);
-  background: rgba(var(--app-primary-rgb), 0.045);
+  background: var(--app-surface-muted);
 }
 
 .location-panel__map,
@@ -1256,10 +1218,6 @@ onBeforeUnmount(() => {
 
   .dashboard-panel__tag {
     max-width: 100%;
-  }
-
-  .location-panel__actions > .ant-btn {
-    margin-left: 0;
   }
 
   .location-panel__status {

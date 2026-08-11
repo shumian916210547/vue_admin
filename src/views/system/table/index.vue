@@ -9,103 +9,128 @@
       <span class="schema-page__count">{{ tableList.length }} 张数据表</span>
     </header>
 
-    <a-form class="schema-page__filters" size="small">
-      <a-button size="small" type="primary" @click="(tableModal.show = true), (tableModal.type = 'add')"
-        v-permission="['permission:insert', permissions]">新建</a-button>
+    <el-form class="schema-page__filters" size="small" @submit.prevent>
+      <el-button size="small" type="primary" @click="(tableModal.show = true), (tableModal.type = 'add')"
+        v-permission="['permission:insert', permissions]">新建</el-button>
 
       <div class="schema-page__filter-query">
-        <a-form-item label="表格名称" v-permission="['permission:query', permissions]" style="margin-bottom: 0;">
-          <a-input size="small" placeholder="请输入表格名称" v-model:value="queryState.name" />
-        </a-form-item>
-        <a-button size="small" type="primary" @click="getSchemaList(queryState)" v-permission="['permission:query', permissions]">
+        <el-form-item label="表格名称" v-permission="['permission:query', permissions]" style="margin-bottom: 0;">
+          <el-input size="small" placeholder="请输入表格名称" v-model="queryState.name" clearable />
+        </el-form-item>
+        <el-button size="small" type="primary" @click="getSchemaList(queryState)" v-permission="['permission:query', permissions]">
           查询
-        </a-button>
-        <a-button size="small" @click="queryReset()" v-permission="['permission:reset', permissions]">重置</a-button>
-        <a-button size="small" :loading="statusChecking" @click="checkAllTableStatuses()">
+        </el-button>
+        <el-button size="small" @click="queryReset()" v-permission="['permission:reset', permissions]">重置</el-button>
+        <el-button size="small" :loading="statusChecking" @click="checkAllTableStatuses()">
           检测状态
-        </a-button>
+        </el-button>
       </div>
 
-    </a-form>
-    <a-table size="small" :columns="columns" :data-source="tableList" :pagination="false" class="schema-page__table"
-      rowKey="objectId" :scroll="{ x: 1040 }">
-      <template #bodyCell="{ column, record }">
+    </el-form>
+    <el-table size="small" width="100%" :data="tableList" class="schema-page__table" row-key="objectId" border>
+      <el-table-column type="expand" width="44">
+        <template #default="{ row }">
+          <el-table size="small" width="100%" class="schema-page__field-table" :data="row.fields" border>
+            <el-table-column
+              v-for="column in innerColumns"
+              :key="column.key"
+              :prop="column.dataIndex"
+              :label="column.title"
+              :width="column.width"
+              :min-width="column.minWidth || (column.width ? undefined : 140)"
+              :fixed="column.fixed"
+              :class-name="column.className"
+            >
+              <template #default="{ row: fieldRow, $index }">
+                <template v-if="column.key === 'operation'">
+                  <span class="table-operation">
+                    <el-button size="small" @click="handleEditField(row, $index)" v-permission="['permission:editField', permissions]">
+                      修改字段
+                    </el-button>
+                    <el-divider direction="vertical" />
+                    <el-popconfirm title="删除字段后不可恢复，确定继续吗？" confirm-button-text="删除" cancel-button-text="取消"
+                      @confirm="handleRemoveField(row, $index)">
+                      <template #reference>
+                        <el-button size="small" type="danger" v-permission="['permission:removeField', permissions]">
+                          删除字段
+                        </el-button>
+                      </template>
+                    </el-popconfirm>
+                  </span>
+                </template>
+                <template v-else-if="column.key === 'fieldName'">
+                  {{ fieldRow.formState.fieldName }}
+                </template>
+                <template v-else-if="column.key === 'fieldType'">
+                  {{ fieldTypeLabel(fieldRow.formState.fieldType) }}
+                </template>
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+      </el-table-column>
+      <el-table-column
+        v-for="column in columns"
+        :key="column.key"
+        :prop="column.dataIndex"
+        :label="column.title"
+        :width="column.width"
+        :min-width="column.minWidth || (column.width ? undefined : 140)"
+        :fixed="column.fixed"
+        :class-name="column.className"
+      >
+      <template #default="{ row }">
         <template v-if="column.key === 'status'">
-          <a-tooltip :title="record.statusMessage || '正在检测数据表状态'">
-            <a-tag :color="getTableStatusMeta(record.status).color">
-              {{ getTableStatusMeta(record.status).label }}
-            </a-tag>
-          </a-tooltip>
+          <el-tooltip :content="row.statusMessage || '正在检测数据表状态'">
+            <el-tag size="small" :type="getTableStatusMeta(row.status).type">
+              {{ getTableStatusMeta(row.status).label }}
+            </el-tag>
+          </el-tooltip>
         </template>
         <template v-else-if="column.key === 'operation'">
           <div class="schema-page__row-actions">
-            <a-button size="small" @click="generateAPI(record)">生成接口</a-button>
-            <a-divider type="vertical" />
-            <a-button size="small" @click="
+            <el-button size="small" @click="generateAPI(row)">生成接口</el-button>
+            <el-divider direction="vertical" />
+            <el-button size="small" @click="
               (fieldModal.type = 'add'),
               (fieldModal.show = true),
-              (fieldModal.className = record.className)
+              (fieldModal.className = row.className)
               " v-permission="['permission:insertField', permissions]">
               新建字段
-            </a-button>
-            <a-divider type="vertical" />
-            <a-popconfirm title="删除数据表及其记录后不可恢复，确定继续吗？" ok-text="删除" cancel-text="取消"
-              @confirm="handleDeleteSchema(record)" @cancel="() => { }">
-              <a-button size="small" type="danger" v-permission="['permission:remove', permissions]">
+            </el-button>
+            <el-divider direction="vertical" />
+            <el-popconfirm title="删除数据表及其记录后不可恢复，确定继续吗？" confirm-button-text="删除" cancel-button-text="取消"
+              @confirm="handleDeleteSchema(row)">
+              <template #reference>
+              <el-button size="small" type="danger" v-permission="['permission:remove', permissions]">
                 删除表格
-              </a-button>
-            </a-popconfirm>
+              </el-button>
+              </template>
+            </el-popconfirm>
           </div>
         </template>
+        <span v-else>{{ row[column.dataIndex] }}</span>
       </template>
-      <template #expandedRowRender="{ record }">
-        <a-table size="small" class="schema-page__field-table" :columns="innerColumns" :data-source="record.fields"
-          :pagination="false">
-          <template #bodyCell="{ column, index }">
-            <template v-if="column.key === 'operation'">
-              <span class="table-operation">
-                <a-button size="small" @click="handleEditField(record, index)" v-permission="['permission:editField', permissions]">
-                  修改字段
-                </a-button>
-                <a-divider type="vertical" />
-                <a-popconfirm title="删除字段后不可恢复，确定继续吗？" ok-text="删除" cancel-text="取消"
-                  @confirm="handleRemoveField(record, index)" @cancel="() => { }">
-                  <a-button size="small" type="danger" v-permission="['permission:removeField', permissions]">
-                    删除字段
-                  </a-button>
-                </a-popconfirm>
-              </span>
-            </template>
-
-            <template v-else-if="column.key === 'fieldName'">
-              {{ record.fields[index].formState.fieldName }}
-            </template>
-            <template v-else-if="column.key === 'fieldType'">
-              {{ fieldTypeLabel(record.fields[index].formState.fieldType) }}
-            </template>
-          </template>
-        </a-table>
-      </template>
-    </a-table>
-    <IndexField v-model:modalVisible="fieldModal.show" @onSubmit="handleSubmitField" :editState="editState"
+      </el-table-column>
+    </el-table>
+    <IndexField v-model="fieldModal.show" @onSubmit="handleSubmitField" :editState="editState"
       :type="fieldModal.type"></IndexField>
 
     <!-- 更新表格，新增表格 -->
-    <InsertTable v-if="tableModal.show" v-model:modalVisible="tableModal.show" @onSubmit="handleInsertTable">
+    <InsertTable v-if="tableModal.show" v-model="tableModal.show" @onSubmit="handleInsertTable">
     </InsertTable>
 
-    <a-modal v-model:visible="apiModalVisible" title="接口详情" width="500" @ok="
-      () => {
-        apiModalVisible = false;
-      }
-    ">
+    <el-dialog v-model="apiModalVisible" title="接口详情" width="500">
       <div class="schema-page__api-preview">
         <div class="schema-page__api-toolbar">
-          <a-button size="small" type="primary" @click="handleCopy(apiString)">复制代码</a-button>
+          <el-button size="small" type="primary" @click="handleCopy(apiString)">复制代码</el-button>
         </div>
         <pre>{{ apiString }}</pre>
       </div>
-    </a-modal>
+      <template #footer>
+        <el-button size="small" @click="apiModalVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
@@ -127,7 +152,8 @@ import Parse from "@/service/parse-client";
 import { reactive, ref } from "vue";
 import store from "@/store";
 import { Mixins } from "@/mixins";
-import { notification } from "ant-design-vue";
+import { ElNotification } from "element-plus";
+import { normalizeEditComponent } from "@/utils/element";
 
 const { queryPermission } = Mixins();
 
@@ -166,11 +192,11 @@ const tableList = ref([...store.getters["GET_TABLES"]]);
 const statusChecking = ref(false);
 let statusRequestId = 0;
 
-/** 数据表运行状态与 Ant Design Vue 标签颜色的固定映射；绿色表示真实数据类可访问，红色表示检测失败。 */
+/** 数据表运行状态与 Element Plus 标签类型的固定映射；绿色表示真实数据类可访问，红色表示检测失败。 */
 const tableStatusMeta = {
-  checking: { label: "检测中", color: "processing" },
-  normal: { label: "正常", color: "green" },
-  error: { label: "异常", color: "red" },
+  checking: { label: "检测中", type: "warning" },
+  normal: { label: "正常", type: "success" },
+  error: { label: "异常", type: "danger" },
 };
 
 /** Parse Schema 字段类型到中文界面名称的映射；对象键保留服务端类型值，避免影响数据协议。 */
@@ -198,7 +224,7 @@ const fieldTypeLabel = (fieldType) => fieldTypeLabels[fieldType] || fieldType ||
 /**
  * 返回数据表状态标签的展示配置，未知状态统一按“检测中”处理，避免页面出现空白状态。
  * @param {"checking" | "normal" | "error" | undefined} status 数据表当前检测状态。
- * @returns {{label: string, color: string}} Ant Design Vue 标签文案和颜色配置。
+ * @returns {{label: string, type: string}} Element Plus 标签文案和类型配置。
  */
 const getTableStatusMeta = (status) => tableStatusMeta[status] || tableStatusMeta.checking;
 
@@ -267,7 +293,7 @@ const getSchemaList = async (query) => {
             chineseName: field.chineseName,
             defaultValue:
               field.defaultValue?.objectId || field.defaultValue,
-            editComponent: field.editComponent,
+            editComponent: normalizeEditComponent(field.editComponent),
             isFilter: field.isFilter,
             isTable: field.isTable,
             isPointer: field.isPointer,
@@ -297,9 +323,9 @@ const getSchemaList = async (query) => {
   });
   await checkAllTableStatuses(tableList.value);
   store.commit("SET_TABLES", [...tableList.value]);
-  notification.success({
-    message: sessionStorage.getItem("pageName"),
-    description: "数据获取成功",
+  ElNotification.success({
+    title: sessionStorage.getItem("pageName"),
+    message: "数据获取成功",
     duration: 0.5,
   });
 };
@@ -475,15 +501,15 @@ const handleCopy = async (value) => {
   try {
     if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(value);
     else if (!copyTextWithFallback(value)) throw new Error("COPY_FAILED");
-    notification.success({
-      message: "提示",
-      description: "复制成功",
+    ElNotification.success({
+      title: "提示",
+      message: "复制成功",
       duration: 0.5,
     });
   } catch {
-    notification.error({
-      message: "复制失败",
-      description: "浏览器未授予剪贴板权限，请手动选择代码后复制。",
+    ElNotification.error({
+      title: "复制失败",
+      message: "浏览器未授予剪贴板权限，请手动选择代码后复制。",
     });
   }
 };
@@ -498,9 +524,9 @@ await getSchemaList(queryState);
 
 .schema-page__heading {
   display: flex;
-  margin-bottom: 22px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--app-border);
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
@@ -543,10 +569,11 @@ await getSchemaList(queryState);
   align-items: center;
   justify-content: space-between;
   margin-bottom: 18px;
-  padding: 8px 16px 8px;
-  background: rgba(var(--app-primary-rgb), 0.04);
-  border: 1px solid var(--app-glass-border);
-  border-radius: 12px;
+  padding: 12px 16px;
+  background: var(--app-surface);
+  border: 0;
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow-soft);
 }
 
 .schema-page__filter-query {
@@ -557,15 +584,8 @@ await getSchemaList(queryState);
   justify-content: flex-end;
 }
 
-.schema-page__filter-query .ant-input {
-  width: 220px;
-}
-
 .schema-page__table {
-  overflow: hidden;
-  border: 1px solid var(--app-glass-border);
-  background: var(--app-glass-surface);
-  border-radius: 12px;
+  width: 100%;
 }
 
 .schema-page__row-actions {
@@ -575,15 +595,8 @@ await getSchemaList(queryState);
   gap: 4px;
 }
 
-.schema-page__row-actions > .ant-btn,
-.schema-page__row-actions .ant-popconfirm > .ant-btn {
-  padding-right: 5px;
-  padding-left: 5px;
-}
-
 .schema-page__field-table {
-  overflow: hidden;
-  border-radius: 8px;
+  width: 100%;
 }
 
 .schema-page__api-preview {
@@ -633,8 +646,5 @@ await getSchemaList(queryState);
     gap: 8px;
   }
 
-  .schema-page__filter-query .ant-input {
-    width: min(100%, 220px);
-  }
 }
 </style>

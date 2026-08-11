@@ -1,155 +1,88 @@
 <template>
-    <a-modal :footer="null" v-model:visible="visible" @cancel="handleCancel" :width="modalWidth" ref="modalRef"
-        style="position: relative">
-        <template #title>
-            <div ref="modalTitleRef" style="width: 100%; cursor: move">
-                {{ className }}
-            </div>
-        </template>
-        <a-descriptions size="small" :title="dataMap.name" bordered>
-            <template v-for="(key, index) in Object.keys(props.fields)" :key="index">
-                <a-descriptions-item :label="props.fields[key].chineseName">
-                    {{ colValue(dataMap[key], props.fields[key]) }}
-                </a-descriptions-item>
-            </template>
-        </a-descriptions>
-        <div class="bar" @mousedown="down($event)" ref="bar"></div>
-        <template #modalRender="{ originVNode }">
-            <div :style="transformStyle">
-                <component :is="originVNode" />
-            </div>
-        </template>
-    </a-modal>
+  <el-dialog
+    v-model="visible"
+    class="common-preview"
+    :title="className"
+    :width="dialogWidth"
+    draggable
+    destroy-on-close
+  >
+    <el-descriptions :title="dataMap.name" :column="2" border size="small">
+      <el-descriptions-item
+        v-for="(key, index) in Object.keys(props.fields)"
+        :key="index"
+        :label="props.fields[key].chineseName"
+      >
+        {{ colValue(dataMap[key], props.fields[key]) }}
+      </el-descriptions-item>
+    </el-descriptions>
+  </el-dialog>
 </template>
 
 <script setup>
-import { useDraggable } from "@vueuse/core";
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, ref, watch } from "vue";
 
-const emit = defineEmits(["update:modalVisible"])
+const emit = defineEmits(["update:modelValue"]);
 const props = defineProps({
-    className: {
-        required: true,
-        type: String,
-    },
-    fields: {
-        required: true,
-        type: Object,
-    },
-    dataMap: {
-        required: true,
-        type: Object
-    },
-    modalVisible: {
-        type: Boolean,
-        default: false,
-    }
+  className: {
+    required: true,
+    type: String,
+  },
+  fields: {
+    required: true,
+    type: Object,
+  },
+  dataMap: {
+    required: true,
+    type: Object,
+  },
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const visible = ref(props.modalVisible);
-watch(() => props.modalVisible, (n, o) => {
-    visible.value = n
-}, { deep: true })
-const handleCancel = () => {
-    emit("update:modalVisible", false)
-}
-
-const colValue = (value, colOption) => {
-    switch (colOption.type) {
-        case "Array":
-            let str = ''
-            if (colOption.isPointer) {
-                value.forEach(item => {
-                    str += item.name + '\n'
-                })
-            } else {
-                value.forEach(item => { str += item + '\n' })
-            }
-            return str;
-        case "Pointer": return value.name;
-        default: return value;
-    }
-}
-
+const visible = ref(props.modelValue);
 const modalWidth = ref("600px");
-const modalTitleRef = ref();
-const { x, y, isDragging } = useDraggable(modalTitleRef);
-const startX = ref(0);
-const startY = ref(0);
-const startedDrag = ref(false);
-const transformX = ref(0);
-const transformY = ref(0);
-const preTransformX = ref(0);
-const preTransformY = ref(0);
-const dragRect = ref({
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-});
-watch([x, y], () => {
-    if (!startedDrag.value) {
-        startX.value = x.value;
-        startY.value = y.value;
-        const bodyRect = document.body.getBoundingClientRect();
-        const titleRect = modalTitleRef.value.getBoundingClientRect();
-        dragRect.value.right = bodyRect.width - titleRect.width;
-        dragRect.value.bottom = bodyRect.height - titleRect.height;
-        preTransformX.value = transformX.value;
-        preTransformY.value = transformY.value;
-    }
-    startedDrag.value = true;
-});
-watch(isDragging, () => {
-    if (!isDragging) {
-        startedDrag.value = false;
-    }
-});
-watchEffect(() => {
-    if (startedDrag.value) {
-        transformX.value =
-            preTransformX.value +
-            Math.min(Math.max(dragRect.value.left, x.value), dragRect.value.right) -
-            startX.value;
-        transformY.value =
-            preTransformY.value +
-            Math.min(Math.max(dragRect.value.top, y.value), dragRect.value.bottom) -
-            startY.value;
-    }
-});
-const transformStyle = computed(() => {
-    return {
-        transform: `translate(${transformX.value}px, ${transformY.value}px)`,
-    };
+
+/**
+ * 将父组件的预览可见状态同步到 Element Plus Dialog。
+ * @param {boolean} nextVisible 父组件传入的最新可见状态。
+ * @returns {void} 更新本地受控状态，不发起请求。
+ */
+watch(
+  () => props.modelValue,
+  (nextVisible) => {
+    visible.value = nextVisible;
+  }
+);
+
+/**
+ * 将 Dialog 的关闭动作同步回父组件的 v-model。
+ * @param {boolean} nextVisible Element Plus Dialog 的最新可见状态。
+ * @returns {void} 发出 update:modelValue 事件。
+ */
+watch(visible, (nextVisible) => {
+  if (nextVisible !== props.modelValue) emit("update:modelValue", nextVisible);
 });
 
-const down = (e) => {
-    const startX = e.clientX;
-    const offsetX = e.target.offsetLeft; //元素左边到窗口左边的距离
-    e.target.setCaptrue; //设置鼠标捕获(之后的事件捕获会作用在当前元素上)
-    document.onmousemove = (e) => {
-        const endX = e.clientX;
-        const width = offsetX - (startX - endX);
-        if (width > 600) modalWidth.value = width + "px";
-    };
-    document.onmouseup = (e) => {
-        document.onmousemove = null;
-        document.onmouseup = null;
-        e.target.releaseCaptrue; //释放鼠标捕获
-    };
+/**
+ * 将 Parse 的数组或 Pointer 值转换为可读的详情文本。
+ * @param {unknown} value 当前字段值，可为空、数组或 Pointer 对象。
+ * @param {{type?: string, isPointer?: boolean}} colOption 字段类型和 Pointer 标识。
+ * @returns {string | unknown} 适合在详情单元格中展示的值。
+ */
+const colValue = (value, colOption) => {
+  if (value === null || value === undefined || value === "") return "未设置";
+  if (colOption.type === "Array" && Array.isArray(value)) {
+    return value
+      .map((item) => (colOption.isPointer ? item?.name || item?.objectId : item))
+      .filter(Boolean)
+      .join("\n");
+  }
+  if (colOption.type === "Pointer") return value?.name || value?.objectId || value;
+  return value;
 };
-</script>
 
-<style lang="scss" scoped>
-.bar {
-    cursor: col-resize;
-    width: 24px;
-    display: inline-block;
-    line-height: 200px;
-    vertical-align: middle;
-    position: absolute;
-    right: 0px;
-    top: 0;
-    height: 100%;
-}
-</style>
+const dialogWidth = computed(() => (window.innerWidth < 700 ? "calc(100% - 24px)" : modalWidth.value));
+</script>

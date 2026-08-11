@@ -1,43 +1,37 @@
 <template>
-  <a-layout class="left-layout" :class="{ 'left-layout--dark': props.systemOptions.theme === 'dark' }">
-    <a-layout-sider
-      v-model:collapsed="collapsed"
-      :trigger="null"
-      :theme="props.systemOptions.theme"
-      breakpoint="md"
-      :collapsed-width="64"
-      collapsible
+  <el-container class="left-layout" :class="{ 'left-layout--dark': props.systemOptions.theme === 'dark' }">
+    <el-aside
+      :width="collapsed ? '64px' : '228px'"
+      :class="['left-layout__aside', { 'left-layout--collapsed': collapsed }]"
     >
       <slot name="layout-menu"></slot>
-    </a-layout-sider>
-    <a-layout>
-      <a-layout-header
+    </el-aside>
+    <el-container class="left-layout__main">
+      <el-header
         class="left-layout__header"
         id="layoutHeader"
       >
         <div class="left-layout__header-main">
-          <component
-            :is="props.AntdIcon['MenuUnfoldOutlined']"
+          <el-icon
             v-if="collapsed"
             class="trigger"
             @click="toggleCollapsed"
-          ></component>
+          ><component :is="props.iconMap['MenuUnfoldOutlined']" /></el-icon>
 
-          <component
-            :is="props.AntdIcon['MenuFoldOutlined']"
+          <el-icon
             v-else
             class="trigger"
             @click="toggleCollapsed"
-          ></component>
+          ><component :is="props.iconMap['MenuFoldOutlined']" /></el-icon>
 
           <slot name="layout-header-right"></slot>
         </div>
 
         <slot name="layout-tags"> </slot>
-      </a-layout-header>
+      </el-header>
       <slot name="layout-content"> </slot>
-    </a-layout>
-  </a-layout>
+    </el-container>
+  </el-container>
 </template>
 
 <script setup>
@@ -49,7 +43,7 @@ const props = defineProps({
     default: () => {},
     required: true,
   },
-  AntdIcon: {
+  iconMap: {
     type: Object,
     default: () => {},
     required: true,
@@ -69,14 +63,20 @@ const toggleCollapsed = () => {
 <style lang="scss">
 .left-layout__header {
   z-index: 1;
-  padding: 0 !important;
-  color: var(--app-text) !important;
-  background: var(--app-glass-surface) !important;
-  border-bottom: 1px solid var(--app-glass-border);
-  box-shadow: 0 8px 24px rgba(var(--app-primary-rgb), 0.04);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  padding: 0;
+  color: var(--app-text);
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border-soft);
+  box-shadow: 0 1px 8px rgba(var(--app-primary-rgb), 0.035);
   flex-direction: column;
+}
+
+.left-layout__aside {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+  transition: width var(--app-transition);
 }
 
 .left-layout__header-main {
@@ -88,9 +88,9 @@ const toggleCollapsed = () => {
 }
 
 .left-layout--dark .left-layout__header {
-  color: var(--app-text) !important;
-  background: var(--app-glass-surface) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  color: var(--app-text);
+  background: var(--app-surface);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.16);
 }
 
 .left-layout .trigger {
@@ -122,7 +122,7 @@ const toggleCollapsed = () => {
 
 @media (max-width: 768px) {
   .left-layout__header {
-    padding: 0 !important;
+    padding: 0;
   }
 
   .left-layout__header-main {
@@ -130,7 +130,7 @@ const toggleCollapsed = () => {
     padding: 0 8px;
   }
 
-  .left-layout > .ant-layout {
+  .left-layout__main {
     min-width: 0;
   }
 }

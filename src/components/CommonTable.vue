@@ -1,106 +1,229 @@
 <template>
   <section class="common-table">
-    <!-- 筛选 -->
     <slot name="top">
-      <a-form class="common-table__filters" :model="where" ref="form" size="small">
-        <a-row :gutter="[16, 12]">
-          <a-col :xs="24" :lg="5" class="common-table__create-action">
-            <a-button size="small" type="primary" @click="emit('onInsert')"
-              v-permission="['permission:insert', permissions]">新建</a-button>
-          </a-col>
-          <a-col :xs="24" :lg="19" class="common-table__query-area">
+      <el-form ref="form" class="common-table__filters" :model="where" size="small" @submit.prevent>
+        <el-row :gutter="16" class="common-table__filter-row">
+          <el-col :xs="24" :lg="5" class="common-table__create-action">
+            <el-button
+              size="small"
+              type="primary"
+              v-permission="['permission:insert', permissions]"
+              @click="emit('onInsert')"
+            >
+              新建
+            </el-button>
+          </el-col>
+          <el-col :xs="24" :lg="19" class="common-table__query-area">
             <div class="common-table__filter-fields">
-              <template v-for="(field_name, index) in getFilterField(props.fields)" :key="index">
-                <a-form-item :label="fields[field_name].chineseName" class="common-table__filter-item"
-                  :name="field_name" v-permission="['permission:query', permissions]">
-                  <template v-if="fields[field_name].editComponent == 'ASelect'">
-                    <component size="small" class="common-table__filter-control" v-model:value="where[field_name]"
-                      :placeholder="getFieldPlaceholder(fields[field_name], field_name, true)" :allowClear="true"
-                      :is="fields[field_name].editComponent" :fieldNames="{
-                        label: fields[field_name].componentOption.labelKey,
-                        value: fields[field_name].componentOption.valueKey,
-                      }" :mode="fields[field_name].componentOption.mode" :options="selectoptions[
-                        fields[field_name].componentOption.selectTable
-                      ]
-                        ">
-                    </component>
-                  </template>
-                  <template v-else>
-                    <component size="small" class="common-table__filter-control" v-model:value="where[field_name]" :allowClear="true"
-                      :placeholder="getFieldPlaceholder(fields[field_name], field_name)" :is="fields[field_name].editComponent">
-                    </component>
-                  </template>
-                </a-form-item>
+              <template v-for="(fieldName, index) in getFilterField(props.fields)" :key="index">
+                <el-form-item
+                  v-permission="['permission:query', permissions]"
+                  :label="fields[fieldName].chineseName"
+                  :prop="fieldName"
+                  class="common-table__filter-item"
+                >
+                  <el-select
+                    v-if="getEditComponent(fields[fieldName]) === 'ElSelect'"
+                    v-model="where[fieldName]"
+                    class="common-table__filter-control"
+                    size="small"
+                    :placeholder="getFieldPlaceholder(fields[fieldName], fieldName, true)"
+                    :clearable="true"
+                    :filterable="true"
+                    :multiple="isMultiple(fields[fieldName])"
+                  >
+                    <el-option
+                      v-for="option in selectoptions[fields[fieldName].componentOption?.selectTable] || []"
+                      :key="option.objectId || option.value || option.name"
+                      :label="getOptionLabel(option, fields[fieldName])"
+                      :value="getOptionValue(option, fields[fieldName])"
+                    />
+                  </el-select>
+                  <el-input-number
+                    v-else-if="getEditComponent(fields[fieldName]) === 'ElInputNumber'"
+                    v-model="where[fieldName]"
+                    class="common-table__filter-control"
+                    size="small"
+                    controls-position="right"
+                    :placeholder="getFieldPlaceholder(fields[fieldName], fieldName)"
+                  />
+                  <el-switch
+                    v-else-if="getEditComponent(fields[fieldName]) === 'ElSwitch'"
+                    v-model="where[fieldName]"
+                    size="small"
+                  />
+                  <el-date-picker
+                    v-else-if="getEditComponent(fields[fieldName]) === 'ElDatePicker'"
+                    v-model="where[fieldName]"
+                    class="common-table__filter-control"
+                    size="small"
+                    type="datetime"
+                    :placeholder="getFieldPlaceholder(fields[fieldName], fieldName)"
+                    clearable
+                  />
+                  <el-date-picker
+                    v-else-if="getEditComponent(fields[fieldName]) === 'ElDateRangePicker'"
+                    v-model="where[fieldName]"
+                    class="common-table__filter-control"
+                    size="small"
+                    type="datetimerange"
+                    :start-placeholder="`${getFieldPlaceholder(fields[fieldName], fieldName)}开始`"
+                    :end-placeholder="`${getFieldPlaceholder(fields[fieldName], fieldName)}结束`"
+                    clearable
+                  />
+                  <el-input
+                    v-else
+                    v-model="where[fieldName]"
+                    class="common-table__filter-control"
+                    size="small"
+                    clearable
+                    :placeholder="getFieldPlaceholder(fields[fieldName], fieldName)"
+                  />
+                </el-form-item>
               </template>
             </div>
             <div class="common-table__toolbar-actions">
-              <a-button size="small" type="primary" @click="emit('onQuery')"
-                v-permission="['permission:query', permissions]">查询</a-button>
-              <a-button size="small" @click="handleReset" v-permission="['permission:reset', permissions]">重置</a-button>
-              <a-button size="small" @click="openExport">
-                导出
-              </a-button>
+              <el-button
+                size="small"
+                type="primary"
+                v-permission="['permission:query', permissions]"
+                @click="emit('onQuery')"
+              >
+                查询
+              </el-button>
+              <el-button
+                size="small"
+                v-permission="['permission:reset', permissions]"
+                @click="handleReset"
+              >
+                重置
+              </el-button>
+              <el-button size="small" @click="openExport">导出</el-button>
             </div>
-          </a-col>
-        </a-row>
-      </a-form>
+          </el-col>
+        </el-row>
+      </el-form>
     </slot>
 
-    <!-- 表格 -->
-    <a-table size="small" class="common-table__data" :columns="tableColumns" :data-source="tableData" :pagination="queryState"
-      :loading="tableLoading" rowKey="objectId" :scroll="{ x: 720 }" :defaultExpandedRowKeys="expandedRowKeys"
-      @change="handleTableChange" bordered @resizeColumn="handleResizeColumn">
-      <template #bodyCell="{ column, record }">
-        <!-- 根据数据类型展示数据 -->
-        <template v-if="column.key === 'operation'">
-          <div class="common-table__row-actions">
-            <a-button size="small" @click="emit('onPreview', record)" v-permission="['permission:preview', permissions]">
-              查看
-            </a-button>
-
-            <template v-if="innerContainerTitle">
-              <a-button size="small" @click="emit('onAdd', record)" v-permission="['permission:insertChildren', permissions]">
-                {{ innerContainerTitle }}
-              </a-button>
-              <a-divider type="vertical" />
+    <div class="common-table__data-wrap">
+      <el-table
+        v-loading="tableLoading"
+        class="common-table__data"
+        size="small"
+        width="100%"
+        :data="tableData"
+        row-key="objectId"
+        border
+        :row-class-name="getRowClassName"
+        @header-dragend="handleHeaderDragend"
+      >
+        <el-table-column v-if="innerContainer" type="expand" width="44">
+          <template #default="{ row, $index }">
+            <slot
+              name="expandedRowRender"
+              :record="row"
+              :index="$index"
+              :indent="0"
+              :expanded="true"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          v-for="column in tableColumns"
+          :key="column.key || column.dataIndex"
+          :prop="column.dataIndex"
+          :label="column.title"
+          :width="column.width"
+          :min-width="column.minWidth || (column.width ? undefined : 140)"
+          :fixed="column.fixed"
+          :class-name="column.className"
+          :resizable="column.resizable !== false"
+        >
+          <template #default="{ row }">
+            <template v-if="column.key === 'operation'">
+              <div class="common-table__row-actions">
+                <el-button
+                  size="small"
+                  v-permission="['permission:preview', permissions]"
+                  @click="emit('onPreview', row)"
+                >
+                  查看
+                </el-button>
+                <template v-if="innerContainerTitle">
+                  <el-button
+                    size="small"
+                    v-permission="['permission:insertChildren', permissions]"
+                    @click="emit('onAdd', row)"
+                  >
+                    {{ innerContainerTitle }}
+                  </el-button>
+                  <el-divider direction="vertical" />
+                </template>
+                <el-button
+                  size="small"
+                  v-permission="['permission:edit', permissions]"
+                  @click="emit('onEdit', row)"
+                >
+                  修改
+                </el-button>
+                <el-popconfirm
+                  title="删除后不可恢复，确定要继续吗？"
+                  confirm-button-text="删除"
+                  cancel-button-text="取消"
+                  width="260"
+                  @confirm="emit('onDelete', row)"
+                >
+                  <template #reference>
+                    <el-button
+                      size="small"
+                      type="danger"
+                      v-permission="['permission:remove', permissions]"
+                    >
+                      删除
+                    </el-button>
+                  </template>
+                </el-popconfirm>
+              </div>
             </template>
-            <a-button size="small" @click="emit('onEdit', record)" v-permission="['permission:edit', permissions]">
-              修改
-            </a-button>
+            <CommonFields v-else :column="column" :record="row" :fields="fields" />
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
-            <a-popconfirm title="删除后不可恢复，确定要继续吗？" ok-text="删除" cancel-text="取消" @confirm="emit('onDelete', record)">
-              <a-button size="small" type="danger" v-permission="['permission:remove', permissions]">
-                删除
-              </a-button>
-            </a-popconfirm>
-          </div>
-        </template>
-        <CommonFields :column="column" :record="record" :fields="fields"></CommonFields>
-      </template>
-      <template v-if="innerContainer" #expandedRowRender="{ record, index, indent, expanded }">
-        <slot name="expandedRowRender" :record="record" :index="index" :indent="indent" :expanded="expanded"></slot>
-      </template>
-      <template #expandIcon="{ record }">
-        <div v-if="record.routes && record.routes.length">
-          <button type="button" class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed" aria-label="展开行"
-            v-show="expandedRowKeys.indexOf(record.objectId) === -1" @click="expand(record.objectId)"></button>
-          <button type="button" class="ant-table-row-expand-icon ant-table-row-expand-icon-expanded" aria-label="收起行"
-            v-show="expandedRowKeys.indexOf(record.objectId) !== -1" @click="expand('')"></button>
-        </div>
-      </template>
-    </a-table>
+    <el-pagination
+      v-if="showPagination"
+      class="common-table__pagination"
+      background
+      size="small"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :page-sizes="[10, 20, 50, 100]"
+      :total="Number(props.queryState?.total) || 0"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handlePageSizeChange"
+      @current-change="handleCurrentChange"
+    />
 
-    <CommonExport v-model:modalVisible="exportMap.show" :className="props.className" :tableColumns="tableColumns"
-      :fields="props.fields"></CommonExport>
+    <CommonExport
+      v-model="exportMap.show"
+      :class-name="props.className"
+      :table-columns="tableColumns"
+      :fields="props.fields"
+    />
   </section>
 </template>
 
 <script setup>
-import { watch, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
+
 import { Mixins } from "@/mixins";
 import { findAll } from "@/service/base.service";
+import { normalizeEditComponent } from "@/utils/element";
+
 import CommonExport from "./CommonExport.vue";
 import CommonFields from "./CommonFields.vue";
+
 const props = defineProps({
   className: {
     required: true,
@@ -119,12 +242,10 @@ const props = defineProps({
   queryState: {
     type: Object,
     default: () => ({}),
-    required: false,
   },
   queryVal: {
     type: Object,
     default: () => ({}),
-    required: false,
   },
   innerContainer: {
     type: Boolean,
@@ -143,22 +264,7 @@ const props = defineProps({
     default: false,
   },
 });
-const where = reactive(props.queryVal);
-const { queryPermission, getFilterField } = Mixins();
 
-/**
- * 为动态筛选控件生成稳定的中文占位提示，兼容历史元数据缺少 componentOption 的情况。
- * @param {{chineseName?: string, componentOption?: {placeholder?: string}} | undefined} field Schema 字段配置。
- * @param {string} fieldName 字段键名，仅在中文名称缺失时用于生成兜底提示。
- * @param {boolean} isSelect 是否为选择类控件；选择类使用“请选择”，其余使用“请输入”。
- * @returns {string} 可直接传给 Ant Design Vue 输入控件的中文 placeholder。
- */
-const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
-  const configured = field?.componentOption?.placeholder;
-  if (typeof configured === "string" && configured.trim()) return configured;
-  const label = field?.chineseName || fieldName || "该字段";
-  return `${isSelect ? "请选择" : "请输入"}${label}`;
-};
 const emit = defineEmits([
   "onChange",
   "onQueryReset",
@@ -170,55 +276,133 @@ const emit = defineEmits([
   "onAdd",
   "onPreview",
 ]);
+const where = reactive(props.queryVal);
+const form = ref();
+const selectoptions = reactive({});
+const exportMap = reactive({ show: false });
+const { queryPermission, getFilterField } = Mixins();
+const permissions = await queryPermission();
+
+/**
+ * 读取并规范化筛选字段的编辑组件标识，确保历史 Schema 使用 Element Plus 控件。
+ * @param {{editComponent?: unknown} | undefined} field Schema 字段配置。
+ * @returns {string} Element Plus 组件标识或未知原始标识。
+ */
+const getEditComponent = (field) => normalizeEditComponent(field?.editComponent);
+
+/**
+ * 为动态筛选控件生成稳定的中文占位提示，兼容历史元数据缺少 componentOption 的情况。
+ * @param {{chineseName?: string, componentOption?: {placeholder?: string}} | undefined} field Schema 字段配置。
+ * @param {string} fieldName 字段键名，仅在中文名称缺失时用于生成兜底提示。
+ * @param {boolean} isSelect 是否为选择类控件；选择类使用“请选择”，其余使用“请输入”。
+ * @returns {string} 可直接传给 Element Plus 输入控件的中文 placeholder。
+ */
+const getFieldPlaceholder = (field, fieldName, isSelect = false) => {
+  const configured = field?.componentOption?.placeholder;
+  if (typeof configured === "string" && configured.trim()) return configured;
+  const label = field?.chineseName || fieldName || "该字段";
+  return `${isSelect ? "请选择" : "请输入"}${label}`;
+};
+
+/**
+ * 判断动态选择控件是否应启用多选。
+ * @param {{componentOption?: {mode?: string}, type?: string, isPointer?: boolean}} field Schema 字段配置。
+ * @returns {boolean} mode 为 multiple/tags 或字段为 Pointer 数组时返回 true。
+ */
+const isMultiple = (field) =>
+  ["multiple", "tags"].includes(field?.componentOption?.mode) ||
+  (field?.isPointer && field?.type === "Array");
+
+/**
+ * 从关联记录中读取选择项显示文本。
+ * @param {Record<string, unknown>} option 关联数据源中的一条记录。
+ * @param {{componentOption?: {labelKey?: string}}} field Schema 字段配置。
+ * @returns {string} 选择项标签。
+ */
+const getOptionLabel = (option, field) =>
+  String(option?.[field?.componentOption?.labelKey || "name"] ?? option?.label ?? option?.name ?? "");
+
+/**
+ * 从关联记录中读取选择项值。
+ * @param {Record<string, unknown>} option 关联数据源中的一条记录。
+ * @param {{componentOption?: {valueKey?: string}}} field Schema 字段配置。
+ * @returns {string | number | boolean | undefined} 选择项值。
+ */
+const getOptionValue = (option, field) =>
+  option?.[field?.componentOption?.valueKey || "objectId"] ?? option?.value;
+
+/**
+ * 为 Element Plus 表格生成无截断的行类名，确保动态字段可完整换行展示。
+ * @returns {string} 表格行 CSS 类名。
+ */
+const getRowClassName = () => "common-table__row";
+
 watch(
   where,
-  (n) => {
-    emit("update:queryVal", Object.assign({}, props.queryVal, n));
+  (nextWhere) => {
+    emit("update:queryVal", Object.assign({}, props.queryVal, nextWhere));
   },
   { deep: true }
 );
 
-const exportMap = reactive({
-  show: false,
-});
-
 watch(
   () => props.queryVal,
-  (n) => {
-    Object.keys(n).forEach((key) => {
-      where[key] = n[key];
+  (nextWhere) => {
+    Object.keys(nextWhere || {}).forEach((key) => {
+      where[key] = nextWhere[key];
     });
-  }
+  },
+  { deep: true }
 );
 
-const form = ref();
-
 /**
- * 保存用户拖动后的表格列宽。
- * @param {number} width 新列宽，单位为像素。
- * @param {Record<string, unknown>} column Ant Design Vue 传入的列配置对象。
- * @returns {void} 直接更新列对象的 width，供当前渲染周期使用。
+ * 保存用户拖动后的 Element Plus 表格列宽。
+ * @param {number} newWidth 新列宽，单位为像素。
+ * @param {number} oldWidth 拖动前列宽，单位为像素。
+ * @param {{property?: string}} column Element Plus 表格列对象。
+ * @returns {void} 直接更新对应列配置。
  */
-function handleResizeColumn(width, column) {
-  column.width = width;
-}
-
-/**
- * 将 Ant Design Vue 表格的分页对象转换为父页面需要的页码和每页数量。不能直接透传 `$event`，
- * 否则父级会把对象误写入 pageNum，导致翻页、排序或刷新后查询状态损坏。
- * @param {{current?: number, pageSize?: number}} pagination 表格 change 事件返回的分页信息。
- * @returns {void} 向父级发出规范化后的 onChange 页码和每页数量参数。
- */
-const handleTableChange = (pagination) => {
-  const current = Number.isInteger(pagination?.current) && pagination.current > 0 ? pagination.current : 1;
-  const pageSize =
-    Number.isInteger(pagination?.pageSize) && pagination.pageSize > 0
-      ? pagination.pageSize
-      : props.queryState?.pageSize || 10;
-  emit("onChange", current, pageSize);
+const handleHeaderDragend = (newWidth, oldWidth, column) => {
+  void oldWidth;
+  const target = props.tableColumns.find((item) => item.dataIndex === column?.property);
+  if (target) target.width = newWidth;
 };
 
-const selectoptions = reactive({});
+/**
+ * 将分页器页码和每页数量传给父页面，由父页面维护 BFF 查询状态。
+ * @param {number} page 当前页码，从 1 开始。
+ * @param {number} size 每页记录数。
+ * @returns {void} 发出规范化后的 onChange 事件。
+ */
+const emitPageChange = (page, size) => {
+  const nextPage = Number.isInteger(page) && page > 0 ? page : 1;
+  const nextSize = Number.isInteger(size) && size > 0 ? size : pageSize.value;
+  emit("onChange", nextPage, nextSize);
+};
+
+/**
+ * 处理 Element Plus 分页器的每页数量变化，切换数量时回到第一页。
+ * @param {number} size 最新每页数量。
+ * @returns {void} 发出第一页查询事件。
+ */
+const handlePageSizeChange = (size) => emitPageChange(1, size);
+
+/**
+ * 处理 Element Plus 分页器的页码变化。
+ * @param {number} page 最新页码。
+ * @returns {void} 发出当前页查询事件。
+ */
+const handleCurrentChange = (page) => emitPageChange(page, pageSize.value);
+
+/**
+ * 清空筛选表单并通知父组件恢复统一维护的 queryState。
+ * @returns {void} 发出重置事件并清理 Element Plus 表单状态。
+ */
+const handleReset = () => {
+  emit("onQueryReset");
+  form.value?.resetFields?.();
+};
+
 /**
  * 加载筛选区下拉框关联数据源，失败时由统一请求层向上抛出而不伪造选项。
  * @param {string} className 关联数据表的 Parse 类名；为空时不执行请求。
@@ -226,35 +410,8 @@ const selectoptions = reactive({});
  */
 const loadSelectOptions = async (className) => {
   if (!className) return [];
-  selectoptions[className] = [];
   selectoptions[className] = await findAll(className);
-};
-
-getFilterField(props.fields).forEach((field) => {
-  if (props.fields[field].editComponent == "ASelect")
-    loadSelectOptions(props.fields[field].componentOption.selectTable);
-});
-
-/**
- * 清空筛选表单并通知父组件恢复其统一维护的 queryState。
- * @returns {void} 先发出 onQueryReset，再调用 Ant Design Vue 表单重置方法。
- */
-const handleReset = () => {
-  emit("onQueryReset");
-  form.value?.resetFields?.();
-};
-
-const permissions = await queryPermission();
-
-const expandedRowKeys = reactive([]);
-
-/**
- * 切换当前展开行；传入空值时清空数组，修复原实现把空字符串保留为伪展开项的问题。
- * @param {string} objectId 需要展开的记录 objectId；空字符串表示收起全部。
- * @returns {void} 就地更新 expandedRowKeys，保持 Vue 对数组变更的追踪。
- */
-const expand = (objectId) => {
-  expandedRowKeys.splice(0, expandedRowKeys.length, ...(objectId ? [objectId] : []));
+  return selectoptions[className];
 };
 
 /**
@@ -264,6 +421,19 @@ const expand = (objectId) => {
 const openExport = () => {
   exportMap.show = true;
 };
+
+const filterFields = getFilterField(props.fields);
+filterFields.forEach((fieldName) => {
+  if (getEditComponent(props.fields[fieldName]) === "ElSelect") {
+    void loadSelectOptions(props.fields[fieldName]?.componentOption?.selectTable);
+  }
+});
+
+const currentPage = computed(() => Number(props.queryState?.current || props.queryState?.pageNum) || 1);
+const pageSize = computed(() => Number(props.queryState?.pageSize) || 10);
+const showPagination = computed(() =>
+  Boolean(props.queryState && Object.prototype.hasOwnProperty.call(props.queryState, "total"))
+);
 </script>
 
 <style lang="scss" scoped>
@@ -279,10 +449,15 @@ const openExport = () => {
 .common-table__filters {
   min-height: 64px;
   margin-bottom: 18px;
-  padding: 8px 16px 8px;
-  background: rgba(var(--app-primary-rgb), 0.04);
-  border: 1px solid var(--app-glass-border);
-  border-radius: 12px;
+  padding: 12px 16px;
+  background: var(--app-surface);
+  border: 0;
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow-soft);
+}
+
+.common-table__filter-row {
+  row-gap: 12px;
 }
 
 .common-table__query-area,
@@ -309,7 +484,7 @@ const openExport = () => {
 }
 
 .common-table__filter-item {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 
 .common-table__filter-control {
@@ -325,64 +500,29 @@ const openExport = () => {
   justify-content: flex-start;
 }
 
+.common-table__data-wrap {
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow-x: auto;
+}
+
 .common-table__row-actions {
   display: flex;
+  min-width: max-content;
   align-items: center;
   flex-wrap: nowrap;
   gap: 4px;
 }
 
-.common-table__row-actions>.ant-btn,
-.common-table__row-actions .ant-popconfirm>.ant-btn {
-  min-width: 44px;
-  margin: 0;
-}
-
-.common-table__data {
-  min-height: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
-  border: 1px solid var(--app-glass-border);
-  border-radius: 12px;
-  background: var(--app-glass-surface);
-  box-shadow: var(--app-shadow-soft);
-}
-
-:deep(.ant-form-item-label) {
-  display: flex;
-  align-items: center;
-}
-
-:deep(.common-table__data .ant-table-container) {
-  border: 0;
-}
-
-:deep(.common-table__data .ant-spin-nested-loading),
-:deep(.common-table__data .ant-spin-container),
-:deep(.ant-table-container),
-:deep(.ant-table-content) {
-  height: 100%;
-}
-
-:deep(.ant-spin-container) {
-  display: flex;
-  flex-direction: column;
-}
-
-:deep(.ant-table) {
-  flex: 1;
-  overflow: hidden;
-}
-
-:deep(p) {
-  margin-bottom: 0 !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.common-table__pagination {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  min-height: 42px;
+  padding: 10px 0 0;
 }
 
 @media (max-width: 991px) {
-
   .common-table__query-area,
   .common-table__filter-fields,
   .common-table__toolbar-actions,
@@ -393,7 +533,7 @@ const openExport = () => {
 
 @media (max-width: 576px) {
   .common-table__filters {
-    padding: 6px 12px 6px;
+    padding: 6px 12px;
   }
 
   .common-table__filter-fields,
@@ -406,7 +546,8 @@ const openExport = () => {
     width: min(100%, 230px);
   }
 
-  .common-table__toolbar-actions {
+  .common-table__toolbar-actions,
+  .common-table__pagination {
     justify-content: flex-start;
   }
 }

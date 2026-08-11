@@ -7,212 +7,247 @@
         <p>每名成员可分配一个岗位、关联多个组织，并获得一个或多个组织的数据访问范围。</p>
       </div>
       <div class="member-page__heading-actions management-page__heading-actions">
-        <a-button size="small" v-auth="['permission:query', permissions]" :loading="loading || memberLoading" @click="refreshMemberPage">
-          <template #icon><ReloadOutlined /></template>
+        <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading || memberLoading" @click="refreshMemberPage">
+          <template #icon><el-icon><Refresh /></el-icon></template>
           刷新列表
-        </a-button>
-        <a-button size="small" v-auth="['permission:insert', permissions]" type="primary" :disabled="!organizations.length || !roles.length" @click="openMemberModal('create')">
-          <template #icon><UserAddOutlined /></template>
+        </el-button>
+        <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" :disabled="!organizations.length || !roles.length" @click="openMemberModal('create')">
+          <template #icon><el-icon><UserFilled /></el-icon></template>
           新增成员
-        </a-button>
+        </el-button>
       </div>
     </header>
 
-    <a-alert
+    <el-alert
       v-if="loadError"
       class="management-page__alert"
       type="error"
       show-icon
-      :message="loadError"
-      description="请先完成组织与岗位配置，并确认当前账号为系统管理员。"
-    />
+      :title="loadError"
+    >请先完成组织与岗位配置，并确认当前账号为系统管理员。</el-alert>
 
     <div class="member-page__workspace">
-      <a-card class="member-page__organization-card" :bordered="false">
-        <template #title>
-          <span class="management-page__card-title"><ApartmentOutlined /> 组织架构</span>
-        </template>
-        <template #extra>
-          <a-button type="link" size="small" @click="clearOrganizationFilter">全部组织</a-button>
+      <el-card class="member-page__organization-card">
+        <template #header>
+          <div class="management-page__card-header">
+            <span class="management-page__card-title"><el-icon><OfficeBuilding /></el-icon> 组织架构</span>
+          <el-button type="primary" link size="small" @click="clearOrganizationFilter">全部组织</el-button>
+          </div>
         </template>
         <p class="member-page__tree-tip">点击组织节点，右侧成员列表会按组织范围刷新。</p>
-        <a-tree
+        <el-tree
           class="member-page__organization-tree app-scrollbar"
-          :tree-data="organizationTree"
-          :selected-keys="selectedOrganizationId ? [selectedOrganizationId] : []"
+          :data="organizationTree"
+          node-key="key"
+          :props="{ label: 'title', children: 'children' }"
+          :current-node-key="selectedOrganizationId"
+          highlight-current
           :default-expand-all="true"
-          block-node
-          @select="handleOrganizationSelect"
+          @node-click="handleOrganizationSelect"
         />
-      </a-card>
+      </el-card>
 
-      <a-card class="member-page__table-card" :bordered="false">
-        <template #title>
-          <span class="management-page__card-title"><TeamOutlined /> 成员列表</span>
-        </template>
-        <template #extra>
+      <el-card class="member-page__table-card">
+        <template #header>
+          <div class="management-page__card-header management-page__card-header--wrap">
+            <span class="management-page__card-title"><el-icon><UserFilled /></el-icon> 成员列表</span>
           <div class="member-page__filters">
-            <a-switch
+            <el-switch
               size="small"
-              v-model:checked="memberQuery.includeDescendants"
-              checked-children="含下级"
-              un-checked-children="直属"
+              v-model="memberQuery.includeDescendants"
+              active-text="含下级"
+              inactive-text="直属"
               :disabled="!selectedOrganizationId"
               @change="handleOrganizationScopeChange"
             />
-              <a-input-search
+            <el-input
               size="small"
               v-auth="['permission:query', permissions]"
-              v-model:value="memberQuery.keyword"
+              v-model="memberQuery.keyword"
               class="member-page__member-search"
-              allow-clear
+              clearable
               placeholder="按登录账号检索"
-              :loading="memberLoading"
-              @search="handleMemberSearch"
-            />
+              @keyup.enter="handleMemberSearch"
+            >
+              <template #append>
+                <el-button size="small" aria-label="搜索成员" @click="handleMemberSearch">
+                  <el-icon><Search /></el-icon>
+                </el-button>
+              </template>
+            </el-input>
+          </div>
           </div>
         </template>
         <p class="member-page__tip">当前筛选：{{ organizationFilterLabel }}。“关联组织”记录成员所属的多个组织；“组织数据权限”决定其可读取和操作的业务数据范围。</p>
-        <a-alert
+        <el-alert
           v-if="memberLoadError"
           class="member-page__members-alert"
           type="error"
           show-icon
-          :message="memberLoadError"
-          description="已有列表内容已保留；可调整检索条件后重试。"
-        />
-        <a-table
-          size="small"
-          class="member-page__table"
-          :columns="memberColumns"
-          :data-source="members"
-          :loading="memberLoading"
-          :pagination="memberPagination"
-          :scroll="{ x: 1180 }"
-          row-key="objectId"
-          @change="handleMemberTableChange"
+          :title="memberLoadError"
+        >已有列表内容已保留；可调整检索条件后重试。</el-alert>
+        <el-table
+        size="small"
+        class="member-page__table"
+        width="100%"
+        :data="members"
+        v-loading="memberLoading"
+        row-key="objectId"
         >
-          <template #bodyCell="{ column, record }">
+          <el-table-column
+            v-for="column in memberColumns"
+            :key="column.key"
+            :prop="column.dataIndex"
+            :label="column.title"
+            :width="column.width"
+            :min-width="column.minWidth || (column.width ? undefined : 140)"
+            :fixed="column.fixed"
+            :class-name="column.className"
+          >
+            <template #default="{ row }">
             <template v-if="column.key === 'position'">
-              {{ positionName(record.roleId) || "未设置岗位" }}
+              {{ positionName(row.roleId) || "未设置岗位" }}
             </template>
             <template v-else-if="column.key === 'organizations'">
-              <span class="member-page__scope-list">{{ organizationNames(record.organizationIds, record.organizationId) }}</span>
+              <span class="member-page__scope-list">{{ organizationNames(row.organizationIds, row.organizationId) }}</span>
             </template>
             <template v-else-if="column.key === 'scope'">
-              <span class="member-page__scope-list">{{ organizationNames(record.scopeIds) }}</span>
+              <span class="member-page__scope-list">{{ organizationNames(row.scopeIds) }}</span>
             </template>
             <template v-else-if="column.key === 'kind'">
-              <a-tag :color="record.organizationAdmin ? 'processing' : 'default'">
-                {{ record.organizationAdmin ? "子管理员" : "普通成员" }}
-              </a-tag>
+              <el-tag size="small" :type="row.organizationAdmin ? 'warning' : 'info'">
+                {{ row.organizationAdmin ? "子管理员" : "普通成员" }}
+              </el-tag>
             </template>
             <template v-else-if="column.key === 'status'">
-              <a-tag :color="record.isDelete ? 'default' : 'success'">
-                {{ record.isDelete ? "已停用" : "启用" }}
-              </a-tag>
+              <el-tag size="small" :type="row.isDelete ? 'info' : 'success'">
+                {{ row.isDelete ? "已停用" : "启用" }}
+              </el-tag>
             </template>
             <template v-else-if="column.key === 'operation'">
               <div class="member-page__row-actions">
-                <a-button size="small" v-auth="['permission:edit', permissions]" type="link" @click="openMemberModal('edit', record.objectId)">编辑与授权</a-button>
+                <el-button size="small" v-auth="['permission:edit', permissions]" type="primary" link @click="openMemberModal('edit', row.objectId)">编辑与授权</el-button>
               </div>
             </template>
-          </template>
-        </a-table>
-      </a-card>
+            <span v-else>{{ row[column.dataIndex] }}</span>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          class="member-page__pagination"
+          background
+          size="small"
+          :current-page="memberQuery.page"
+          :page-size="memberQuery.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="memberTotal"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleMemberPageSizeChange"
+          @current-change="handleMemberPageChange"
+        />
+      </el-card>
     </div>
 
-    <a-modal
-      v-model:visible="memberModal.visible"
+    <el-dialog
+      v-model="memberModal.visible"
       :title="memberModal.mode === 'create' ? '新增成员账号' : '编辑成员与授权'"
-      :confirm-loading="memberModal.submitting"
       :width="780"
-      ok-text="保存"
-      cancel-text="取消"
-      @ok="submitMember"
-      @cancel="closeMemberModal"
+      @close="closeMemberModal"
     >
-      <a-form size="small" ref="memberFormRef" :model="memberForm" :rules="memberRules" layout="vertical">
-        <a-row :gutter="[12, 0]">
-          <a-col :xs="24" :md="12">
-            <a-form-item label="登录账号" name="username">
-              <a-input size="small" v-model:value="memberForm.username" :disabled="memberModal.mode === 'edit'" placeholder="建议使用工号或企业邮箱前缀" :maxlength="64" />
-            </a-form-item>
-          </a-col>
-          <a-col :xs="24" :md="12">
-            <a-form-item :label="memberModal.mode === 'create' ? '初始密码' : '重置密码'" name="password">
-              <a-input-password size="small" v-model:value="memberForm.password" :placeholder="memberModal.mode === 'create' ? '至少 12 位，避免使用常见密码' : '留空则不修改密码'" :maxlength="256" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="[12, 0]">
-          <a-col :xs="24" :md="12">
-            <a-form-item label="姓名" name="name">
-              <a-input size="small" v-model:value="memberForm.name" placeholder="请输入成员姓名" :maxlength="100" />
-            </a-form-item>
-          </a-col>
-          <a-col :xs="24" :md="12">
-            <a-form-item label="邮箱" name="email">
-              <a-input size="small" v-model:value="memberForm.email" placeholder="可选，用于识别成员" :maxlength="254" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-form-item label="岗位" name="roleId" extra="每名成员只能设置一个岗位；岗位决定可访问的业务页面和页面内按钮。">
-          <a-select size="small" v-model:value="memberForm.roleId" :options="positionOptions" placeholder="请选择岗位" />
-        </a-form-item>
-        <a-form-item label="关联组织" name="organizationIds" extra="可关联一个或多个启用组织，用于记录成员所属关系。">
-          <a-tree-select
+      <el-form size="small" ref="memberFormRef" :model="memberForm" :rules="memberRules" label-position="top">
+        <el-row :gutter="12">
+          <el-col :xs="24" :md="12">
+            <el-form-item label="登录账号" prop="username">
+              <el-input size="small" v-model="memberForm.username" :disabled="memberModal.mode === 'edit'" placeholder="建议使用工号或企业邮箱前缀" maxlength="64" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :md="12">
+            <el-form-item :label="memberModal.mode === 'create' ? '初始密码' : '重置密码'" prop="password">
+              <el-input size="small" v-model="memberForm.password" type="password" show-password :placeholder="memberModal.mode === 'create' ? '至少 12 位，避免使用常见密码' : '留空则不修改密码'" maxlength="256" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="12">
+          <el-col :xs="24" :md="12">
+            <el-form-item label="姓名" prop="name">
+              <el-input size="small" v-model="memberForm.name" placeholder="请输入成员姓名" maxlength="100" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :md="12">
+            <el-form-item label="邮箱" prop="email">
+              <el-input size="small" v-model="memberForm.email" placeholder="可选，用于识别成员" maxlength="254" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="岗位" prop="roleId">
+          <el-select size="small" v-model="memberForm.roleId" placeholder="请选择岗位">
+            <el-option
+              v-for="option in positionOptions"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
+            />
+          </el-select>
+          <p class="form-item-help">每名成员只能设置一个岗位；岗位决定可访问的业务页面和页面内按钮。</p>
+        </el-form-item>
+        <el-form-item label="关联组织" prop="organizationIds">
+          <el-tree-select
             size="small"
-            v-model:value="memberForm.organizationIds"
-            :tree-data="organizationSelectTree"
-            tree-checkable
-            tree-default-expand-all
+            v-model="memberForm.organizationIds"
+            :data="organizationSelectTree"
+            node-key="key"
+            :props="{ label: 'title', value: 'value', children: 'children' }"
+            show-checkbox
+            default-expand-all
             multiple
             placeholder="请选择成员关联的组织"
           />
-        </a-form-item>
-        <a-form-item label="组织数据权限" name="scopeIds" extra="可配置一个或多个组织；选中节点会覆盖其全部下级组织数据。">
-          <a-tree-select
+          <p class="form-item-help">可关联一个或多个启用组织，用于记录成员所属关系。</p>
+        </el-form-item>
+        <el-form-item label="组织数据权限" prop="scopeIds">
+          <el-tree-select
             size="small"
-            v-model:value="memberForm.scopeIds"
-            :tree-data="organizationSelectTree"
-            tree-checkable
-            tree-default-expand-all
+            v-model="memberForm.scopeIds"
+            :data="organizationSelectTree"
+            node-key="key"
+            :props="{ label: 'title', value: 'value', children: 'children' }"
+            show-checkbox
+            default-expand-all
             multiple
             placeholder="请选择可访问的组织数据范围"
           />
-        </a-form-item>
-        <a-row :gutter="[12, 0]">
-          <a-col :xs="24" :md="12">
-            <a-form-item label="账号类型" name="organizationAdmin">
-              <a-radio-group size="small" v-model:value="memberForm.organizationAdmin">
-                <a-radio :value="false">普通成员</a-radio>
-                <a-radio :value="true">子管理员</a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :xs="24" :md="12">
-            <a-form-item label="账号状态" name="isDelete">
-              <a-switch size="small" v-model:checked="memberForm.isDelete" checked-children="停用" un-checked-children="启用" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </a-form>
-    </a-modal>
+          <p class="form-item-help">可配置一个或多个组织；选中节点会覆盖其全部下级组织数据。</p>
+        </el-form-item>
+        <el-row :gutter="12">
+          <el-col :xs="24" :md="12">
+            <el-form-item label="账号类型" prop="organizationAdmin">
+              <el-radio-group size="small" v-model="memberForm.organizationAdmin">
+                <el-radio :label="false">普通成员</el-radio>
+                <el-radio :label="true">子管理员</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :md="12">
+            <el-form-item label="账号状态" prop="isDelete">
+              <el-switch size="small" v-model="memberForm.isDelete" active-text="停用" inactive-text="启用" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <el-button size="small" @click="closeMemberModal">取消</el-button>
+        <el-button size="small" type="primary" :loading="memberModal.submitting" @click="submitMember">保存</el-button>
+      </template>
+    </el-dialog>
   </section>
 </template>
 
 <script setup>
-import {
-  ApartmentOutlined,
-  ReloadOutlined,
-  TeamOutlined,
-  UserAddOutlined,
-} from "@ant-design/icons-vue";
+import { OfficeBuilding, Refresh, Search, UserFilled } from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, ref } from "vue";
-import { notification } from "ant-design-vue";
 
 import { Mixins } from "@/mixins";
+import { ElNotification } from "element-plus";
 import {
   createOrganizationMember,
   getOrganizationMembers,
@@ -223,12 +258,12 @@ import {
 /** 成员表格的列定义；关联组织、组织数据权限与状态列由 bodyCell 插槽格式化。 */
 const memberColumns = [
   { title: "账号", dataIndex: "username", key: "username", width: 160, fixed: "left" },
-  { title: "姓名", dataIndex: "name", key: "name", width: 120 },
-  { title: "岗位", key: "position", width: 150 },
-  { title: "关联组织", key: "organizations", width: 250 },
-  { title: "组织数据权限", key: "scope", width: 260 },
-  { title: "账号类型", key: "kind", width: 110 },
-  { title: "状态", key: "status", width: 90 },
+  { title: "姓名", dataIndex: "name", key: "name", minWidth: 120 },
+  { title: "岗位", key: "position", minWidth: 150 },
+  { title: "关联组织", key: "organizations", minWidth: 250 },
+  { title: "组织数据权限", key: "scope", minWidth: 260 },
+  { title: "账号类型", key: "kind", minWidth: 110 },
+  { title: "状态", key: "status", minWidth: 90 },
   { title: "操作", key: "operation", width: 112, fixed: "right", className: "table-operation-column" },
 ];
 const loading = ref(false);
@@ -266,15 +301,21 @@ const memberForm = reactive({
 const { queryPermission } = Mixins();
 const permissions = await queryPermission();
 
-/** 成员新增与编辑表单的 Ant Design Vue 校验规则。 */
+/** 成员新增与编辑表单的 Element Plus 校验规则。 */
 const memberRules = computed(() => ({
   username: [{ required: true, message: "请输入登录账号", trigger: "blur" }],
   password: [
     {
-      validator: (_rule, value) => {
-        if (memberModal.mode === "create" && !value) return Promise.reject(new Error("请输入初始密码"));
-        if (value && value.length < 12) return Promise.reject(new Error("密码至少需要 12 个字符"));
-        return Promise.resolve();
+      validator: (_rule, value, callback) => {
+        if (memberModal.mode === "create" && !value) {
+          callback(new Error("请输入初始密码"));
+          return;
+        }
+        if (value && value.length < 12) {
+          callback(new Error("密码至少需要 12 个字符"));
+          return;
+        }
+        callback();
       },
       trigger: "blur",
     },
@@ -285,7 +326,7 @@ const memberRules = computed(() => ({
 }));
 
 /**
- * 将服务端组织树转换为 Ant TreeSelect 可消费的节点结构。
+ * 将服务端组织树转换为 Element Plus Tree 和 TreeSelect 可消费的节点结构。
  * @param {Array<Record<string, unknown>>} nodes 服务端组织树节点数组。
  * @returns {Array<Record<string, unknown>>} 包含 title、key、value、children 的树节点。
  */
@@ -306,16 +347,6 @@ const organizationFilterLabel = computed(() => {
   const organization = organizations.value.find((item) => item.objectId === selectedOrganizationId.value);
   return `${organization?.name || "当前组织"}${memberQuery.includeDescendants ? "及全部下级" : "直属成员"}`;
 });
-const memberPagination = computed(() => ({
-  current: memberQuery.page,
-  pageSize: memberQuery.pageSize,
-  total: memberTotal.value,
-  showSizeChanger: true,
-  position: ["bottomRight"],
-  pageSizeOptions: ["10", "20", "50", "100"],
-  showTotal: (total) => `共 ${total} 条`,
-}));
-
 /**
  * 根据对象标识返回岗位名称。
  * @param {string | null | undefined} roleId 成员的岗位 Role objectId。
@@ -474,12 +505,12 @@ const submitMember = async () => {
     if (memberForm.password) payload.password = memberForm.password;
     if (memberModal.mode === "create") await createOrganizationMember(payload);
     else await updateOrganizationMember(memberForm.objectId, payload);
-    notification.success({ message: "成员管理", description: "成员账号与授权已保存。" });
+    ElNotification.success({ title: "成员管理", message: "成员账号与授权已保存。" });
     closeMemberModal();
     await reloadMembers();
   } catch (error) {
     if (error?.errorFields) return;
-    notification.error({ message: "保存失败", description: error?.message || "成员信息未能保存，请检查输入后重试。" });
+    ElNotification.error({ title: "保存失败", message: error?.message || "成员信息未能保存，请检查输入后重试。" });
   } finally {
     memberModal.submitting = false;
   }
@@ -496,11 +527,12 @@ const handleMemberSearch = async () => {
 
 /**
  * 响应组织树节点选择，将右侧列表限制到当前组织并回到第一页。
- * @param {string[]} selectedKeys Ant Design Vue Tree 当前选中的节点 key 数组。
+ * @param {Record<string, unknown> | undefined} data Element Plus Tree 当前选中的节点数据。
+ * @param {{key?: string} | undefined} node Element Plus Tree 当前选中的节点实例。
  * @returns {Promise<void>} 更新组织筛选状态并刷新成员列表；空选择不会改变已有节点。
  */
-const handleOrganizationSelect = async (selectedKeys) => {
-  const organizationId = selectedKeys?.[0] || "";
+const handleOrganizationSelect = async (data, node) => {
+  const organizationId = data?.key || data?.value || node?.key || "";
   if (!organizationId) return;
   selectedOrganizationId.value = organizationId;
   memberQuery.organizationId = organizationId;
@@ -531,15 +563,23 @@ const handleOrganizationScopeChange = async () => {
 };
 
 /**
- * 将 Ant Design Vue 表格分页事件转换为服务端成员查询状态。
- * @param {{current?: number, pageSize?: number}} pagination 表格当前分页信息。
+ * 处理 Element Plus 分页器的每页数量变化并回到第一页。
+ * @param {number} pageSize 最新每页数量。
  * @returns {Promise<void>} 页码状态更新并加载对应成员页后兑现。
  */
-const handleMemberTableChange = async (pagination) => {
-  const nextPageSize = Number(pagination?.pageSize) || memberQuery.pageSize;
-  const nextPage = nextPageSize === memberQuery.pageSize ? Number(pagination?.current) || 1 : 1;
-  memberQuery.page = nextPage;
-  memberQuery.pageSize = nextPageSize;
+const handleMemberPageSizeChange = async (pageSize) => {
+  memberQuery.page = 1;
+  memberQuery.pageSize = Number(pageSize) || 10;
+  await reloadMembers();
+};
+
+/**
+ * 处理 Element Plus 分页器的当前页变化。
+ * @param {number} page 当前页码，从 1 开始。
+ * @returns {Promise<void>} 页码状态更新并加载对应成员页后兑现。
+ */
+const handleMemberPageChange = async (page) => {
+  memberQuery.page = Number(page) || 1;
   await reloadMembers();
 };
 
@@ -585,15 +625,6 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.member-page__organization-card :deep(.ant-card-body),
-.member-page__table-card :deep(.ant-card-body) {
-  display: flex;
-  min-height: 0;
-  gap: 14px;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
 .member-page__tree-tip {
   margin: 0;
   color: var(--app-muted);
@@ -621,18 +652,6 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.member-page__table-card :deep(.ant-card-head) {
-  flex: 0 0 auto;
-}
-
-.member-page__table-card :deep(.ant-card-body) {
-  display: flex;
-  min-height: 0;
-  gap: 14px;
-  flex: 1 1 auto;
-  flex-direction: column;
-}
-
 .member-page__tip {
   margin: 0;
   color: var(--app-muted);
@@ -648,9 +667,15 @@ onMounted(() => {
 
 .member-page__scope-list {
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.member-page__pagination {
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  padding-top: 4px;
 }
 
 .member-page__row-actions {

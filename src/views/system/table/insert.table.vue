@@ -1,89 +1,87 @@
 <template>
-  <a-modal
-    v-model:visible="visible"
+  <el-dialog
+    v-model="visible"
     title="新增数据表"
-    @ok="handleOk"
     width="600px"
+    destroy-on-close
   >
-    <a-form
-      :model="tableState"
-      size="small"
+    <el-form
       ref="form1"
-      :label-col="{ span: 4 }"
-      :wrapper-col="{ span: 20 }"
+      :model="tableState"
+      label-position="left"
+      label-width="120px"
+      size="small"
       autocomplete="off"
-      labelAlign="left"
     >
-      <a-form-item
+      <el-form-item
         label="表格名称"
-        name="className"
-        :rules="[{ required: true, message: '请输入表格名称' }]"
+        prop="className"
+        :rules="[{ required: true, message: '请输入表格名称', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="tableState.className"
           size="small"
-          v-model:value="tableState.className"
-          allowClear
+          clearable
           placeholder="请输入表格名称"
         />
-      </a-form-item>
-      <a-form-item
+      </el-form-item>
+
+      <el-form-item
         label="表格别名"
-        name="nickName"
-        :rules="[{ required: true, message: '请输入表格别名' }]"
+        prop="nickName"
+        :rules="[{ required: true, message: '请输入表格别名', trigger: 'blur' }]"
       >
-        <a-input
+        <el-input
+          v-model="tableState.nickName"
           size="small"
-          v-model:value="tableState.nickName"
-          allowClear
+          clearable
           placeholder="请输入表格别名"
         />
-      </a-form-item>
-      <a-form-item label="生成路由" name="generate">
-        <a-switch
+      </el-form-item>
+
+      <el-form-item label="生成路由" prop="generate">
+        <el-switch
+          v-model="tableState.generate"
           size="small"
-          v-model:checked="tableState.generate"
-          checked-children="是"
-          un-checked-children="否"
+          active-text="是"
+          inactive-text="否"
         />
-      </a-form-item>
-      <a-form-item
-        label="组织范围管理"
-        name="organizationScoped"
-        extra="启用后自动添加“所属组织”字段，并按组织树与成员管理范围隔离业务数据。"
-      >
-        <a-switch
+      </el-form-item>
+
+      <el-form-item label="组织范围管理" prop="organizationScoped">
+        <el-switch
+          v-model="tableState.organizationScoped"
           size="small"
-          v-model:checked="tableState.organizationScoped"
-          checked-children="启用"
-          un-checked-children="关闭"
+          active-text="启用"
+          inactive-text="关闭"
         />
-      </a-form-item>
-    </a-form>
-  </a-modal>
+        <p class="schema-insert-form__help">
+          启用后自动添加“所属组织”字段，并按组织树与成员管理范围隔离业务数据。
+        </p>
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <el-button size="small" @click="visible = false">取消</el-button>
+      <el-button size="small" type="primary" @click="handleOk">确认</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
+import { ElNotification } from "element-plus";
 import { reactive, ref, watch } from "vue";
-import { notification } from "ant-design-vue";
-const emit = defineEmits(["update:modalVisible", "onSubmit"]);
+
+const emit = defineEmits(["update:modelValue", "onSubmit"]);
 const props = defineProps({
-  modalVisible: {
+  modelValue: {
     type: Boolean,
     default: false,
   },
 });
 
-watch(
-  () => props.modalVisible,
-  (n) => {
-    visible.value = n;
-  }
-);
-const visible = ref(props.modalVisible);
-watch(visible, (n) => {
-  emit("update:modalVisible", n);
-});
-
+const visible = ref(props.modelValue);
+const form1 = ref();
 const tableState = reactive({
   className: null,
   nickName: null,
@@ -91,7 +89,6 @@ const tableState = reactive({
   organizationScoped: true,
 });
 
-const form1 = ref();
 /**
  * 将新建数据表表单恢复为面向企业业务数据的安全默认值。
  * @returns {void} 原地重置响应式表单状态，不触发网络请求。
@@ -102,30 +99,54 @@ const resetTableState = () => {
   tableState.generate = false;
   tableState.organizationScoped = true;
 };
+
 /**
  * 校验新建数据表配置并提交给父级 Schema 管理页。
  * @returns {Promise<void>} 校验成功时触发 onSubmit；失败时保留弹窗和字段提示。
  */
 const handleOk = async () => {
   try {
-    const values = await form1.value.validate();
-    emit("onSubmit", values);
+    await form1.value.validate();
+    emit("onSubmit", { ...tableState });
   } catch {
-    notification.warning({
-      message: "数据表配置未完成",
-      description: "请填写表名和显示名称后再创建。",
+    ElNotification.warning({
+      title: "数据表配置未完成",
+      message: "请填写表名和显示名称后再创建。",
     });
   }
 };
 
 /**
- * 在弹窗关闭后清理上一次建表输入，防止管理员误复用表名或关闭组织范围配置。
- * @param {boolean} isVisible 弹窗最新可见状态；false 表示用户已关闭当前建表流程。
- * @returns {void} 关闭时重置字段和 Ant Design Vue 校验状态。
+ * 将父组件的 v-model 状态同步到 Element Plus Dialog。
+ * @param {boolean} nextVisible 父组件传入的最新弹窗状态。
+ * @returns {void} 更新本地可见状态；关闭时清理表单。
  */
-watch(visible, (isVisible) => {
-  if (isVisible) return;
-  resetTableState();
-  form1.value?.resetFields();
+watch(
+  () => props.modelValue,
+  (nextVisible) => {
+    visible.value = nextVisible;
+    if (!nextVisible) {
+      resetTableState();
+      form1.value?.resetFields?.();
+    }
+  },
+  { immediate: true }
+);
+
+watch(visible, (nextVisible) => {
+  if (nextVisible !== props.modelValue) emit("update:modelValue", nextVisible);
 });
 </script>
+
+<style lang="scss" scoped>
+.schema-insert-form__help {
+  width: 100%;
+  margin: 6px 0 0;
+  color: var(--app-muted);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+</style>

@@ -4,7 +4,7 @@
       v-if="column.key == 'icon' && fields[column.key]?.type == 'String'"
     >
       <div style="display: flex; align-items: center">
-        <component :is="AntdIcon[record[column.key]]"></component>
+        <el-icon><component :is="getElementIcon(record[column.key])" /></el-icon>
         <p>&nbsp;{{ record[column.key] }}</p>
       </div>
     </template>
@@ -15,7 +15,14 @@
       "
     >
       <div style="display: flex; align-items: center">
-        <a-image :width="80" :src="record[column.key]" />
+        <el-image
+          :width="80"
+          :src="record[column.key]"
+          :preview-src-list="record[column.key] ? [record[column.key]] : []"
+          fit="cover"
+          preview-teleported
+          alt="图片字段"
+        />
       </div>
     </template>
     <template
@@ -28,14 +35,14 @@
       </p>
     </template>
     <template v-else-if="fields[column.key]?.type == 'Object'">
-      <a-tooltip placement="top" arrowPointAtCenter>
-        <template #title>
+      <el-tooltip placement="top" :show-after="200">
+        <template #content>
           <p>
             {{ JSON.stringify(record[column.key]) }}
           </p>
         </template>
         <p>{{ JSON.stringify(record[column.key], null, 2) }}</p>
-      </a-tooltip>
+      </el-tooltip>
     </template>
     <template v-else-if="fields[column.key]?.type == 'Array'">
       <span v-for="(item, index) in record[column.key]" :key="index">
@@ -60,7 +67,7 @@
 
 <script setup>
 import moment from "moment";
-import * as AntdIcon from "@ant-design/icons-vue";
+import { getElementIcon } from "@/utils/element";
 const props = defineProps({
   column: {
     required: true,
