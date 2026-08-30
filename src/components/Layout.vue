@@ -8,7 +8,14 @@
   >
     <template #layout-content>
       <el-main
-        :class="['app-content', 'app-scrollbar', { 'app-content--top': systemOptions.layout === 'TopLayout' }]"
+        :class="[
+          'app-content',
+          'app-scrollbar',
+          {
+            'app-content--top': systemOptions.layout === 'TopLayout',
+            'app-content--list': isListPage,
+          },
+        ]"
       >
         <router-view v-slot="{ Component, route }">
           <suspense>
@@ -136,33 +143,38 @@
         </el-tooltip>
 
         <el-popover placement="bottom-end" trigger="click">
-          <template #content>
-            <div class="user-popover">
-              <el-button
-                size="small"
-                @click="openPersonalCenter"
-              >
-                个人中心
-              </el-button>
-              <el-button size="small" @click="loginOut">
-                退出登录
-              </el-button>
-            </div>
-          </template>
-          <div class="header-right">
-            <img
-              v-if="avatarUrl"
-              :src="avatarUrl"
-              :alt="`${userDisplayName} 的头像`"
-              class="header-avatar"
-            />
-            <el-icon
-              v-else
-              class="header-avatar header-avatar--placeholder"
-            ><component :is="iconMap['UserOutlined']" /></el-icon>
-            <span class="header-user-name">{{ userDisplayName }}</span>
-            <el-icon class="header-user-chevron"><component :is="iconMap['DownOutlined']" /></el-icon>
+          <div class="user-popover">
+            <el-button
+              size="small"
+              @click="openPersonalCenter"
+            >
+              个人中心
+            </el-button>
+            <el-button size="small" @click="loginOut">
+              退出登录
+            </el-button>
           </div>
+          <template #reference>
+            <button
+              type="button"
+              class="header-right"
+              aria-label="打开账户菜单"
+              aria-haspopup="menu"
+            >
+              <img
+                v-if="avatarUrl"
+                :src="avatarUrl"
+                :alt="`${userDisplayName} 的头像`"
+                class="header-avatar"
+              />
+              <el-icon
+                v-else
+                class="header-avatar header-avatar--placeholder"
+              ><component :is="iconMap['UserOutlined']" /></el-icon>
+              <span class="header-user-name">{{ userDisplayName }}</span>
+              <el-icon class="header-user-chevron"><component :is="iconMap['DownOutlined']" /></el-icon>
+            </button>
+          </template>
         </el-popover>
       </div>
     </template>
@@ -356,7 +368,7 @@
 import { ElNotification } from "element-plus";
 import { Loading } from "@element-plus/icons-vue";
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { Mixins } from "@/mixins/index";
 import Parse from "@/service/parse-client";
@@ -376,6 +388,7 @@ import LeftLayout from "./LeftLayout.vue";
 import TopLayout from "./TopLayout.vue";
 import Upload from "./Upload.vue";
 
+const route = useRoute();
 const router = useRouter();
 const { toPage, historyPage, removeHistoryRoute } = Mixins();
 const LayoutComponents = { LeftLayout, TopLayout };
@@ -444,6 +457,7 @@ let saveTimer = null;
 let isSavingSystemOptions = false;
 let hasQueuedSystemOptionSave = false;
 const systemOptionsSaveState = ref("idle");
+const isListPage = computed(() => route.meta?.listPage === true);
 
 /**
  * 响应 Element Plus 菜单打开子菜单事件并持久化展开项。
@@ -749,6 +763,10 @@ onUnmounted(() => {
   align-items: center;
   min-height: 44px;
   padding: 0 8px;
+  color: inherit;
+  font: inherit;
+  border: 0;
+  background: transparent;
   cursor: pointer;
   user-select: none;
   border-radius: 10px;

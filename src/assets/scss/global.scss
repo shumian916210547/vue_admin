@@ -84,9 +84,22 @@ a {
 
 /* Element Plus 基础组件：用统一令牌控制尺寸、层级和交互反馈。 */
 .el-button {
-  min-height: var(--el-component-size-small);
+  --el-button-text-color: var(--app-ink);
+  --el-button-bg-color: var(--app-surface);
+  --el-button-border-color: var(--app-border);
+  --el-button-hover-text-color: var(--app-ink);
+  --el-button-hover-bg-color: var(--app-surface-muted);
+  --el-button-hover-border-color: var(--app-primary);
+  --el-button-active-text-color: var(--app-ink);
+  --el-button-active-bg-color: var(--app-surface-muted);
+  --el-button-active-border-color: var(--app-primary);
+  --el-button-disabled-text-color: var(--app-muted);
+  --el-button-disabled-bg-color: var(--app-surface-muted);
+  --el-button-disabled-border-color: var(--app-border);
+  height: var(--app-control-height);
+  min-height: var(--app-control-height);
   padding: 7px 13px;
-  color: var(--app-text);
+  color: var(--el-button-text-color);
   font-weight: 600;
   border-radius: var(--app-radius-sm);
   transition: color var(--app-transition), background-color var(--app-transition),
@@ -94,11 +107,13 @@ a {
 }
 
 .el-button--small {
-  min-height: 32px;
+  height: var(--app-control-height);
+  min-height: var(--app-control-height);
   padding: 6px 11px;
 }
 
 .el-button--large {
+  height: var(--el-component-size-large);
   min-height: 40px;
   padding: 9px 17px;
 }
@@ -111,21 +126,162 @@ a {
   transform: translateY(0);
 }
 
-.el-button--primary {
-  color: var(--app-primary-contrast);
+.el-button--primary:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-text-color: var(--app-primary-contrast);
+  --el-button-bg-color: var(--app-primary);
+  --el-button-border-color: var(--app-primary);
+  --el-button-hover-text-color: var(--app-primary-hover-contrast);
+  --el-button-hover-bg-color: var(--app-primary-hover);
+  --el-button-hover-border-color: var(--app-primary-hover);
+  --el-button-active-text-color: var(--app-primary-hover-contrast);
+  --el-button-active-bg-color: var(--app-primary-hover);
+  --el-button-active-border-color: var(--app-primary-hover);
+  --el-button-disabled-text-color: var(--app-muted);
+  --el-button-disabled-bg-color: var(--app-surface-muted);
+  --el-button-disabled-border-color: var(--app-border);
   box-shadow: 0 4px 10px rgba(var(--app-primary-rgb), 0.16);
 }
 
-.el-button--success {
-  color: var(--app-success-contrast);
+.el-button--success:not(.is-plain):not(.is-text):not(.is-link),
+.el-button--warning:not(.is-plain):not(.is-text):not(.is-link),
+.el-button--danger:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-bg-color: var(--app-surface);
+  --el-button-border-color: var(--app-border);
+  --el-button-disabled-text-color: var(--app-muted);
+  --el-button-disabled-bg-color: var(--app-surface-muted);
+  --el-button-disabled-border-color: var(--app-border);
 }
 
-.el-button--warning {
-  color: var(--app-warning-contrast);
+.el-button--success:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-text-color: var(--app-success-contrast);
+  --el-button-bg-color: var(--app-success);
+  --el-button-border-color: var(--app-success);
+  --el-button-hover-text-color: var(--app-success-contrast);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--app-success) 85%, #000000);
+  --el-button-hover-border-color: color-mix(in srgb, var(--app-success) 85%, #000000);
+  --el-button-active-text-color: var(--app-success-contrast);
+  --el-button-active-bg-color: color-mix(in srgb, var(--app-success) 85%, #000000);
+  --el-button-active-border-color: color-mix(in srgb, var(--app-success) 85%, #000000);
 }
 
-.el-button--danger {
-  color: var(--app-danger-contrast);
+.el-button--warning:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-text-color: var(--app-warning-contrast);
+  --el-button-bg-color: var(--app-warning);
+  --el-button-border-color: var(--app-warning);
+  --el-button-hover-text-color: var(--app-warning-contrast);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--app-warning) 85%, #000000);
+  --el-button-hover-border-color: color-mix(in srgb, var(--app-warning) 85%, #000000);
+  --el-button-active-text-color: var(--app-warning-contrast);
+  --el-button-active-bg-color: color-mix(in srgb, var(--app-warning) 85%, #000000);
+  --el-button-active-border-color: color-mix(in srgb, var(--app-warning) 85%, #000000);
+}
+
+.el-button--danger:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-text-color: var(--app-danger-button-text);
+  --el-button-bg-color: var(--app-danger);
+  --el-button-border-color: var(--app-danger);
+  --el-button-hover-text-color: var(--app-danger-button-text);
+  --el-button-hover-bg-color: color-mix(in srgb, var(--app-danger) 85%, #000000);
+  --el-button-hover-border-color: color-mix(in srgb, var(--app-danger) 85%, #000000);
+  --el-button-active-text-color: var(--app-danger-button-text);
+  --el-button-active-bg-color: color-mix(in srgb, var(--app-danger) 85%, #000000);
+  --el-button-active-border-color: color-mix(in srgb, var(--app-danger) 85%, #000000);
+}
+
+.el-button--info:not(.is-plain):not(.is-text):not(.is-link) {
+  --el-button-text-color: #000000;
+  --el-button-bg-color: var(--app-muted);
+  --el-button-border-color: var(--app-muted);
+  --el-button-hover-text-color: #000000;
+  --el-button-hover-bg-color: color-mix(in srgb, var(--app-muted) 85%, #000000);
+  --el-button-hover-border-color: color-mix(in srgb, var(--app-muted) 85%, #000000);
+  --el-button-active-text-color: #000000;
+  --el-button-active-bg-color: color-mix(in srgb, var(--app-muted) 85%, #000000);
+  --el-button-active-border-color: color-mix(in srgb, var(--app-muted) 85%, #000000);
+}
+
+.el-button--primary.is-plain {
+  --el-button-text-color: color-mix(in srgb, var(--app-primary) 60%, var(--app-ink));
+  --el-button-bg-color: var(--app-primary-soft);
+  --el-button-border-color: var(--app-primary);
+  --el-button-hover-text-color: var(--app-primary-contrast);
+  --el-button-hover-bg-color: var(--app-primary);
+  --el-button-hover-border-color: var(--app-primary);
+  --el-button-active-text-color: var(--app-primary-contrast);
+  --el-button-active-bg-color: var(--app-primary);
+  --el-button-active-border-color: var(--app-primary);
+}
+
+.el-button--success.is-plain {
+  --el-button-text-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+  --el-button-bg-color: color-mix(in srgb, var(--app-success) 10%, var(--app-surface));
+  --el-button-border-color: var(--app-success);
+  --el-button-hover-text-color: var(--app-success-contrast);
+  --el-button-hover-bg-color: var(--app-success);
+  --el-button-hover-border-color: var(--app-success);
+  --el-button-active-text-color: var(--app-success-contrast);
+  --el-button-active-bg-color: var(--app-success);
+  --el-button-active-border-color: var(--app-success);
+}
+
+.el-button--warning.is-plain {
+  --el-button-text-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+  --el-button-bg-color: color-mix(in srgb, var(--app-warning) 10%, var(--app-surface));
+  --el-button-border-color: var(--app-warning);
+  --el-button-hover-text-color: var(--app-warning-contrast);
+  --el-button-hover-bg-color: var(--app-warning);
+  --el-button-hover-border-color: var(--app-warning);
+  --el-button-active-text-color: var(--app-warning-contrast);
+  --el-button-active-bg-color: var(--app-warning);
+  --el-button-active-border-color: var(--app-warning);
+}
+
+.el-button--danger.is-plain {
+  --el-button-text-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
+  --el-button-bg-color: color-mix(in srgb, var(--app-danger) 10%, var(--app-surface));
+  --el-button-border-color: var(--app-danger);
+  --el-button-hover-text-color: var(--app-danger-contrast);
+  --el-button-hover-bg-color: var(--app-danger);
+  --el-button-hover-border-color: var(--app-danger);
+  --el-button-active-text-color: var(--app-danger-contrast);
+  --el-button-active-bg-color: var(--app-danger);
+  --el-button-active-border-color: var(--app-danger);
+}
+
+.el-button--primary.is-text,
+.el-button--primary.is-link {
+  --el-button-text-color: color-mix(in srgb, var(--app-primary) 60%, var(--app-ink));
+  --el-button-hover-text-color: color-mix(in srgb, var(--app-primary-hover) 60%, var(--app-ink));
+  --el-button-hover-link-text-color: color-mix(in srgb, var(--app-primary-hover) 60%, var(--app-ink));
+  --el-button-active-text-color: color-mix(in srgb, var(--app-primary-hover) 60%, var(--app-ink));
+  --el-button-active-color: color-mix(in srgb, var(--app-primary-hover) 60%, var(--app-ink));
+}
+
+.el-button--success.is-text,
+.el-button--success.is-link {
+  --el-button-text-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+  --el-button-hover-text-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+  --el-button-hover-link-text-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+  --el-button-active-text-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+  --el-button-active-color: color-mix(in srgb, var(--app-success) 60%, var(--app-ink));
+}
+
+.el-button--warning.is-text,
+.el-button--warning.is-link {
+  --el-button-text-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+  --el-button-hover-text-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+  --el-button-hover-link-text-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+  --el-button-active-text-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+  --el-button-active-color: color-mix(in srgb, var(--app-warning) 60%, var(--app-ink));
+}
+
+.el-button--danger.is-text,
+.el-button--danger.is-link {
+  --el-button-text-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
+  --el-button-hover-text-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
+  --el-button-hover-link-text-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
+  --el-button-active-text-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
+  --el-button-active-color: color-mix(in srgb, var(--app-danger) 60%, var(--app-ink));
 }
 
 .el-button--primary:not(.is-disabled):hover {
@@ -134,6 +290,8 @@ a {
 
 .el-button.is-text,
 .el-button.is-link {
+  height: var(--app-control-height);
+  min-height: var(--app-control-height);
   padding-right: 8px;
   padding-left: 8px;
 }
@@ -141,11 +299,16 @@ a {
 .el-input__wrapper,
 .el-select__wrapper,
 .el-textarea__inner {
-  min-height: 34px;
+  min-height: var(--app-control-height);
   border-radius: var(--app-radius-sm);
   background: var(--app-surface);
   box-shadow: 0 0 0 1px var(--app-border) inset;
   transition: box-shadow var(--app-transition), background-color var(--app-transition);
+}
+
+.el-input--small .el-input__wrapper,
+.el-select--small .el-select__wrapper {
+  min-height: var(--app-control-height);
 }
 
 .el-input__wrapper:hover,
@@ -164,11 +327,27 @@ a {
   margin-bottom: 18px;
 }
 
+.el-form-item:not(.el-form-item--label-top) {
+  align-items: center;
+}
+
 .el-form-item__label {
   color: var(--app-text);
   font-size: 13px;
   font-weight: 600;
+}
+
+.el-form-item:not(.el-form-item--label-top) > .el-form-item__label,
+.el-form-item:not(.el-form-item--label-top) > .el-form-item__label-wrap > .el-form-item__label {
+  display: inline-flex;
+  min-height: var(--app-control-height);
+  align-items: center;
   line-height: 1.45;
+}
+
+.el-form-item:not(.el-form-item--label-top) > .el-form-item__content {
+  min-height: var(--app-control-height);
+  line-height: var(--app-control-height);
 }
 
 .el-form-item__error {
@@ -232,6 +411,55 @@ a {
 
 .el-table .cell {
   line-height: 1.55;
+}
+
+// 固定在右侧的操作列不能使用默认的 overflow:hidden；按钮内容超出列宽时，
+// Element Plus 会把末尾按钮直接裁掉。操作列宽度由页面配置提供安全最小值，
+// 这里保留可见溢出和不换行行为，保证按钮文字、焦点轮廓和 Popconfirm 触发器完整显示。
+.el-table th.table-operation-column,
+.el-table td.table-operation-column,
+.el-table .table-operation-column .cell {
+  overflow: visible;
+}
+
+.el-table .table-operation-column .cell {
+  white-space: nowrap;
+}
+
+.el-table .table-operation-column .cell > [class*="row-actions"] {
+  width: max-content;
+  min-width: max-content;
+  margin-left: auto;
+}
+
+// 窄屏时固定右列若仍保持 sticky，会在操作列宽于视口时被表格根节点裁剪；
+// 解除 sticky 后由 Element Plus 的横向滚动承载完整操作列，用户可滑到最右侧操作。
+@media (max-width: 640px) {
+  .el-table td.el-table-fixed-column--right.table-operation-column,
+  .el-table th.el-table-fixed-column--right.table-operation-column {
+    position: relative !important;
+    right: auto !important;
+    left: auto !important;
+    z-index: auto !important;
+  }
+
+  .el-table .table-operation-column .cell > [class*="row-actions"] {
+    width: min(270px, calc(100vw - 120px));
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 2px;
+  }
+
+  .el-table .table-operation-column .cell > .table-operation {
+    display: inline-flex;
+    width: min(270px, calc(100vw - 120px));
+    max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 2px;
+  }
 }
 
 .el-table--border .el-table__cell {
@@ -409,6 +637,34 @@ a {
 .el-empty__description p,
 .el-form-item__content .el-text {
   color: var(--app-muted);
+}
+
+// 列表页统一使用上、中、下三段式布局：上段放标题和筛选，下段放分页，
+// 中段拥有唯一的纵向滚动边界，避免表格滚动时筛选和分页一起离开视口。
+.list-page {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.list-page__top,
+.list-page__bottom {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.list-page__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 .management-page {

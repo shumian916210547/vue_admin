@@ -1,15 +1,16 @@
 <template>
-  <section class="schema-page">
-    <header class="schema-page__heading">
-      <div>
-        <span class="schema-page__eyebrow">低代码数据建模</span>
-        <h1>数据表管理</h1>
-        <p>创建数据表、配置字段，并按需生成可直接使用的数据管理页面。</p>
-      </div>
-      <span class="schema-page__count">{{ tableList.length }} 张数据表</span>
-    </header>
+  <section class="schema-page list-page">
+    <div class="list-page__top schema-page__top">
+      <header class="schema-page__heading">
+        <div>
+          <span class="schema-page__eyebrow">低代码数据建模</span>
+          <h1>数据表管理</h1>
+          <p>创建数据表、配置字段，并按需生成可直接使用的数据管理页面。</p>
+        </div>
+        <span class="schema-page__count">{{ tableList.length }} 张数据表</span>
+      </header>
 
-    <el-form class="schema-page__filters" size="small" @submit.prevent>
+      <el-form class="schema-page__filters" size="small" @submit.prevent>
       <el-button size="small" type="primary" @click="(tableModal.show = true), (tableModal.type = 'add')"
         v-permission="['permission:insert', permissions]">新建</el-button>
 
@@ -26,8 +27,12 @@
         </el-button>
       </div>
 
-    </el-form>
-    <el-table size="small" width="100%" :data="tableList" class="schema-page__table" row-key="objectId" border>
+      </el-form>
+    </div>
+
+    <div class="list-page__middle schema-page__middle">
+      <div class="schema-page__table-wrap">
+        <el-table size="small" width="100%" :data="tableList" class="schema-page__table" row-key="objectId" border>
       <el-table-column type="expand" width="44">
         <template #default="{ row }">
           <el-table size="small" width="100%" class="schema-page__field-table" :data="row.fields" border>
@@ -112,7 +117,9 @@
         <span v-else>{{ row[column.dataIndex] }}</span>
       </template>
       </el-table-column>
-    </el-table>
+        </el-table>
+      </div>
+    </div>
     <IndexField v-model="fieldModal.show" @onSubmit="handleSubmitField" :editState="editState"
       :type="fieldModal.type"></IndexField>
 
@@ -519,7 +526,26 @@ await getSchemaList(queryState);
 
 <style lang="scss" scoped>
 .schema-page {
+  display: flex;
+  height: 100%;
   min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.schema-page__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1 1 auto;
+}
+
+.schema-page__table-wrap {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
 }
 
 .schema-page__heading {
@@ -568,6 +594,7 @@ await getSchemaList(queryState);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: nowrap;
   margin-bottom: 18px;
   padding: 12px 16px;
   background: var(--app-surface);
@@ -578,6 +605,8 @@ await getSchemaList(queryState);
 
 .schema-page__filter-query {
   display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
@@ -643,6 +672,7 @@ await getSchemaList(queryState);
   .schema-page__filters {
     align-items: flex-start;
     flex-direction: column;
+    flex-wrap: wrap;
     gap: 8px;
   }
 

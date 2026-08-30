@@ -1,28 +1,31 @@
 <template>
-  <section class="organization-page management-page" :aria-busy="loading">
-    <header class="management-page__heading">
-      <div>
-        <span class="management-page__eyebrow">组织治理</span>
-        <h1>组织管理</h1>
-        <p>维护企业总部、区域、地方公司和部门的层级关系；成员关联与组织数据权限请在“成员管理”中配置。</p>
-      </div>
-      <div class="management-page__heading-actions">
-        <el-button size="small" v-auth="['permission:query', permissions]" type="primary" :loading="loading" @click="refreshOrganizationPage">
-          <template #icon><el-icon><Refresh /></el-icon></template>
-          刷新组织
-        </el-button>
-      </div>
-    </header>
+  <section class="organization-page management-page list-page" :aria-busy="loading">
+    <div class="list-page__top">
+      <header class="management-page__heading">
+        <div>
+          <span class="management-page__eyebrow">组织治理</span>
+          <h1>组织管理</h1>
+          <p>维护企业总部、区域、地方公司和部门的层级关系；成员关联与组织数据权限请在“成员管理”中配置。</p>
+        </div>
+        <div class="management-page__heading-actions">
+          <el-button size="small" v-auth="['permission:query', permissions]" type="primary" :loading="loading" @click="refreshOrganizationPage">
+            <template #icon><el-icon><Refresh /></el-icon></template>
+            刷新组织
+          </el-button>
+        </div>
+      </header>
 
-    <el-alert
-      v-if="loadError"
-      class="management-page__alert"
-      type="error"
-      show-icon
-      :title="loadError"
-    >请确认当前账号是系统管理员，并检查后端服务是否可用。</el-alert>
+      <el-alert
+        v-if="loadError"
+        class="management-page__alert"
+        type="error"
+        show-icon
+        :title="loadError"
+      >请确认当前账号是系统管理员，并检查后端服务是否可用。</el-alert>
+    </div>
 
-    <el-row :gutter="20" class="organization-page__layout">
+    <div class="list-page__middle organization-page__middle">
+      <el-row :gutter="20" class="organization-page__layout">
       <el-col :xs="24" :xl="10">
         <el-card class="organization-page__tree-card">
           <template #header>
@@ -105,7 +108,8 @@
           <el-empty v-else description="从左侧选择组织节点，或创建企业根组织" />
         </el-card>
       </el-col>
-    </el-row>
+      </el-row>
+    </div>
 
     <el-dialog
       v-model="organizationModal.visible"
@@ -393,23 +397,51 @@ onMounted(() => {
 <style lang="scss" scoped>
 .organization-page {
   display: flex;
+  height: 100%;
   min-width: 0;
-  gap: 20px;
+  min-height: 0;
+  gap: 0;
   flex-direction: column;
 }
 
-.organization-page__layout {
+.organization-page__middle {
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.organization-page__layout {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+}
+
+.organization-page__layout :deep(.el-col) {
+  min-height: 0;
 }
 
 .organization-page__tree-card,
 .organization-page__detail-card {
+  display: flex;
   height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.organization-page__tree-card :deep(.el-card__body),
+.organization-page__detail-card :deep(.el-card__body) {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 .organization-page__tree {
+  min-width: 0;
   min-height: 360px;
   max-height: min(58vh, 620px);
+  overflow: auto;
   padding-right: 6px;
 }
 

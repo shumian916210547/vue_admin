@@ -1,10 +1,10 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { loadRoutes, resetDynamicRoutes } from "./dynamicRoute";
 import { routes } from "./staticRoute";
 import Parse, { clearCurrentAuthContext, getCurrentAuthContext } from "@/service/parse-client";
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes,
 });
 let shouldRecheckResolvedRoute = true;
@@ -113,7 +113,14 @@ router.beforeEach(async (to) => {
     await loadRoutes(router);
     if (shouldRecheckResolvedRoute) {
       shouldRecheckResolvedRoute = false;
-      return { path: to.fullPath, replace: true };
+      // 动态路由首次装配后需要重新解析目标页；不能把 fullPath 当作 path 字段传入，
+      // 否则 Vue Router 会丢弃其中的 query，独立编辑页的 documentId 会因此消失。
+      return {
+        path: to.path,
+        query: to.query,
+        hash: to.hash,
+        replace: true,
+      };
     }
     if (isDynamicRoutePlaceholder(to)) return { path: "/404", replace: true };
     if (!canEnterManagedRoute(to)) return { path: "/404", replace: true };

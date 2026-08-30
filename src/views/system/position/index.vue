@@ -1,44 +1,48 @@
 <template>
-  <section class="position-page management-page" :aria-busy="loading">
-    <header class="management-page__heading">
-      <div>
-        <span class="management-page__eyebrow">岗位访问控制</span>
-        <h1>岗位管理</h1>
-        <p>为岗位选择可访问的业务页面，并在每个页面内细分查询、新建、编辑、删除等按钮权限。</p>
-      </div>
-      <div class="position-page__heading-actions management-page__heading-actions">
-        <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadPositionPage">
-          <template #icon><el-icon><Refresh /></el-icon></template>
-          刷新配置
-        </el-button>
-        <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" @click="openPositionModal('create')">
-          <template #icon><el-icon><Plus /></el-icon></template>
-          新增岗位
-        </el-button>
-      </div>
-    </header>
+  <section class="position-page management-page list-page" :aria-busy="loading">
+    <div class="list-page__top">
+      <header class="management-page__heading">
+        <div>
+          <span class="management-page__eyebrow">岗位访问控制</span>
+          <h1>岗位管理</h1>
+          <p>为岗位选择可访问的业务页面，并在每个页面内细分查询、新建、编辑、删除等按钮权限。</p>
+        </div>
+        <div class="position-page__heading-actions management-page__heading-actions">
+          <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadPositionPage">
+            <template #icon><el-icon><Refresh /></el-icon></template>
+            刷新配置
+          </el-button>
+          <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" @click="openPositionModal('create')">
+            <template #icon><el-icon><Plus /></el-icon></template>
+            新增岗位
+          </el-button>
+        </div>
+      </header>
 
-    <el-alert
-      v-if="loadError"
-      class="management-page__alert"
-      type="error"
-      show-icon
-      :title="loadError"
-    >请确认当前账号为系统管理员，并检查系统路由配置是否已完成初始化。</el-alert>
+      <el-alert
+        v-if="loadError"
+        class="management-page__alert"
+        type="error"
+        show-icon
+        :title="loadError"
+      >请确认当前账号为系统管理员，并检查系统路由配置是否已完成初始化。</el-alert>
+    </div>
 
-    <el-card class="position-page__table-card">
+    <div class="list-page__middle position-page__middle">
+      <el-card class="position-page__table-card">
       <template #header>
         <span class="management-page__card-title"><el-icon><CircleCheck /></el-icon> 岗位与页面权限</span>
       </template>
       <p class="position-page__tip">首页、系统管理和业务页面均可按岗位分配；保存后还会同步校验页面内按钮权限。删除岗位前须先为引用该岗位的成员重新分配岗位。</p>
-      <el-table
-        size="small"
-        class="position-page__table"
-        width="100%"
-        :data="positions"
-        v-loading="loading"
-        row-key="objectId"
-      >
+      <div class="position-page__table-wrap">
+        <el-table
+          size="small"
+          class="position-page__table"
+          width="100%"
+          :data="positions"
+          v-loading="loading"
+          row-key="objectId"
+        >
         <el-table-column
           v-for="column in positionColumns"
           :key="column.key"
@@ -71,8 +75,10 @@
           <span v-else>{{ row[column.dataIndex] }}</span>
         </template>
         </el-table-column>
-      </el-table>
-    </el-card>
+        </el-table>
+      </div>
+      </el-card>
+    </div>
 
     <el-dialog
       v-model="positionModal.visible"
@@ -150,7 +156,7 @@ import {
 const positionColumns = [
   { title: "岗位名称", dataIndex: "name", key: "name", minWidth: 220 },
   { title: "可访问页面", key: "pages", minWidth: 360 },
-  { title: "操作", key: "actions", width: 150, fixed: "right", className: "table-operation-column" },
+  { title: "操作", key: "actions", minWidth: 180, fixed: "right", className: "table-operation-column" },
 ];
 /** 按钮权限代码的中文说明；由 BFF 返回的代码只在此白名单中展示。 */
 const buttonPermissionLabels = {
@@ -505,10 +511,19 @@ onMounted(() => {
 <style lang="scss" scoped>
 .position-page {
   display: flex;
+  height: 100%;
   min-width: 0;
-  min-height: 620px;
-  gap: 20px;
+  min-height: 0;
+  gap: 0;
   flex-direction: column;
+}
+
+.position-page__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
 }
 
 .position-page__heading-actions,
@@ -530,6 +545,15 @@ onMounted(() => {
 
 .position-page__table-card {
   display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.position-page__table-card :deep(.el-card__body) {
+  display: flex;
+  min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
@@ -545,6 +569,12 @@ onMounted(() => {
 .position-page__table {
   min-width: 0;
   min-height: 0;
+}
+
+.position-page__table-wrap {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   flex: 1 1 auto;
 }
 

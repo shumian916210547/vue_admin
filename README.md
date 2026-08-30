@@ -15,11 +15,13 @@
 - 5 套主题预设（深海蓝、翡翠绿、暮光紫、暖阳橙、石墨灰）、10 项颜色自定义和可切换毛玻璃效果。
 - 企业工作台：首页展示当前账号的登录日历（登录日期蓝色标点）、连续/近 30 日活跃、会话时长、快捷入口、天气和位置服务。
 - Module/Route 驱动的动态菜单与页面加载。
-- Schema 驱动的动态 CRUD：筛选、分页、查看、新增、编辑、删除、CSV 导出。
+- Schema 驱动的动态 CRUD：筛选、分页、查看、新增、编辑、删除、CSV 导出；编辑弹窗支持全屏和默认最小高度。
 - 数据表建模：表、字段、关联、编辑组件、筛选/列表展示配置、页面路由生成与真实数据类运行状态检测。
-- 统一界面规范：Element Plus 组件统一使用小尺寸，表单控件提供中文占位提示，表格操作列固定在右侧且保持单行操作。
+- 统一界面规范：Element Plus 组件统一使用小尺寸，表单控件提供中文占位提示；桌面端表格操作列固定在右侧，窄屏通过表格内部横向滚动和必要换行保证按钮完整可达。
 - 企业组织、成员与岗位：系统管理员分开维护组织树、成员和岗位；成员页采用组织树 + 成员表左右分栏，可切换直属/包含后代节点筛选；成员可关联多个组织、分配一个岗位，并配置多个组织数据范围。
 - 在线成员管理：查看成员手机号、上线时间、在线时长和设备信息；支持强制下线与按分钟冻结账号。
+- 在线协同表格：独立工作簿列表与编辑页、创建/导入/下载导出、创建者/时间/文件大小/容量上限元数据、逐次修改记录、成员分享、文件所有权转移、版本历史和软删除恢复；编辑页支持局部全屏；公开访问仅面向同 Company 内已登录且符合组织范围的成员，默认禁止导出。
+- ONLYOFFICE 容器：后端配置 ONLYOFFICE 后加载简体中文真实在线编辑器，并由 Fast 协同模式显示其他成员选区姓名提示；未配置时显示“编辑器待部署”，当前不伪造自研 WebSocket/CRDT 协同。
 - 岗位权限：岗位可配置可访问业务页面，以及页面内查询、新建、编辑、删除、强制下线和冻结等按钮权限；`v-auth`/`v-permission` 只负责显示优化，服务端会再次校验。
 - 系统配置恢复：管理员登录时可幂等补齐模块管理、数据表管理、组织管理、成员管理和岗位管理入口，以及历史 Schema 中缺少的字段元数据，不覆盖已有自定义配置。
 - 数据表组件配置：`ElSelect`、`ElTreeSelect`、`ElUpload`、日期、Pointer 等。
@@ -37,6 +39,7 @@
 | 网络 | Axios、同源 `/api` BFF |
 | 地图 | 高德地图 JavaScript API |
 | 后端契约 | Express BFF、Parse Server、PostgreSQL |
+| 协同编辑器 | 可选 ONLYOFFICE Document Server（由后端签发配置和短时令牌） |
 
 ## 快速开始
 
@@ -52,7 +55,7 @@ npm ci
 npm run serve
 ```
 
-开发服务器默认打开在 `http://localhost:4200`，`/api` 会代理到 `http://localhost:3000`。浏览器只应知道 `VUE_APP_API_BASE=/api`；不要在 `.env.local` 或 `public/config.js` 写入数据库 URI、Parse Master Key、JWT 密钥等服务端机密。
+开发服务器监听所有网络接口，默认端口为 `4200`；本机可通过 `http://localhost:4200` 访问，局域网设备可通过 `http://<本机局域网IP>:4200` 访问。`/api` 会代理到 `http://localhost:3000`。通过局域网地址访问时，请同步将后端 `admin_server/.env` 的 `PUBLIC_ORIGIN` 和 `CORS_ORIGINS` 设置为实际前端地址，并重启后端；如无法连接，还需检查 Windows 防火墙是否允许 TCP `4200`。浏览器只应知道 `VUE_APP_API_BASE=/api`；不要在 `.env.local` 或 `public/config.js` 写入数据库 URI、Parse Master Key、JWT 密钥等服务端机密。
 
 ```powershell
 npm run build
@@ -60,6 +63,8 @@ node dist/app.js
 ```
 
 `npm run build` 会生成生产产物，`node dist/app.js` 可运行内置的依赖无关静态服务器。
+
+使用协同表格前，需先在 `admin_server` 执行 `npm run migrate:collab`。编辑器是否可用由后端 `OFFICE_*` 配置决定，前端不保存数据库 URI、内部 Office 地址或 JWT 密钥。
 
 ## 配置
 
@@ -80,14 +85,14 @@ vue_admin/
 ├─ scripts/                      # 安全检查脚本
 ├─ src/
 │  ├─ assets/scss/               # tokens、全局视觉规范、布局样式
-│  ├─ components/                # Layout、CommonPage、CommonTable、CommonForm 等
+│  ├─ components/                # Layout、CommonPage、CommonTable、CommonForm 和协同表格组件
 │  ├─ config/                    # 表格配置
 │  ├─ mixins/                    # 页面导航、权限、筛选辅助逻辑
 │  ├─ router/                    # 静态路由、动态路由与登录守卫
-│  ├─ service/                   # api-client、parse-client、仪表盘、天气和在线成员服务
+│  ├─ service/                   # api-client、parse-client、仪表盘、天气、在线成员和协同表格服务
 │  ├─ store/                     # Vuex 系统状态
 │  ├─ utils/                     # 主题、CSV、数据字典、通用工具
-│  └─ views/                     # 登录、企业工作台、个人中心、模块和数据表页面
+│  └─ views/                     # 登录、企业工作台、个人中心、模块、数据表和协同表格页面
 ├─ .env.example                  # 浏览器安全配置模板
 └─ package.json
 ```

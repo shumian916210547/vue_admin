@@ -1,6 +1,7 @@
 <template>
-  <section class="common-table">
-    <slot name="top">
+  <section class="common-table list-page">
+    <div class="common-table__top list-page__top">
+      <slot name="top"></slot>
       <el-form ref="form" class="common-table__filters" :model="where" size="small" @submit.prevent>
         <el-row :gutter="16" class="common-table__filter-row">
           <el-col :xs="24" :lg="5" class="common-table__create-action">
@@ -103,107 +104,111 @@
           </el-col>
         </el-row>
       </el-form>
-    </slot>
-
-    <div class="common-table__data-wrap">
-      <el-table
-        v-loading="tableLoading"
-        class="common-table__data"
-        size="small"
-        width="100%"
-        :data="tableData"
-        row-key="objectId"
-        border
-        :row-class-name="getRowClassName"
-        @header-dragend="handleHeaderDragend"
-      >
-        <el-table-column v-if="innerContainer" type="expand" width="44">
-          <template #default="{ row, $index }">
-            <slot
-              name="expandedRowRender"
-              :record="row"
-              :index="$index"
-              :indent="0"
-              :expanded="true"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-for="column in tableColumns"
-          :key="column.key || column.dataIndex"
-          :prop="column.dataIndex"
-          :label="column.title"
-          :width="column.width"
-          :min-width="column.minWidth || (column.width ? undefined : 140)"
-          :fixed="column.fixed"
-          :class-name="column.className"
-          :resizable="column.resizable !== false"
-        >
-          <template #default="{ row }">
-            <template v-if="column.key === 'operation'">
-              <div class="common-table__row-actions">
-                <el-button
-                  size="small"
-                  v-permission="['permission:preview', permissions]"
-                  @click="emit('onPreview', row)"
-                >
-                  查看
-                </el-button>
-                <template v-if="innerContainerTitle">
-                  <el-button
-                    size="small"
-                    v-permission="['permission:insertChildren', permissions]"
-                    @click="emit('onAdd', row)"
-                  >
-                    {{ innerContainerTitle }}
-                  </el-button>
-                  <el-divider direction="vertical" />
-                </template>
-                <el-button
-                  size="small"
-                  v-permission="['permission:edit', permissions]"
-                  @click="emit('onEdit', row)"
-                >
-                  修改
-                </el-button>
-                <el-popconfirm
-                  title="删除后不可恢复，确定要继续吗？"
-                  confirm-button-text="删除"
-                  cancel-button-text="取消"
-                  width="260"
-                  @confirm="emit('onDelete', row)"
-                >
-                  <template #reference>
-                    <el-button
-                      size="small"
-                      type="danger"
-                      v-permission="['permission:remove', permissions]"
-                    >
-                      删除
-                    </el-button>
-                  </template>
-                </el-popconfirm>
-              </div>
-            </template>
-            <CommonFields v-else :column="column" :record="row" :fields="fields" />
-          </template>
-        </el-table-column>
-      </el-table>
     </div>
 
-    <el-pagination
-      v-if="showPagination"
-      class="common-table__pagination"
-      background
-      size="small"
-      :current-page="currentPage"
-      :page-size="pageSize"
-      :page-sizes="[10, 20, 50, 100]"
-      :total="Number(props.queryState?.total) || 0"
-      layout="total, sizes, prev, pager, next, jumper"
-      @size-change="handlePageSizeChange"
-      @current-change="handleCurrentChange"
-    />
+    <div class="common-table__middle list-page__middle">
+      <div class="common-table__data-wrap">
+        <el-table
+          v-loading="tableLoading"
+          class="common-table__data"
+          size="small"
+          width="100%"
+          :data="tableData"
+          row-key="objectId"
+          border
+          :row-class-name="getRowClassName"
+          @header-dragend="handleHeaderDragend"
+        >
+          <el-table-column v-if="innerContainer" type="expand" width="44">
+            <template #default="{ row, $index }">
+              <slot
+                name="expandedRowRender"
+                :record="row"
+                :index="$index"
+                :indent="0"
+                :expanded="true"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            v-for="column in tableColumns"
+            :key="column.key || column.dataIndex"
+            :prop="column.dataIndex"
+            :label="column.title"
+            :width="column.key === 'operation' ? undefined : column.width"
+            :min-width="column.key === 'operation' ? Math.max(Number(column.minWidth) || 0, 320) : (column.minWidth || (column.width ? undefined : 140))"
+            :fixed="column.fixed"
+            :class-name="column.className"
+            :resizable="column.resizable !== false"
+          >
+            <template #default="{ row }">
+              <template v-if="column.key === 'operation'">
+                <div class="common-table__row-actions">
+                  <el-button
+                    size="small"
+                    v-permission="['permission:preview', permissions]"
+                    @click="emit('onPreview', row)"
+                  >
+                    查看
+                  </el-button>
+                  <template v-if="innerContainerTitle">
+                    <el-button
+                      size="small"
+                      v-permission="['permission:insertChildren', permissions]"
+                      @click="emit('onAdd', row)"
+                    >
+                      {{ innerContainerTitle }}
+                    </el-button>
+                    <el-divider direction="vertical" />
+                  </template>
+                  <el-button
+                    size="small"
+                    v-permission="['permission:edit', permissions]"
+                    @click="emit('onEdit', row)"
+                  >
+                    修改
+                  </el-button>
+                  <el-popconfirm
+                    title="删除后不可恢复，确定要继续吗？"
+                    confirm-button-text="删除"
+                    cancel-button-text="取消"
+                    width="260"
+                    @confirm="emit('onDelete', row)"
+                  >
+                    <template #reference>
+                      <el-button
+                        size="small"
+                        type="danger"
+                        v-permission="['permission:remove', permissions]"
+                      >
+                        删除
+                      </el-button>
+                    </template>
+                  </el-popconfirm>
+                </div>
+              </template>
+              <CommonFields v-else :column="column" :record="row" :fields="fields" />
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+
+    <div class="common-table__bottom list-page__bottom">
+      <el-pagination
+        v-if="showPagination"
+        class="common-table__pagination"
+        background
+        size="small"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="Number(props.queryState?.total) || 0"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handlePageSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
 
     <CommonExport
       v-model="exportMap.show"
@@ -439,9 +444,26 @@ const showPagination = computed(() =>
 <style lang="scss" scoped>
 .common-table {
   display: flex;
+  width: 100%;
+  height: 100%;
   min-width: 0;
   min-height: 0;
   gap: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.common-table__top,
+.common-table__bottom {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.common-table__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   flex: 1 1 auto;
   flex-direction: column;
 }
@@ -457,6 +479,7 @@ const showPagination = computed(() =>
 }
 
 .common-table__filter-row {
+  align-items: center;
   row-gap: 12px;
 }
 
@@ -501,10 +524,11 @@ const showPagination = computed(() =>
 }
 
 .common-table__data-wrap {
+  flex: 1 1 auto;
   width: 100%;
   min-height: 0;
   min-width: 0;
-  overflow-x: auto;
+  overflow: auto;
 }
 
 .common-table__row-actions {
@@ -520,6 +544,24 @@ const showPagination = computed(() =>
   justify-content: flex-end;
   min-height: 42px;
   padding: 10px 0 0;
+}
+
+@media (min-width: 992px) {
+  // 桌面端筛选字段和查询操作保持在同一工具栏行；字段过多时只滚动筛选字段区域，
+  // 查询、重置和导出按钮仍保持可见，避免操作按钮被挤到下一行。
+  .common-table__filter-row,
+  .common-table__query-area {
+    flex-wrap: nowrap;
+  }
+
+  .common-table__filter-fields {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .common-table__filter-item {
+    flex: 0 0 auto;
+  }
 }
 
 @media (max-width: 991px) {

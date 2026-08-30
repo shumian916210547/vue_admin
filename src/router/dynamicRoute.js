@@ -8,6 +8,20 @@ const STATIC_ROUTE_PATHS = new Set(chil_routes.map((route) => route.path));
 const ROUTE_PATH_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_/-]*$/;
 const COMPONENT_PATH_PATTERN = /^\/[A-Za-z0-9_./-]+$/;
 const REQUIRED_SYSTEM_ROUTE_PATHS = new Set(["module", "table", "organization", "member", "position", "online-member"]);
+const REQUIRED_COLLAB_MODULE_PATH = "collab";
+const REQUIRED_COLLAB_ROUTE_PATH = "spreadsheet";
+const COLLAB_EDITOR_ROUTE_PATH = "spreadsheet/editor";
+const COLLAB_EDITOR_COMPONENT_PATH = "/collab/spreadsheet/editor";
+/** Wrapper 生成页和仓库内置的数据管理页组件；编辑器等非列表页不加入此集合。 */
+const LIST_PAGE_COMPONENT_PATHS = new Set([
+  "/system/module/index",
+  "/system/table/index",
+  "/system/organization/index",
+  "/system/member/index",
+  "/system/position/index",
+  "/system/online-member/index",
+  "/collab/spreadsheet/index",
+]);
 const STATIC_PERMISSION_PATHS = new Set(["home"]);
 /** 旧版将组织与成员配置合并在同一入口时使用的菜单名称，发现后触发一次幂等迁移。 */
 const LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME = "组织与成员";
@@ -15,6 +29,14 @@ let routes = [...chil_routes];
 let activeRouteRemovers = [];
 let loadingRoutesPromise = null;
 let routeLoadVersion = 0;
+
+/**
+ * 判断动态路由是否使用列表页的固定上中下滚动布局。
+ * @param {unknown} pageComponent Route 元数据中的页面组件路径。
+ * @returns {boolean} Wrapper 生成页或已登记的列表页组件返回 true；其他页面返回 false。
+ */
+const isListPageComponent = (pageComponent) =>
+  pageComponent === "/Wrapper" || LIST_PAGE_COMPONENT_PATHS.has(pageComponent);
 
 /**
  * 判断数据库中的路由 path 是否可安全作为 Vue Router 的相对路径。
@@ -92,11 +114,11 @@ const resetStaticRoutePermissions = () => {
 };
 
 /**
- * 判断当前管理员所属企业是否缺少基础系统配置。仅在 Module、首页元数据或关键 Route 缺失时触发后端幂等修复，
+ * 判断当前管理员所属企业是否缺少基础系统配置。仅在 Module、首页元数据、协同表格入口或关键 Route 缺失时触发后端幂等修复，
  * 不覆盖已配置的自定义业务模块。
  * @param {Array<Record<string, unknown>>} moduleRecords BFF 返回的当前企业 Module 记录。
  * @param {{isAdmin?: boolean} | null} authContext 当前可信认证上下文。
- * @returns {boolean} 系统管理员且缺少任一基础配置、首页元数据或仍使用旧组织成员入口名称时返回 true。
+ * @returns {boolean} 系统管理员且缺少任一基础配置、协同表格入口、首页元数据或仍使用旧组织成员入口名称时返回 true。
  */
 const needsSystemConfigurationRepair = (moduleRecords, authContext) => {
   if (!authContext?.isAdmin) return false;
@@ -104,10 +126,14 @@ const needsSystemConfigurationRepair = (moduleRecords, authContext) => {
   const homeModule = moduleRecords.find((module) => module?.path === "home");
   if (!systemModule || !Array.isArray(systemModule.routes)) return true;
   const currentPaths = new Set(systemModule.routes.map((route) => route?.path));
+  const collabModule = moduleRecords.find((module) => module?.path === REQUIRED_COLLAB_MODULE_PATH);
+  const collabRoute = collabModule?.routes?.find((route) => route?.path === REQUIRED_COLLAB_ROUTE_PATH);
   const organizationRoute = systemModule.routes.find((route) => route?.path === "organization");
   const homeRoute = homeModule?.routes?.find((route) => route?.path === "home");
   return (
     [...REQUIRED_SYSTEM_ROUTE_PATHS].some((path) => !currentPaths.has(path)) ||
+    !collabModule ||
+    !collabRoute ||
     organizationRoute?.name === LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME ||
     !homeRoute
   );
@@ -136,6 +162,41 @@ const resolvePageComponent = (pageComponent) => {
 };
 
 /**
+ * 为已授权的协同表格列表追加隐藏编辑器子路由，使工作簿编辑器拥有独立页面而不改变既有页面级权限。
+ * 编辑器与列表共用同一个后端 Route objectId，后端继续以 collab.spreadsheet 的页面权限和文档 ACL 作为唯一安全边界。
+ * @param {Record<string, unknown>} module 当前企业的 Module 元数据。
+ * @param {Array<Record<string, unknown>>} children 已经通过页面权限和路径校验的子路由。
+ * @returns {Array<Record<string, unknown>>} 追加独立编辑器路由后的子路由数组。
+ */
+const appendCollabEditorRoute = (module, children) => {
+  if (module?.path !== REQUIRED_COLLAB_MODULE_PATH) return children;
+  if (children.some((route) => route.path === COLLAB_EDITOR_ROUTE_PATH)) return children;
+  const listRoute = children.find(
+    (route) => route.path === REQUIRED_COLLAB_ROUTE_PATH && route.pageComponent === "/collab/spreadsheet/index"
+  );
+  if (!listRoute) return children;
+
+  return [
+    ...children,
+    {
+      ...listRoute,
+      name: "工作簿编辑器",
+      path: COLLAB_EDITOR_ROUTE_PATH,
+      objectId: `${listRoute.objectId}:editor`,
+      menu: false,
+      pageComponent: COLLAB_EDITOR_COMPONENT_PATH,
+      component: resolvePageComponent(COLLAB_EDITOR_COMPONENT_PATH),
+      meta: {
+        ...listRoute.meta,
+        menu: false,
+        listPage: false,
+        permissionCode: `page:${module.path}/${REQUIRED_COLLAB_ROUTE_PATH}`,
+      },
+    },
+  ];
+};
+
+/**
  * 按当前可信会话过滤并规范化一组 Module 记录；不会修改从 BFF 返回的原始对象。
  * @param {Array<Record<string, unknown>>} moduleRecords BFF 返回的 Module 元数据数组。
  * @param {{role?: {module?: Array<{objectId?: string}>}, isAdmin?: boolean} | null} authContext 当前认证上下文。
@@ -161,10 +222,12 @@ const buildAuthorizedModules = (moduleRecords, authContext) => {
                 targetClass: route.targetClass,
                 id: route.objectId,
                 menu: route.menu,
+                listPage: isListPageComponent(route.pageComponent),
                 permissionCode: `page:${module.path}/${route.path}`,
               },
             }))
         : [];
+      const childrenWithEditor = appendCollabEditorRoute(module, authorizedChildren);
 
       return {
         ...module,
@@ -172,10 +235,10 @@ const buildAuthorizedModules = (moduleRecords, authContext) => {
         // router-view 的容器承载已授权的子路由，不能降级为 404，否则深链接
         // 虽然匹配成功却没有位置渲染子页面。
         component:
-          authorizedChildren.length && !isSafeComponentPath(module.pageComponent)
+          childrenWithEditor.length && !isSafeComponentPath(module.pageComponent)
             ? () => import("@/components/PageLoading")
             : resolvePageComponent(module.pageComponent),
-        children: authorizedChildren.length ? authorizedChildren : undefined,
+        children: childrenWithEditor.length ? childrenWithEditor : undefined,
         meta: {
           targetClass: module.targetClass,
           id: module.objectId,

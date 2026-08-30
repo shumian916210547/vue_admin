@@ -32,12 +32,24 @@
   min-height: 0;
 }
 
+// 列表页由页面自身把内容拆成上、中、下三段；关闭 app-content 的整页滚动，
+// 让筛选区和分页区固定在内容视口内，仅中段承载表格或树的滚动。
+.app-content.app-content--list {
+  overflow: hidden;
+}
+
 .app-content > * {
   // 页面根节点至少填满内容区，使表格页可以把列表区域设为 flex: 1；内容高于视口时仍由
   // app-content 统一承接纵向滚动，避免子页在 flex 收缩后内容溢出却无法滚动。
   flex: 1 0 auto;
   min-width: 0;
   min-height: 100%;
+}
+
+.app-content.app-content--list > * {
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .app-brand {

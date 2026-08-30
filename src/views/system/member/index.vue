@@ -1,32 +1,64 @@
 <template>
-  <section class="member-page management-page" :aria-busy="loading || memberLoading">
-    <header class="management-page__heading">
-      <div>
-        <span class="management-page__eyebrow">成员与组织权限</span>
-        <h1>成员管理</h1>
-        <p>每名成员可分配一个岗位、关联多个组织，并获得一个或多个组织的数据访问范围。</p>
-      </div>
-      <div class="member-page__heading-actions management-page__heading-actions">
-        <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading || memberLoading" @click="refreshMemberPage">
-          <template #icon><el-icon><Refresh /></el-icon></template>
-          刷新列表
-        </el-button>
-        <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" :disabled="!organizations.length || !roles.length" @click="openMemberModal('create')">
-          <template #icon><el-icon><UserFilled /></el-icon></template>
-          新增成员
-        </el-button>
-      </div>
-    </header>
+  <section class="member-page management-page list-page" :aria-busy="loading || memberLoading">
+    <div class="list-page__top">
+      <header class="management-page__heading">
+        <div>
+          <span class="management-page__eyebrow">成员与组织权限</span>
+          <h1>成员管理</h1>
+          <p>每名成员可分配一个岗位、关联多个组织，并获得一个或多个组织的数据访问范围。</p>
+        </div>
+        <div class="member-page__heading-actions management-page__heading-actions">
+          <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading || memberLoading" @click="refreshMemberPage">
+            <template #icon><el-icon><Refresh /></el-icon></template>
+            刷新列表
+          </el-button>
+          <el-button size="small" v-auth="['permission:insert', permissions]" type="primary" :disabled="!organizations.length || !roles.length" @click="openMemberModal('create')">
+            <template #icon><el-icon><UserFilled /></el-icon></template>
+            新增成员
+          </el-button>
+        </div>
+      </header>
 
-    <el-alert
-      v-if="loadError"
-      class="management-page__alert"
-      type="error"
-      show-icon
-      :title="loadError"
-    >请先完成组织与岗位配置，并确认当前账号为系统管理员。</el-alert>
+      <el-alert
+        v-if="loadError"
+        class="management-page__alert"
+        type="error"
+        show-icon
+        :title="loadError"
+      >请先完成组织与岗位配置，并确认当前账号为系统管理员。</el-alert>
 
-    <div class="member-page__workspace">
+      <div class="member-page__filter-bar" role="search">
+        <span class="member-page__filter-label">成员筛选</span>
+        <div class="member-page__filters">
+          <el-switch
+            size="small"
+            v-model="memberQuery.includeDescendants"
+            active-text="含下级"
+            inactive-text="直属"
+            :disabled="!selectedOrganizationId"
+            @change="handleOrganizationScopeChange"
+          />
+          <el-input
+            size="small"
+            v-auth="['permission:query', permissions]"
+            v-model="memberQuery.keyword"
+            class="member-page__member-search"
+            clearable
+            placeholder="按登录账号检索"
+            @keyup.enter="handleMemberSearch"
+          >
+            <template #append>
+              <el-button size="small" aria-label="搜索成员" @click="handleMemberSearch">
+                <el-icon><Search /></el-icon>
+              </el-button>
+            </template>
+          </el-input>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-page__middle member-page__middle">
+      <div class="member-page__workspace">
       <el-card class="member-page__organization-card">
         <template #header>
           <div class="management-page__card-header">
@@ -49,33 +81,8 @@
 
       <el-card class="member-page__table-card">
         <template #header>
-          <div class="management-page__card-header management-page__card-header--wrap">
+          <div class="management-page__card-header">
             <span class="management-page__card-title"><el-icon><UserFilled /></el-icon> 成员列表</span>
-          <div class="member-page__filters">
-            <el-switch
-              size="small"
-              v-model="memberQuery.includeDescendants"
-              active-text="含下级"
-              inactive-text="直属"
-              :disabled="!selectedOrganizationId"
-              @change="handleOrganizationScopeChange"
-            />
-            <el-input
-              size="small"
-              v-auth="['permission:query', permissions]"
-              v-model="memberQuery.keyword"
-              class="member-page__member-search"
-              clearable
-              placeholder="按登录账号检索"
-              @keyup.enter="handleMemberSearch"
-            >
-              <template #append>
-                <el-button size="small" aria-label="搜索成员" @click="handleMemberSearch">
-                  <el-icon><Search /></el-icon>
-                </el-button>
-              </template>
-            </el-input>
-          </div>
           </div>
         </template>
         <p class="member-page__tip">当前筛选：{{ organizationFilterLabel }}。“关联组织”记录成员所属的多个组织；“组织数据权限”决定其可读取和操作的业务数据范围。</p>
@@ -86,14 +93,15 @@
           show-icon
           :title="memberLoadError"
         >已有列表内容已保留；可调整检索条件后重试。</el-alert>
-        <el-table
-        size="small"
-        class="member-page__table"
-        width="100%"
-        :data="members"
-        v-loading="memberLoading"
-        row-key="objectId"
-        >
+        <div class="member-page__table-wrap">
+          <el-table
+          size="small"
+          class="member-page__table"
+          width="100%"
+          :data="members"
+          v-loading="memberLoading"
+          row-key="objectId"
+          >
           <el-table-column
             v-for="column in memberColumns"
             :key="column.key"
@@ -132,20 +140,25 @@
             <span v-else>{{ row[column.dataIndex] }}</span>
             </template>
           </el-table-column>
-        </el-table>
-        <el-pagination
-          class="member-page__pagination"
-          background
-          size="small"
-          :current-page="memberQuery.page"
-          :page-size="memberQuery.pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="memberTotal"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleMemberPageSizeChange"
-          @current-change="handleMemberPageChange"
-        />
+          </el-table>
+        </div>
       </el-card>
+      </div>
+    </div>
+
+    <div class="list-page__bottom member-page__bottom">
+      <el-pagination
+        class="member-page__pagination"
+        background
+        size="small"
+        :current-page="memberQuery.page"
+        :page-size="memberQuery.pageSize"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="memberTotal"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleMemberPageSizeChange"
+        @current-change="handleMemberPageChange"
+      />
     </div>
 
     <el-dialog
@@ -264,7 +277,7 @@ const memberColumns = [
   { title: "组织数据权限", key: "scope", minWidth: 260 },
   { title: "账号类型", key: "kind", minWidth: 110 },
   { title: "状态", key: "status", minWidth: 90 },
-  { title: "操作", key: "operation", width: 112, fixed: "right", className: "table-operation-column" },
+  { title: "操作", key: "operation", minWidth: 150, fixed: "right", className: "table-operation-column" },
 ];
 const loading = ref(false);
 const memberLoading = ref(false);
@@ -591,10 +604,38 @@ onMounted(() => {
 <style lang="scss" scoped>
 .member-page {
   display: flex;
+  height: 100%;
   min-width: 0;
-  min-height: 620px;
-  gap: 20px;
+  min-height: 0;
+  gap: 0;
   flex-direction: column;
+}
+
+.member-page__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.member-page__filter-bar {
+  display: flex;
+  min-width: 0;
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  background: var(--app-surface);
+  border-radius: var(--app-radius);
+  box-shadow: var(--app-shadow-soft);
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.member-page__filter-label {
+  color: var(--app-ink);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .member-page__heading-actions,
@@ -611,6 +652,7 @@ onMounted(() => {
 
 .member-page__workspace {
   display: grid;
+  width: 100%;
   min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
@@ -625,6 +667,15 @@ onMounted(() => {
   flex-direction: column;
 }
 
+.member-page__organization-card :deep(.el-card__body),
+.member-page__table-card :deep(.el-card__body) {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
 .member-page__tree-tip {
   margin: 0;
   color: var(--app-muted);
@@ -633,6 +684,7 @@ onMounted(() => {
 }
 
 .member-page__organization-tree {
+  min-width: 0;
   min-height: 240px;
   flex: 1 1 auto;
 }
@@ -662,6 +714,12 @@ onMounted(() => {
 .member-page__table {
   min-width: 0;
   min-height: 0;
+}
+
+.member-page__table-wrap {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   flex: 1 1 auto;
 }
 
@@ -675,7 +733,7 @@ onMounted(() => {
 .member-page__pagination {
   justify-content: flex-end;
   flex: 0 0 auto;
-  padding-top: 4px;
+  padding-top: 10px;
 }
 
 .member-page__row-actions {
@@ -703,6 +761,11 @@ onMounted(() => {
 
   .member-page__heading-actions {
     justify-content: flex-start;
+  }
+
+  .member-page__filter-bar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .member-page__filters {

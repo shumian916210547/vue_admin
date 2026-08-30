@@ -1,21 +1,39 @@
 <template>
   <el-dialog
     v-model="visible"
-    class="common-form-modal"
+    :class="['common-form-modal', { 'common-form-modal--fullscreen': isFullscreen }]"
     :width="modalWidth"
+    :fullscreen="isFullscreen"
     draggable
     destroy-on-close
   >
     <template #header>
-      <div class="common-form-modal__title">
-        {{ modalType[type] + " " + className }}
+      <div class="common-form-modal__header">
+        <div class="common-form-modal__title">
+          {{ modalType[type] + " " + className }}
+        </div>
+        <el-tooltip :content="isFullscreen ? '退出全屏' : '全屏编辑'" placement="bottom">
+          <el-button
+            class="common-form-modal__fullscreen-button"
+            size="small"
+            text
+            :aria-label="isFullscreen ? '退出全屏编辑' : '全屏编辑'"
+            @click.stop="toggleFullscreen"
+          >
+            <el-icon v-if="isFullscreen"><Close /></el-icon>
+            <el-icon v-else><FullScreen /></el-icon>
+          </el-button>
+        </el-tooltip>
       </div>
     </template>
 
     <div
       v-if="visible"
       class="common-form-modal__body"
-      :style="{ '--common-form-width': formWidth, '--common-form-height': formHeight }"
+      :style="{
+        '--common-form-width': formWidth,
+        '--common-form-min-height': formMinHeight,
+      }"
     >
       <el-form
         ref="formRef"
@@ -160,6 +178,7 @@
 </template>
 
 <script setup>
+import { Close, FullScreen } from "@element-plus/icons-vue";
 import { ElNotification } from "element-plus";
 import { computed, reactive, ref, watch } from "vue";
 
@@ -201,7 +220,8 @@ const modalType = {
 };
 const modalWidth = ref("600px");
 const formWidth = ref("100%");
-const formHeight = ref("auto");
+const formMinHeight = ref("360px");
+const isFullscreen = ref(false);
 const formRef = ref();
 const visible = ref(props.modelValue);
 const formState = reactive({});
@@ -330,9 +350,20 @@ watch(
  * @returns {void} 发出 update:modelValue 事件。
  */
 watch(visible, (nextVisible) => {
-  if (!nextVisible) resetFormState();
+  if (!nextVisible) {
+    isFullscreen.value = false;
+    resetFormState();
+  }
   if (nextVisible !== props.modelValue) emit("update:modelValue", nextVisible);
 });
+
+/**
+ * 切换当前数据表记录编辑弹窗的全屏模式，让宽字段和大段文本获得完整编辑空间。
+ * @returns {void} 更新 Element Plus Dialog 的 fullscreen 状态；关闭弹窗时由 visible watcher 自动恢复普通模式。
+ */
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value;
+};
 
 /**
  * 初始化新增表单或清理关闭后的旧值。
@@ -411,11 +442,11 @@ watch(
     if (formFieldKeys.value.some((key) => getEditComponent(props.fields[key]) === "RichTextEditor")) {
       modalWidth.value = "1480px";
       formWidth.value = "400px";
-      formHeight.value = "420px";
+      formMinHeight.value = "420px";
     } else {
       modalWidth.value = "600px";
       formWidth.value = "100%";
-      formHeight.value = "auto";
+      formMinHeight.value = "360px";
     }
   },
   { deep: true, immediate: true }
@@ -529,15 +560,39 @@ const disableSelect = async (items) => {
 </script>
 
 <style lang="scss" scoped>
-.common-form-modal__title {
+.common-form-modal__header {
+  display: flex;
   width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.common-form-modal__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: move;
+}
+
+.common-form-modal__fullscreen-button {
+  flex: 0 0 auto;
 }
 
 .common-form-modal__body {
   position: relative;
   width: var(--common-form-width, 100%);
-  min-height: var(--common-form-height, auto);
+  min-height: var(--common-form-min-height, 360px);
+}
+
+.common-form-modal--fullscreen .common-form-modal__body {
+  width: 100%;
+  min-height: 0;
+}
+
+.common-form-modal--fullscreen :deep(.el-dialog__body) {
+  overflow: auto;
 }
 
 .common-form-modal__form {
@@ -562,10 +617,16 @@ const disableSelect = async (items) => {
   white-space: normal;
 }
 
+@media (min-width: 901px) {
+  .common-form-modal--fullscreen .common-form-modal__rich-text-item {
+    width: calc(100% - 440px);
+  }
+}
+
 @media (max-width: 900px) {
   .common-form-modal__body {
     width: 100%;
-    min-height: auto;
+    min-height: var(--common-form-min-height, 360px);
   }
 
   .common-form-modal__rich-text-item {

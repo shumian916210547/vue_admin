@@ -44,6 +44,7 @@ export const elementIconMap = Object.freeze({
   EnvironmentOutlined: Location,
   ExpandOutlined: FullScreen,
   FieldTimeOutlined: Timer,
+  Grid,
   HomeOutlined: House,
   LockOutlined: Lock,
   LoginOutlined: SwitchButton,

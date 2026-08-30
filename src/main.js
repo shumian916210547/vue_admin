@@ -3,6 +3,7 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import ElementPlus, { ElNotification } from "element-plus";
+import zhCn from "element-plus/dist/locale/zh-cn.mjs";
 import "./registerServiceWorker";
 import "element-plus/dist/index.css";
 import "./assets/scss/global.scss";
@@ -52,7 +53,7 @@ const updateAuthVisibility = (el, value) => {
 const app = createApp(App)
   .use(store)
   .use(router)
-  .use(ElementPlus, { size: "small" });
+  .use(ElementPlus, { size: "small", locale: zhCn });
 
 /**
  * 提示用户已有可用的新前端版本；不会自动刷新，以免中断当前正在编辑的业务数据。

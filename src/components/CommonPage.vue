@@ -18,6 +18,9 @@
     @onAdd="emit('add', $event)"
     @onPreview="handlePreview"
   >
+    <template #top>
+      <slot name="top"></slot>
+    </template>
     <template
       v-if="innerContainer"
       #expandedRowRender="{ record, index, indent, expanded }"
@@ -150,7 +153,7 @@ const loadColumns = async (fields) => {
     key: "operation",
     resizable: true,
     fixed: "right",
-    width: 220,
+    minWidth: 320,
     className: "table-operation-column",
   });
 };

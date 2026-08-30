@@ -1,26 +1,29 @@
 <template>
-  <section class="online-member-page management-page" :aria-busy="loading">
-    <header class="management-page__heading">
-      <div>
-        <span class="management-page__eyebrow">在线成员运维</span>
-        <h1>在线成员</h1>
-        <p>查看当前企业的有效管理端会话；强制下线会撤销该成员的全部会话，冻结会同时阻止新登录。</p>
-      </div>
-      <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadOnlineMembers">
-        <template #icon><el-icon><Refresh /></el-icon></template>
-        刷新列表
-      </el-button>
-    </header>
+  <section class="online-member-page management-page list-page" :aria-busy="loading">
+    <div class="list-page__top">
+      <header class="management-page__heading">
+        <div>
+          <span class="management-page__eyebrow">在线成员运维</span>
+          <h1>在线成员</h1>
+          <p>查看当前企业的有效管理端会话；强制下线会撤销该成员的全部会话，冻结会同时阻止新登录。</p>
+        </div>
+        <el-button size="small" v-auth="['permission:query', permissions]" :loading="loading" @click="reloadOnlineMembers">
+          <template #icon><el-icon><Refresh /></el-icon></template>
+          刷新列表
+        </el-button>
+      </header>
 
-    <el-alert
-      v-if="loadError"
-      class="management-page__alert"
-      type="error"
-      show-icon
-      :title="loadError"
-    >请确认当前账号为系统管理员，并检查服务端会话配置是否已完成迁移。</el-alert>
+      <el-alert
+        v-if="loadError"
+        class="management-page__alert"
+        type="error"
+        show-icon
+        :title="loadError"
+      >请确认当前账号为系统管理员，并检查服务端会话配置是否已完成迁移。</el-alert>
+    </div>
 
-    <el-card class="online-member-page__card">
+    <div class="list-page__middle online-member-page__middle">
+      <el-card class="online-member-page__card">
       <template #header>
         <div class="management-page__card-header">
           <span class="management-page__card-title"><el-icon><UserFilled /></el-icon> 在线会话</span>
@@ -28,14 +31,15 @@
         </div>
       </template>
       <p class="online-member-page__tip">在线时长按会话首次建立时间计算；设备信息来自登录请求的 User-Agent 分类，不保存完整请求头。</p>
-      <el-table
-        size="small"
-        class="online-member-page__table"
-        width="100%"
-        :data="sessions"
-        v-loading="loading"
-        row-key="objectId"
-      >
+      <div class="online-member-page__table-wrap">
+        <el-table
+          size="small"
+          class="online-member-page__table"
+          width="100%"
+          :data="sessions"
+          v-loading="loading"
+          row-key="objectId"
+        >
         <el-table-column
           v-for="column in columns"
           :key="column.key"
@@ -80,9 +84,11 @@
           <span v-else>{{ row[column.dataIndex] }}</span>
         </template>
         </el-table-column>
-      </el-table>
-      <el-empty v-if="!loading && !sessions.length" description="当前没有在线成员" />
-    </el-card>
+        </el-table>
+        <el-empty v-if="!loading && !sessions.length" description="当前没有在线成员" />
+      </div>
+      </el-card>
+    </div>
 
     <el-dialog
       v-model="freezeModal.visible"
@@ -141,7 +147,7 @@ const columns = [
   { title: "在线时长", key: "duration", minWidth: 150 },
   { title: "最后活动", key: "lastSeenAt", minWidth: 180 },
   { title: "登录设备", dataIndex: "deviceInfo", key: "deviceInfo", minWidth: 220 },
-  { title: "操作", key: "operation", width: 176, fixed: "right", className: "table-operation-column" },
+  { title: "操作", key: "operation", minWidth: 210, fixed: "right", className: "table-operation-column" },
 ];
 /** 冻结弹窗中可直接选择的常用时长，value 单位为分钟。 */
 const freezePresets = [
@@ -313,14 +319,32 @@ onBeforeUnmount(() => {
 <style lang="scss" scoped>
 .online-member-page {
   display: flex;
+  height: 100%;
   min-width: 0;
-  min-height: 620px;
-  gap: 20px;
+  min-height: 0;
+  gap: 0;
   flex-direction: column;
+}
+
+.online-member-page__middle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
 }
 
 .online-member-page__card {
   display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.online-member-page__card :deep(.el-card__body) {
+  display: flex;
+  min-width: 0;
   min-height: 0;
   flex: 1 1 auto;
   flex-direction: column;
@@ -335,6 +359,13 @@ onBeforeUnmount(() => {
 
 .online-member-page__table {
   min-width: 0;
+}
+
+.online-member-page__table-wrap {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  flex: 1 1 auto;
 }
 
 .online-member-page__member {

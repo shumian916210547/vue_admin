@@ -1,14 +1,15 @@
 <template>
-  <section class="module-page">
-    <header class="module-page__heading">
-      <div>
-        <span class="module-page__eyebrow">导航与权限</span>
-        <h1>模块管理</h1>
-        <p>维护后台菜单模块及其子路由，路由可关联到已配置的数据表页面或组件。</p>
-      </div>
-    </header>
-
+  <section class="module-page list-page">
     <CommonPage ref="commonPage" :className="'Module'" @add="handleAdd" :innerContainer="true" innerContainerTitle="新增">
+      <template #top>
+        <header class="module-page__heading">
+          <div>
+            <span class="module-page__eyebrow">导航与权限</span>
+            <h1>模块管理</h1>
+            <p>维护后台菜单模块及其子路由，路由可关联到已配置的数据表页面或组件。</p>
+          </div>
+        </header>
+      </template>
       <!-- 路由列表 -->
       <template #innerContainer="{ record }">
         <el-table size="small" width="100%" class="module-page__route-table" :data="formattingData(record.routes)" row-key="objectId" border>
@@ -199,7 +200,7 @@ const loadFields = async () => {
     dataIndex: "operation",
     key: "operation",
     fixed: "right",
-    width: 128,
+    minWidth: 160,
     className: "table-operation-column",
   });
 };
@@ -223,9 +224,16 @@ await findAll("Route");
 <style lang="scss" scoped>
 .module-page {
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.module-page > .common-table {
+  min-height: 0;
+  flex: 1 1 auto;
 }
 
 .module-page__heading {
