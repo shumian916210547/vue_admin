@@ -10,14 +10,14 @@ vue_admin/
 ├─ scripts/                      # 安全检查
 ├─ src/
 │  ├─ assets/scss/               # tokens.scss、global.scss、Layout.scss
-│  ├─ components/                # 布局、动态表格、动态表单、上传和协同表格等可复用组件
+│  ├─ components/                # 布局、动态表格、动态表单、上传、协同表格与 camera 播放器
 │  ├─ config/                    # 表格配置
 │  ├─ mixins/                    # 导航、权限、筛选辅助逻辑
 │  ├─ router/                    # 静态路由、动态路由、守卫
 │  ├─ service/                   # BFF 请求、Parse 兼容适配层、天气、在线成员与协同表格服务
 │  ├─ store/                     # Vuex 状态
 │  ├─ utils/                     # CSV、请求、数据字典与通用工具
-│  └─ views/                     # 页面；system/ 下含组织、成员、岗位、在线成员，collab/ 下含协同表格页
+│  └─ views/                     # system/ 平台配置；camera/ 视频组织、设备、成员、1–16分屏；collab/ 协同表格
 ├─ .env.example                  # 无机密的浏览器配置模板
 ├─ README.md                     # 功能、配置、结构和快速开始
 └─ package.json

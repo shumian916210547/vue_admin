@@ -8,7 +8,13 @@
 
 **搜索关键词：** Vue 3 Admin、Vue Admin Template、企业后台管理系统、低代码平台、Schema 驱动 CRUD、动态表单、动态路由、RBAC、多租户、组织树、Element Plus、Parse Server、PostgreSQL。
 
+界面统一采用简洁的细边框卡片、小圆角和一致的标题、表单、表格及弹窗间距；亮色、深色与自定义主题共用视觉令牌。窄屏下横向导航保留菜单入口，纵向导航默认折叠，筛选按钮可换行，表格支持内部横向滚动，弹窗宽度随视口收缩。
+
 ## 核心功能
+
+- 独立「摄像头管理」模块：`/camera/organizations`、`/camera/devices`、`/camera/members`、`/camera/video` 提供三类组织树、设备归属与筛选、成员授权、1–16分屏视频墙和个人监控视图。视频中心支持流畅/标准、拖拽设备、暂停恢复、全屏和断线重试，离页释放全部连接；旧 `/system/camera` 跳转设备管理。见 [独立模块指南](docs/CAMERA_WORKSPACE_GUIDE.md)。
+
+- 局域网 IPC 管理：`/camera/devices` 支持扫描关联、设备名称/封面配置、实时预览、服务器录像回放与 SD 卡/NVR 设备历史回放。Chrome/Edge 使用 HLS.js，Safari 使用原生 HLS；前端只访问同源 BFF。后端需 FFmpeg、设备加密密钥和 IPC 数据库迁移；萤石/小米仅支持开放本地协议的型号，详见 [IPC 指南](docs/IPC_CAMERA_GUIDE.md)。
 
 - 登录、受保护会话、退出登录与个人资料维护。
 - 横向/纵向布局、亮/深色模式、Logo、页签、刷新和全屏偏好。
@@ -85,17 +91,23 @@ vue_admin/
 ├─ scripts/                      # 安全检查脚本
 ├─ src/
 │  ├─ assets/scss/               # tokens、全局视觉规范、布局样式
-│  ├─ components/                # Layout、CommonPage、CommonTable、CommonForm 和协同表格组件
+│  ├─ components/                # Layout、CommonPage、CommonTable、CommonForm、协同表格与摄像头组件
 │  ├─ config/                    # 表格配置
 │  ├─ mixins/                    # 页面导航、权限、筛选辅助逻辑
 │  ├─ router/                    # 静态路由、动态路由与登录守卫
 │  ├─ service/                   # api-client、parse-client、仪表盘、天气、在线成员和协同表格服务
 │  ├─ store/                     # Vuex 系统状态
 │  ├─ utils/                     # 主题、CSV、数据字典、通用工具
-│  └─ views/                     # 登录、企业工作台、个人中心、模块、数据表和协同表格页面
+│  └─ views/                     # 登录、企业工作台、系统管理、协同表格及 camera/ 独立视频模块
 ├─ .env.example                  # 浏览器安全配置模板
 └─ package.json
 ```
+
+## 摄像头验证记录
+
+- [最终27组验证记录](docs/CAMERA_WORKSPACE_TEST_REPORT.md)：权限、双来源录像、1–16分屏及资源释放；含硬件验收和现有依赖审计限制。
+- [基础接入验证记录](docs/IPC_CAMERA_TEST_REPORT.md)：基础协议、设备模拟和录像回放。
+
 
 ## 质量检查
 
@@ -107,11 +119,11 @@ npm run audit:prod
 
 ## 文档
 
-- [系统使用文档](../docs/SYSTEM_USAGE.md)：登录、数据建模、模块、权限、上传、API 和运维。
-- [工作区 README](../README.md)：前后端架构、完整目录和开源发布建议。
+- [系统使用文档](docs/SYSTEM_USAGE.md)：登录、数据建模、模块、权限、上传、API 和运维。
+- [后端仓库](https://github.com/shumian916210547/admin_server)：BFF、媒体服务、数据库迁移与部署配置。
 - [前端开发约定](AGENTS.md)：组件、样式、安全边界与质量门禁。
 
-若将本前端作为独立仓库发布，请将上述通用文档一并纳入仓库，并在 GitHub/Gitee 设置 `vue3`、`vue-admin`、`low-code`、`rbac`、`element-plus` 等 Topics。
+通用使用指南和摄像头验收记录已纳入 `docs/`，可在 GitHub/Gitee 设置 `vue3`、`vue-admin`、`low-code`、`rbac`、`element-plus` 等 Topics。
 
 ## GitHub 项目主页建议
 

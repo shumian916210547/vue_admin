@@ -26,6 +26,7 @@ import {
   Upload,
   User,
   UserFilled,
+  VideoCamera,
 } from "@element-plus/icons-vue";
 
 /**
@@ -60,6 +61,7 @@ export const elementIconMap = Object.freeze({
   UploadOutlined: Upload,
   UserAddOutlined: Avatar,
   UserOutlined: User,
+  VideoCamera,
 });
 
 const elementFormComponentNames = new Set([

@@ -8,6 +8,8 @@ const STATIC_ROUTE_PATHS = new Set(chil_routes.map((route) => route.path));
 const ROUTE_PATH_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_/-]*$/;
 const COMPONENT_PATH_PATTERN = /^\/[A-Za-z0-9_./-]+$/;
 const REQUIRED_SYSTEM_ROUTE_PATHS = new Set(["module", "table", "organization", "member", "position", "online-member"]);
+/** 摄像头模块四个独立页面必须全部存在，旧系统入口会由后端幂等迁移并保留 Route ID。 */
+const REQUIRED_CAMERA_PATHS = ["organizations", "devices", "members", "video"];
 const REQUIRED_COLLAB_MODULE_PATH = "collab";
 const REQUIRED_COLLAB_ROUTE_PATH = "spreadsheet";
 const COLLAB_EDITOR_ROUTE_PATH = "spreadsheet/editor";
@@ -20,6 +22,10 @@ const LIST_PAGE_COMPONENT_PATHS = new Set([
   "/system/member/index",
   "/system/position/index",
   "/system/online-member/index",
+  "/system/camera/index",
+  "/camera/organizations/index",
+  "/camera/devices/index",
+  "/camera/members/index",
   "/collab/spreadsheet/index",
 ]);
 const STATIC_PERMISSION_PATHS = new Set(["home"]);
@@ -130,12 +136,14 @@ const needsSystemConfigurationRepair = (moduleRecords, authContext) => {
   const collabRoute = collabModule?.routes?.find((route) => route?.path === REQUIRED_COLLAB_ROUTE_PATH);
   const organizationRoute = systemModule.routes.find((route) => route?.path === "organization");
   const homeRoute = homeModule?.routes?.find((route) => route?.path === "home");
+  const cameraModule = moduleRecords.find((module) => module?.path === "camera");
   return (
     [...REQUIRED_SYSTEM_ROUTE_PATHS].some((path) => !currentPaths.has(path)) ||
     !collabModule ||
     !collabRoute ||
     organizationRoute?.name === LEGACY_ORGANIZATION_MEMBER_ROUTE_NAME ||
     !homeRoute
+    || REQUIRED_CAMERA_PATHS.some((path) => !cameraModule?.routes?.some((route) => route.path === path))
   );
 };
 
@@ -259,8 +267,26 @@ const buildAuthorizedModules = (moduleRecords, authContext) => {
  * @returns {void} 路由完成注册后保存其移除函数。
  */
 const addManagedRoute = (router, route) => {
-  const removeRoute = router.addRoute("Layout", route);
+  /**
+   * 为路由注册生成唯一 name，保留 store 菜单中的中文名称，避免多个模块的组织/成员同名互相卸载。
+   * @param {object} record 必填，动态 Module/Route 记录。
+   * @returns {object} 仅供 Vue Router 注册的克隆，不更改菜单和页签文案。
+   */
+  const uniqueRecord = (record) => ({
+    ...record,
+    name: `dynamic:${record.objectId}`,
+    meta: { ...record.meta, title: record.name },
+    ...(record.children ? { children: record.children.map(uniqueRecord) } : {}),
+  });
+  const removeRoute = router.addRoute("Layout", uniqueRecord(route));
   if (typeof removeRoute === "function") activeRouteRemovers.push(removeRoute);
+  if (route.path === "camera") {
+    const devices = route.children?.find((child) => child.targetClass === "CameraDevice");
+    if (devices) {
+      const removeLegacy = router.addRoute("Layout", { path: "system/camera", name: "legacy-camera-entry", redirect: "/camera/devices", menu: false, meta: { ...devices.meta, menu: false } });
+      activeRouteRemovers.push(removeLegacy);
+    }
+  }
 };
 
 /**
