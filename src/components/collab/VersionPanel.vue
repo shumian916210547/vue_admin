@@ -395,10 +395,9 @@ watch(
 }
 
 .collab-version-panel__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .collab-version-panel__header p,

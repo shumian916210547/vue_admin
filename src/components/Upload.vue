@@ -1,5 +1,5 @@
 <template>
-  <div class="clearfix">
+  <div class="upload-control">
     <el-upload
       size="small"
       :file-list="fileList"
@@ -37,32 +37,33 @@
       width="800px"
     >
       <template v-if="fileType == 'image/*'">
-        <img alt="文件预览" style="width: 100%;object-fit: contain;" :src="previewUrl" />
+        <img alt="文件预览" class="upload-control__preview" :src="previewUrl" />
       </template>
       <template v-if="fileType == 'audio/*'">
-        <audio aria-label="音频文件预览" style="width: 100%" :src="previewUrl" />
+        <audio controls aria-label="音频文件预览" class="upload-control__preview" :src="previewUrl" />
       </template>
       <template v-if="fileType == 'video/*'">
-        <video controls aria-label="视频文件预览" style="width: 100%" :src="previewUrl" />
+        <video controls aria-label="视频文件预览" class="upload-control__preview" :src="previewUrl" />
       </template>
       <template v-if="fileType == '*'">
         <img
           v-if="autoSelectComponent('img')"
           alt="文件预览"
-          style="width: 100%"
+          class="upload-control__preview"
           :src="previewUrl"
         />
         <audio
           v-if="autoSelectComponent('audio')"
+          controls
           aria-label="音频文件预览"
-          style="width: 100%"
+          class="upload-control__preview"
           :src="previewUrl"
         />
         <video
           v-if="autoSelectComponent('video')"
           controls
           aria-label="视频文件预览"
-          style="width: 100%"
+          class="upload-control__preview"
           :src="previewUrl"
         />
         <embed
@@ -70,7 +71,7 @@
           :src="previewUrl"
           type="application/pdf"
           width="100%"
-          style="height: 400px"
+          class="upload-control__document"
         />
       </template>
     </el-dialog>
@@ -288,6 +289,23 @@ const autoSelectComponent = (info) => {
 </script>
 
 <style lang="scss" scoped>
+.upload-control {
+  max-width: 100%;
+}
+
+.upload-control__preview {
+  display: block;
+  width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+}
+
+.upload-control__document {
+  height: 400px;
+  max-height: 65vh;
+  border: 1px solid var(--app-border-soft);
+}
+
 .upload-control__hint {
   margin-top: 8px;
   color: var(--app-muted);

@@ -622,9 +622,10 @@ onMounted(() => {
 .member-page__filter-bar {
   display: flex;
   min-width: 0;
-  margin-bottom: 18px;
+  margin-bottom: var(--app-space);
   padding: 12px 16px;
   background: var(--app-surface);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius);
   box-shadow: var(--app-shadow-soft);
   align-items: center;
@@ -733,7 +734,7 @@ onMounted(() => {
 .member-page__pagination {
   justify-content: flex-end;
   flex: 0 0 auto;
-  padding-top: 10px;
+  padding-top: var(--app-space);
 }
 
 .member-page__row-actions {
@@ -752,11 +753,25 @@ onMounted(() => {
   }
 
   .member-page__workspace {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: var(--app-space);
   }
 
   .member-page__organization-card {
-    min-height: 260px;
+    min-height: 220px;
+    flex: 0 0 auto;
+  }
+
+  .member-page__table-card {
+    min-height: 360px;
+    flex: 0 0 auto;
+  }
+
+  .member-page__table-wrap {
+    min-height: 240px;
+    max-height: 420px;
   }
 
   .member-page__heading-actions {

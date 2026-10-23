@@ -587,7 +587,7 @@ onMounted(() => {
   margin-top: 4px;
   padding: 16px;
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: var(--app-radius);
   background: rgba(var(--app-primary-rgb), 0.035);
 }
 

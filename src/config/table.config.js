@@ -24,7 +24,7 @@ export const columns = [
         title: "操作",
         key: "operation",
         fixed: "right",
-        width: 256,
+        minWidth: 340,
         className: "table-operation-column",
     },
 ];
@@ -45,7 +45,7 @@ export const innerColumns = [
         dataIndex: "operation",
         key: "operation",
         fixed: "right",
-        width: 176,
+        minWidth: 220,
         className: "table-operation-column",
     },
 ];

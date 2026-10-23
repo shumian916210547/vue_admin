@@ -1,9 +1,9 @@
 <template>
   <section class="schema-page list-page">
     <div class="list-page__top schema-page__top">
-      <header class="schema-page__heading">
+      <header class="schema-page__heading management-page__heading">
         <div>
-          <span class="schema-page__eyebrow">低代码数据建模</span>
+          <span class="management-page__eyebrow">低代码数据建模</span>
           <h1>数据表管理</h1>
           <p>创建数据表、配置字段，并按需生成可直接使用的数据管理页面。</p>
         </div>
@@ -15,7 +15,7 @@
         v-permission="['permission:insert', permissions]">新建</el-button>
 
       <div class="schema-page__filter-query">
-        <el-form-item label="表格名称" v-permission="['permission:query', permissions]" style="margin-bottom: 0;">
+        <el-form-item label="表格名称" v-permission="['permission:query', permissions]" class="schema-page__filter-item">
           <el-input size="small" placeholder="请输入表格名称" v-model="queryState.name" clearable />
         </el-form-item>
         <el-button size="small" type="primary" @click="getSchemaList(queryState)" v-permission="['permission:query', permissions]">
@@ -548,37 +548,6 @@ await getSchemaList(queryState);
   flex: 1 1 auto;
 }
 
-.schema-page__heading {
-  display: flex;
-  margin-bottom: 24px;
-  padding-bottom: 0;
-  border-bottom: 0;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.schema-page__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.schema-page__heading h1 {
-  margin: 6px 0 7px;
-  color: var(--app-ink);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.schema-page__heading p {
-  margin: 0;
-  color: var(--app-muted);
-  font-size: 13px;
-}
-
 .schema-page__count {
   flex: 0 0 auto;
   margin-top: 8px;
@@ -587,20 +556,25 @@ await getSchemaList(queryState);
   font-size: 12px;
   font-weight: 600;
   background: var(--app-primary-soft);
-  border-radius: 999px;
+  border-radius: var(--app-radius-xs);
 }
 
 .schema-page__filters {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: nowrap;
-  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: var(--app-space-sm);
+  margin-bottom: var(--app-space);
   padding: 12px 16px;
   background: var(--app-surface);
-  border: 0;
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius);
   box-shadow: var(--app-shadow-soft);
+}
+
+.schema-page__filter-item {
+  margin-bottom: 0;
 }
 
 .schema-page__filter-query {
@@ -632,7 +606,7 @@ await getSchemaList(queryState);
   height: 430px;
   overflow: auto;
   background: var(--app-ink);
-  border-radius: 10px;
+  border-radius: var(--app-radius);
 }
 
 .schema-page__api-toolbar {
@@ -657,9 +631,6 @@ await getSchemaList(queryState);
 }
 
 @media (max-width: 767px) {
-  .schema-page__heading {
-    display: block;
-  }
 
   .schema-page__count {
     display: inline-block;

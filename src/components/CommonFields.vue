@@ -3,9 +3,9 @@
     <template
       v-if="column.key == 'icon' && fields[column.key]?.type == 'String'"
     >
-      <div style="display: flex; align-items: center">
+      <div class="common-fields__inline">
         <el-icon><component :is="getElementIcon(record[column.key])" /></el-icon>
-        <p>&nbsp;{{ record[column.key] }}</p>
+        <p>{{ record[column.key] }}</p>
       </div>
     </template>
     <template
@@ -14,9 +14,9 @@
         fields[column.key]?.type == 'String'
       "
     >
-      <div style="display: flex; align-items: center">
+      <div class="common-fields__inline">
         <el-image
-          :width="80"
+          class="common-fields__image"
           :src="record[column.key]"
           :preview-src-list="record[column.key] ? [record[column.key]] : []"
           fit="cover"
@@ -86,7 +86,20 @@ const props = defineProps({
 </script>
 
 <style lang="scss" scoped>
-* {
+p {
   margin: 0;
+}
+
+.common-fields__inline {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-sm);
+}
+
+.common-fields__image {
+  width: 64px;
+  height: 48px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius-xs);
 }
 </style>

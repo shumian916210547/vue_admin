@@ -566,6 +566,7 @@ const disableSelect = async (items) => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-right: 8px;
 }
 
 .common-form-modal__title {
@@ -583,6 +584,7 @@ const disableSelect = async (items) => {
 .common-form-modal__body {
   position: relative;
   width: var(--common-form-width, 100%);
+  max-width: 100%;
   min-height: var(--common-form-min-height, 360px);
 }
 

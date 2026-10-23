@@ -956,9 +956,10 @@ onMounted(async () => {
 .collab-page__filter-bar {
   display: flex;
   min-width: 0;
-  margin-bottom: 18px;
+  margin-bottom: var(--app-space);
   padding: 12px 16px;
   background: var(--app-surface);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius);
   box-shadow: var(--app-shadow-soft);
   align-items: center;
@@ -1015,7 +1016,7 @@ onMounted(async () => {
   width: 30px;
   height: 30px;
   color: var(--app-primary);
-  border-radius: 8px;
+  border-radius: var(--app-radius);
   background: var(--app-primary-soft);
   place-items: center;
   flex: 0 0 auto;
@@ -1052,7 +1053,7 @@ onMounted(async () => {
 
 .collab-page__pagination {
   justify-content: flex-end;
-  padding-top: 14px;
+  padding-top: var(--app-space);
 }
 
 @media (max-width: 640px) {

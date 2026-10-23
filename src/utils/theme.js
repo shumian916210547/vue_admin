@@ -10,21 +10,21 @@ export const THEME_PRESETS = Object.freeze([
     colors: {
       light: {
         primary: "#2563eb",
-        canvas: "#f4f7ff",
+        canvas: "#f6f7f9",
         surface: "#ffffff",
         ink: "#172033",
         text: "#526075",
-        muted: "#8a94a6",
-        border: "#dfe7f5",
+        muted: "#6b7280",
+        border: "#dce0e6",
       },
       dark: {
         primary: "#60a5fa",
-        canvas: "#081324",
-        surface: "#0f1d32",
-        ink: "#f2f7ff",
-        text: "#c7d3e4",
-        muted: "#8fa0b8",
-        border: "#263b58",
+        canvas: "#13171e",
+        surface: "#1b2029",
+        ink: "#e5e7eb",
+        text: "#c1c7d0",
+        muted: "#98a2b3",
+        border: "#343b47",
       },
     },
   },
@@ -299,9 +299,9 @@ export const getEffectiveThemeColors = (options = {}) => {
   const text = ensureContrast(normalizeHexColor(options.textColor, defaults.text), readableBackgrounds, 4.5);
   const muted = ensureContrast(normalizeHexColor(options.mutedColor, defaults.muted), readableBackgrounds, 3);
   const border = normalizeHexColor(options.borderColor, defaults.border);
-  const success = normalizeHexColor(options.successColor, appearance === "dark" ? "#34d399" : "#12a594");
-  const warning = normalizeHexColor(options.warningColor, appearance === "dark" ? "#fbbf24" : "#f59e0b");
-  const danger = normalizeHexColor(options.dangerColor, appearance === "dark" ? "#fb7185" : "#e84a5f");
+  const success = normalizeHexColor(options.successColor, appearance === "dark" ? "#34d399" : "#0f9f8b");
+  const warning = normalizeHexColor(options.warningColor, appearance === "dark" ? "#fbbf24" : "#d98a06");
+  const danger = normalizeHexColor(options.dangerColor, appearance === "dark" ? "#fb7185" : "#d9485f");
   const [primaryRed, primaryGreen, primaryBlue] = hexToRgb(primary);
   const [surfaceRed, surfaceGreen, surfaceBlue] = hexToRgb(surface);
   const [successRed, successGreen, successBlue] = hexToRgb(success);
@@ -384,18 +384,6 @@ export const applyVisualTheme = (options = {}) => {
   root.style.setProperty(
     "--app-glass-border",
     glassEnabled ? toRgba(colors.border, colors.appearance === "dark" ? 0.72 : 0.9) : colors.border
-  );
-  root.style.setProperty(
-    "--app-shadow",
-    colors.appearance === "dark"
-      ? "0 12px 28px rgba(0, 0, 0, 0.24)"
-      : "0 10px 28px rgba(31, 47, 75, 0.06)"
-  );
-  root.style.setProperty(
-    "--app-shadow-soft",
-    colors.appearance === "dark"
-      ? "0 3px 12px rgba(0, 0, 0, 0.18)"
-      : "0 2px 10px rgba(31, 47, 75, 0.05)"
   );
 };
 

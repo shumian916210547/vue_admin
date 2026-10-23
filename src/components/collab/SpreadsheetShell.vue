@@ -355,7 +355,7 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   min-width: 0;
-  min-height: 680px;
+  min-height: min(680px, 80dvh);
   flex-direction: column;
   border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius-lg);
@@ -368,8 +368,8 @@ onBeforeUnmount(() => {
   z-index: 2000;
   inset: 0;
   width: 100vw;
-  height: 100vh;
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -395,10 +395,9 @@ onBeforeUnmount(() => {
 }
 
 .spreadsheet-shell__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .spreadsheet-shell h2 {
@@ -450,13 +449,7 @@ onBeforeUnmount(() => {
 .spreadsheet-shell__loading,
 .spreadsheet-shell__unavailable,
 .spreadsheet-shell__editor-wrap {
-  min-height: 1000px;
-}
-
-:deep(.spreadsheet-shell__editor-wrap) {
-  iframe {
-    min-height: 800px;
-  }
+  min-height: min(480px, 60dvh);
 }
 
 .spreadsheet-shell__loading,
@@ -477,7 +470,7 @@ onBeforeUnmount(() => {
   height: 56px;
   color: var(--app-primary);
   font-size: 28px;
-  border-radius: 16px;
+  border-radius: var(--app-radius);
   background: var(--app-primary-soft);
   place-items: center;
 }
@@ -511,7 +504,7 @@ onBeforeUnmount(() => {
   display: flex;
   width: 100%;
   height: 100%;
-  min-height: 1000px;
+  min-height: min(680px, 75dvh);
   flex: 1 1 auto;
 }
 
@@ -520,7 +513,7 @@ onBeforeUnmount(() => {
   display: block;
   width: 100% !important;
   height: 100% !important;
-  min-height: 1000px;
+  min-height: min(680px, 75dvh);
   border: 0;
 }
 

@@ -35,7 +35,7 @@
       </el-main>
     </template>
 
-    <template #layout-menu>
+    <template #layout-menu="{ collapsed = false }">
       <div
         v-if="systemOptions.showLogo"
         class="app-brand"
@@ -58,7 +58,9 @@
         :default-openeds="openKeys"
         :default-active="selectedKeys[0]"
         :theme="systemOptions.theme"
-        :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'inline'"
+        :mode="systemOptions.layout == 'TopLayout' ? 'horizontal' : 'vertical'"
+        :collapse="systemOptions.layout === 'LeftLayout' && collapsed"
+        :collapse-transition="false"
         class="app-menu"
         @open="handleMenuOpen"
         @close="handleMenuClose"
@@ -67,10 +69,8 @@
           <template v-if="item.children">
             <el-sub-menu :index="'sub' + item.objectId" :disabled="!item.menu">
               <template #title>
-                <span>
-                  <el-icon><component :is="iconMap[item.meta.icon]" /></el-icon>
-                  <span>{{ item.name }}</span>
-                </span>
+                <el-icon><component :is="iconMap[item.meta.icon]" /></el-icon>
+                <span>{{ item.name }}</span>
               </template>
               <template
                 v-for="chil in item.children"
@@ -110,36 +110,44 @@
       <div class="header-actions">
         <!-- 主题配置 -->
         <el-tooltip content="主题配置" placement="bottom">
-          <el-icon
+          <button
+            type="button"
+            aria-label="主题配置"
             class="header-action-icon"
             @click="openThemeSettings"
-          ><component :is="iconMap['SkinOutlined']" /></el-icon>
+          ><el-icon><component :is="iconMap['SkinOutlined']" /></el-icon></button>
         </el-tooltip>
 
         <template v-if="systemOptions.fullScreen">
           <!-- 全屏 -->
           <el-tooltip content="全屏" placement="bottom" v-if="!isFullScreen">
-            <el-icon
+            <button
+              type="button"
+              aria-label="全屏"
               class="header-action-icon"
               @click="zoomPage"
-            ><component :is="iconMap['ExpandOutlined']" /></el-icon>
+            ><el-icon><component :is="iconMap['ExpandOutlined']" /></el-icon></button>
           </el-tooltip>
 
           <!-- 退出全屏 -->
           <el-tooltip content="退出全屏" placement="bottom" v-else>
-            <el-icon
+            <button
+              type="button"
+              aria-label="退出全屏"
               class="header-action-icon"
               @click="zoomPage"
-            ><component :is="iconMap['CompressOutlined']" /></el-icon>
+            ><el-icon><component :is="iconMap['CompressOutlined']" /></el-icon></button>
           </el-tooltip>
         </template>
 
         <!-- 刷新按钮 -->
         <el-tooltip v-if="systemOptions.refresh" content="刷新" placement="bottom">
-          <el-icon
-              class="header-action-icon"
+          <button
+            type="button"
+            aria-label="刷新页面"
+            class="header-action-icon"
             @click="pageReload"
-          ><component :is="iconMap['ReloadOutlined']" /></el-icon>
+          ><el-icon><component :is="iconMap['ReloadOutlined']" /></el-icon></button>
         </el-tooltip>
 
         <el-popover placement="bottom-end" trigger="click">
@@ -182,10 +190,6 @@
     <template #layout-tags v-if="systemOptions.showTags">
       <div
         :class="['tags-view', { 'tags-view--top': systemOptions.layout === 'TopLayout' }]"
-        :style="{
-          padding:
-            systemOptions.layout == 'TopLayout' ? '4px 0 4px 0px' : '4px 10px',
-        }"
       >
         <template v-for="(item, index) in historyPage" :key="item.pageKey">
           <el-tag
@@ -194,7 +198,6 @@
               'tags-view__tag',
               { 'tags-view__tag--active': item.pageKey == selectedKeys[0] },
             ]"
-            :color="item.pageKey == selectedKeys[0] ? themeColorValues.primary : undefined"
             :id="item.pageKey"
             @click="handleTag(item)"
             closable
@@ -212,7 +215,7 @@
     v-model="systemModal.show"
     title="主题配置"
     direction="rtl"
-    width="390"
+    size="min(390px, 100vw)"
     class="system-settings"
   >
     <el-form
@@ -300,7 +303,7 @@
           inactive-text="关闭"
           @change="handleSystemOptionChange"
         />
-        <p class="system-settings__hint">开启后，页面容器、导航和弹窗会使用半透明磨砂层与背景柔化效果。</p>
+        <p class="system-settings__hint">开启后，标识、主题预览和地图加载层使用轻微透明效果，业务表格保持清晰。</p>
       </el-form-item>
 
       <el-form-item label="图标">
@@ -362,7 +365,6 @@
     </p>
   </el-drawer>
 </template>
-
 
 <script setup>
 import { ElNotification } from "element-plus";
@@ -728,299 +730,4 @@ onUnmounted(() => {
 
 <style lang="scss">
 @import "@/assets/scss/Layout.scss";
-
-.header-actions {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  min-width: 88px;
-  padding-right: 14px;
-}
-
-.header-action-icon {
-  display: inline-flex;
-  width: 36px;
-  height: 36px;
-  margin-right: 0;
-  padding: 0;
-  color: var(--app-text);
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  place-items: center;
-  transition: color var(--app-transition), background-color var(--app-transition),
-    transform var(--app-transition);
-}
-
-.header-action-icon:hover {
-  color: var(--app-primary);
-  background: var(--app-primary-soft);
-  transform: translateY(-1px);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 8px;
-  color: inherit;
-  font: inherit;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 10px;
-  transition: background-color var(--app-transition);
-}
-
-.header-right:hover {
-  background: var(--app-primary-soft);
-}
-
-.header-avatar {
-  display: inline-flex;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  margin-right: 9px;
-  place-items: center;
-  overflow: hidden;
-  color: var(--app-primary);
-  object-fit: cover;
-  background: var(--app-primary-soft);
-  border-radius: 50%;
-}
-
-.header-avatar--placeholder {
-  font-size: 17px;
-}
-
-.header-user-name {
-  max-width: 116px;
-  overflow: hidden;
-  color: var(--app-ink);
-  font-size: 13px;
-  font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.header-user-chevron {
-  margin-left: 9px;
-  color: var(--app-muted);
-  font-size: 11px;
-  transition: transform var(--app-transition);
-}
-
-.header-right:hover .header-user-chevron {
-  transform: rotate(180deg);
-}
-
-.user-popover {
-  display: grid;
-  min-width: 132px;
-  gap: 8px;
-}
-
-.tags-view {
-  display: flex;
-  align-items: center;
-  overflow-x: auto;
-  transition: var(--app-transition);
-
-  &__tag {
-    margin-right: 4px;
-    cursor: pointer;
-  }
-}
-
-.tags-view--top {
-  // 与横向布局的品牌区保持同一宽度，使页签起点与首个菜单项对齐。
-  margin-left: 228px;
-}
-
-.system-settings__select {
-  width: 142px;
-}
-
-.system-settings .system-settings__wide-item {
-  display: block;
-}
-
-.theme-preset-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.theme-preset-card {
-  display: flex;
-  min-width: 0;
-  padding: 10px;
-  color: var(--app-text);
-  text-align: left;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-sm);
-  background: var(--app-glass-surface);
-  cursor: pointer;
-  transition: border-color var(--app-transition), background-color var(--app-transition),
-    transform var(--app-transition), box-shadow var(--app-transition);
-}
-
-.theme-preset-card:hover,
-.theme-preset-card--selected {
-  border-color: var(--app-primary);
-  background: var(--app-primary-soft);
-  box-shadow: 0 6px 14px rgba(var(--app-primary-rgb), 0.12);
-}
-
-.theme-preset-card:hover {
-  transform: translateY(-1px);
-}
-
-.theme-preset-card__swatch {
-  width: 24px;
-  height: 24px;
-  margin: 1px 8px 0 0;
-  border: 2px solid rgba(255, 255, 255, 0.72);
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(20, 38, 74, 0.2);
-  flex: 0 0 auto;
-}
-
-.theme-preset-card__content {
-  display: grid;
-  min-width: 0;
-  gap: 2px;
-}
-
-.theme-preset-card__content strong {
-  overflow: hidden;
-  color: var(--app-ink);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.theme-preset-card__content small {
-  display: -webkit-box;
-  overflow: hidden;
-  color: var(--app-muted);
-  font-size: 11px;
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.theme-color-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
-}
-
-.theme-color-control {
-  display: grid;
-  min-width: 0;
-  gap: 5px;
-  color: var(--app-text);
-  font-size: 12px;
-}
-
-.theme-color-control__input {
-  display: flex;
-  min-width: 0;
-  height: 34px;
-  padding: 4px;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-xs);
-  background: var(--app-glass-strong);
-  align-items: center;
-}
-
-.theme-color-control input {
-  width: 28px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.theme-color-control code {
-  min-width: 0;
-  margin-left: 5px;
-  overflow: hidden;
-  color: var(--app-muted);
-  font-family: "Cascadia Code", Consolas, monospace;
-  font-size: 10px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.theme-color-reset {
-  margin-top: 10px;
-}
-
-.system-settings__hint {
-  margin: 8px 0 0;
-  color: var(--app-muted);
-  font-size: 12px;
-  line-height: 1.65;
-}
-
-.system-settings__status {
-  margin: 8px 0 0;
-  color: var(--app-muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.system-settings__status span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.system-settings__status span::before {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  content: "";
-}
-
-.system-settings__status span:first-child {
-  color: var(--app-primary);
-}
-
-.app-menu {
-  overflow-y: auto;
-  flex: 1;
-}
-
-@media (max-width: 768px) {
-  .header-actions {
-    padding-right: 4px;
-  }
-
-  .header-action-icon {
-    margin-right: 0;
-  }
-
-  .header-user-name,
-  .header-user-chevron {
-    display: none !important;
-  }
-
-  .tags-view--top {
-    margin-left: 0;
-  }
-}
-
-@media (max-width: 420px) {
-  .theme-preset-grid,
-  .theme-color-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

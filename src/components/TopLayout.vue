@@ -31,7 +31,6 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 const props = defineProps({
   systemOptions: {
     type: Object,
-    default: () => {},
     required: true,
   },
 });
@@ -93,96 +92,3 @@ onUnmounted(() => {
   window.removeEventListener("resize", syncHeaderHeight);
 });
 </script>
-
-<style lang="scss">
-.top-layout__spacer {
-  flex: 0 0 auto;
-  width: 100%;
-}
-
-.top-layout__header {
-  position: fixed;
-  z-index: 10;
-  display: flex;
-  width: 100%;
-  padding: 0;
-  color: var(--app-text);
-  background: var(--app-surface);
-  border-bottom: 1px solid var(--app-border-soft);
-  box-shadow: 0 1px 8px rgba(var(--app-primary-rgb), 0.035);
-  flex-direction: column;
-}
-
-.top-layout--dark .top-layout__header {
-  color: var(--app-text);
-  background: var(--app-surface);
-  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.16);
-}
-
-.top-layout__main,
-.top-layout__navigation {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-}
-
-.top-layout__main {
-  width: 100%;
-  min-height: 64px;
-  justify-content: space-between;
-}
-
-.top-layout__navigation {
-  flex: 1 1 auto;
-}
-
-.top-layout__navigation .app-brand {
-  flex: 0 0 228px;
-  width: 228px;
-  min-width: 0;
-}
-
-.top-layout__main > .header-actions {
-  flex: 0 0 auto;
-  min-width: 0;
-}
-
-.top-layout__navigation .app-menu {
-  flex: 1;
-  min-width: 0;
-  line-height: 64px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  background: transparent;
-}
-
-.top-layout__navigation .app-menu::-webkit-scrollbar {
-  display: none;
-}
-
-.top-layout--dark .header-right:hover,
-.top-layout--dark .header-action-icon:hover {
-  color: var(--app-primary);
-  background: var(--app-primary-soft);
-}
-
-.top-layout--dark .header-user-name,
-.top-layout--dark .header-action-icon {
-  color: var(--app-text);
-}
-
-@media (max-width: 768px) {
-  .top-layout__header {
-    padding: 0;
-  }
-
-  .top-layout__navigation .app-menu {
-    display: none;
-  }
-
-  .top-layout__navigation .app-brand {
-    flex: 1 1 auto;
-    width: auto;
-  }
-}
-</style>

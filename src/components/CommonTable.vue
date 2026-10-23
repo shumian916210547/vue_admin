@@ -470,10 +470,10 @@ const showPagination = computed(() =>
 
 .common-table__filters {
   min-height: 64px;
-  margin-bottom: 18px;
+  margin-bottom: var(--app-space);
   padding: 12px 16px;
   background: var(--app-surface);
-  border: 0;
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius);
   box-shadow: var(--app-shadow-soft);
 }
@@ -502,7 +502,7 @@ const showPagination = computed(() =>
 .common-table__filter-fields {
   min-width: 0;
   flex: 1 1 auto;
-  gap: 0 12px;
+  gap: 12px;
   justify-content: flex-end;
 }
 
@@ -542,8 +542,8 @@ const showPagination = computed(() =>
 .common-table__pagination {
   flex: 0 0 auto;
   justify-content: flex-end;
-  min-height: 42px;
-  padding: 10px 0 0;
+  min-height: 48px;
+  padding: var(--app-space) 0 0;
 }
 
 @media (min-width: 992px) {
@@ -575,7 +575,7 @@ const showPagination = computed(() =>
 
 @media (max-width: 576px) {
   .common-table__filters {
-    padding: 6px 12px;
+    padding: 12px;
   }
 
   .common-table__filter-fields,
@@ -586,6 +586,10 @@ const showPagination = computed(() =>
 
   .common-table__filter-control {
     width: min(100%, 230px);
+  }
+
+  .common-table__filter-item {
+    width: 100%;
   }
 
   .common-table__toolbar-actions,

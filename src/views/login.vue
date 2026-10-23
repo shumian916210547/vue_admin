@@ -136,102 +136,65 @@ const handleLogin = async () => {
 .login-page {
   display: flex;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
   height: 100dvh;
+  min-height: 100vh;
   overflow: auto;
   background: var(--app-canvas);
 
   &__intro {
-    position: relative;
     display: flex;
-    width: min(52vw, 780px);
-    min-height: 100%;
-    padding: clamp(36px, 8vw, 108px);
-    overflow: hidden;
-    color: var(--app-primary-contrast);
-    background:
-      radial-gradient(circle at 10% 92%, rgba(255, 255, 255, 0.24), transparent 25rem),
-      radial-gradient(circle at 86% 12%, rgba(255, 255, 255, 0.18), transparent 22rem),
-      linear-gradient(145deg, var(--app-primary-hover), var(--app-primary) 52%, var(--app-primary-hover));
+    width: min(46vw, 640px);
+    flex: 0 0 auto;
+    padding: clamp(32px, 6vw, 80px);
+    color: var(--app-text);
+    border-right: 1px solid var(--app-border-soft);
+    background: var(--app-surface);
     flex-direction: column;
-  }
-
-  &__intro::before,
-  &__intro::after {
-    position: absolute;
-    width: 440px;
-    height: 440px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    content: "";
-  }
-
-  &__intro::before {
-    right: -200px;
-    bottom: -150px;
-  }
-
-  &__intro::after {
-    top: -260px;
-    left: -160px;
-    width: 520px;
-    height: 520px;
-  }
-
-  &__brand,
-  &__message,
-  &__features {
-    position: relative;
-    z-index: 1;
   }
 
   &__brand {
     display: flex;
     align-items: center;
+    color: var(--app-ink);
     font-size: 17px;
-    font-weight: 650;
-    letter-spacing: 0.02em;
+    font-weight: var(--app-font-weight);
+    gap: 12px;
   }
 
   &__brand-mark {
     display: grid;
-    width: 38px;
-    height: 38px;
-    margin-right: 11px;
+    width: 36px;
+    height: 36px;
+    color: var(--app-primary);
+    background: var(--app-primary-soft);
+    border-radius: var(--app-radius);
     font-size: 20px;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.24);
-    border-radius: 11px;
     place-items: center;
+    flex: 0 0 auto;
   }
 
   &__message {
-    max-width: 510px;
-    margin: auto 0 36px;
+    max-width: 460px;
+    margin: auto 0 32px;
+    padding-top: 48px;
   }
 
   &__eyebrow {
-    color: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+    color: var(--app-muted);
+    font-size: 13px;
   }
 
   h1 {
-    margin: 16px 0 20px;
-    color: inherit;
-    font-size: clamp(34px, 4vw, 54px);
-    font-weight: 700;
-    line-height: 1.18;
-    letter-spacing: -0.04em;
+    margin: 16px 0;
+    color: var(--app-ink);
+    font-size: clamp(30px, 3.5vw, 44px);
+    font-weight: var(--app-font-weight);
+    line-height: 1.45;
   }
 
-  p {
-    max-width: 460px;
+  &__message p {
     margin: 0;
-    color: inherit;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.8;
   }
 
@@ -239,65 +202,54 @@ const handleLogin = async () => {
     display: grid;
     margin: 0;
     padding: 0;
-    gap: 13px;
+    gap: 12px;
     list-style: none;
+    font-size: 13px;
 
     li {
       display: flex;
-      color: inherit;
-      font-size: 13px;
       align-items: center;
+      gap: 10px;
     }
 
     span {
-      width: 6px;
-      height: 6px;
-      margin-right: 10px;
-      background: currentColor;
+      width: 5px;
+      height: 5px;
+      background: var(--app-primary);
       border-radius: 50%;
-      box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.12);
     }
   }
 
   &__panel {
     display: grid;
     min-width: 0;
-    min-height: 100%;
     padding: 32px;
-    background:
-      radial-gradient(circle at 75% 14%, rgba(37, 99, 235, 0.08), transparent 18rem),
-      var(--app-canvas);
     flex: 1;
     place-items: center;
   }
 }
 
 .login-card {
-  width: min(100%, 410px);
-  padding: 38px;
-  background: var(--app-glass-surface);
-  border: 1px solid var(--app-glass-border);
-  border-radius: 20px;
-  box-shadow: var(--app-shadow);
-  backdrop-filter: blur(20px) saturate(145%);
-  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  width: min(100%, 400px);
+  padding: 32px;
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
 
   &__heading {
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 
     p {
-      margin: 0 0 8px;
+      margin-bottom: 8px;
       color: var(--app-primary);
       font-size: 13px;
-      font-weight: 600;
     }
 
     h2 {
       margin: 0;
       color: var(--app-ink);
-      font-size: 25px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-size: var(--app-page-title-size);
+      font-weight: var(--app-font-weight);
     }
 
     span {
@@ -309,18 +261,20 @@ const handleLogin = async () => {
   }
 
   &__submit {
-    margin-top: 4px;
+    width: 100%;
+    margin-top: 8px;
   }
 
   &__hint {
     display: flex;
-    margin: 22px 0 0;
+    margin: 20px 0 0;
     color: var(--app-muted);
     font-size: 12px;
     line-height: 1.6;
     align-items: flex-start;
 
     &-icon {
+      flex: 0 0 auto;
       margin: 3px 6px 0 0;
       color: var(--app-primary);
     }
@@ -328,21 +282,18 @@ const handleLogin = async () => {
 }
 
 @media (max-width: 860px) {
-  .login-page {
-    &__intro {
-      display: none;
-    }
+  .login-page__intro {
+    display: none;
+  }
 
-    &__panel {
-      min-height: 100dvh;
-      padding: 20px;
-    }
+  .login-page__panel {
+    padding: var(--app-page-gutter);
   }
 }
 
 @media (max-width: 480px) {
   .login-card {
-    padding: 28px 22px;
+    padding: 24px;
   }
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
   <section class="profile-page">
-    <header class="profile-page__heading">
+    <header class="profile-page__heading management-page__heading">
       <div>
-        <span class="profile-page__eyebrow">账号设置</span>
+        <span class="management-page__eyebrow">账号设置</span>
         <h1>个人中心</h1>
         <p>维护个人头像、名称和邮箱信息。</p>
       </div>
@@ -128,41 +128,14 @@ const updateUserInfo = async (values) => {
 </script>
 
 <style lang="scss" scoped>
-.profile-page__heading {
-  margin-bottom: 22px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--app-border);
-}
-
-.profile-page__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.profile-page__heading h1 {
-  margin: 6px 0 7px;
-  color: var(--app-ink);
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.profile-page__heading p {
-  margin: 0;
-  color: var(--app-muted);
-  font-size: 13px;
-}
 
 .profile-page__card {
   max-width: 780px;
-  padding: 4px 22px 18px;
-  background: var(--app-glass-surface);
-  border: 1px solid var(--app-glass-border);
-  border-radius: 14px;
+  padding: var(--app-panel-padding);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius);
   box-shadow: var(--app-shadow-soft);
-  backdrop-filter: blur(16px) saturate(135%);
-  -webkit-backdrop-filter: blur(16px) saturate(135%);
 }
 
 .profile-page__form {
@@ -171,7 +144,7 @@ const updateUserInfo = async (values) => {
 
 @media (max-width: 576px) {
   .profile-page__card {
-    padding: 4px 14px 18px;
+    padding: var(--app-panel-padding);
   }
 
 }

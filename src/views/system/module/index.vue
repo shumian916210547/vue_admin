@@ -2,9 +2,9 @@
   <section class="module-page list-page">
     <CommonPage ref="commonPage" :className="'Module'" @add="handleAdd" :innerContainer="true" innerContainerTitle="新增">
       <template #top>
-        <header class="module-page__heading">
+        <header class="module-page__heading management-page__heading">
           <div>
-            <span class="module-page__eyebrow">导航与权限</span>
+            <span class="management-page__eyebrow">导航与权限</span>
             <h1>模块管理</h1>
             <p>维护后台菜单模块及其子路由，路由可关联到已配置的数据表页面或组件。</p>
           </div>
@@ -69,7 +69,6 @@
       v-model="modalState.show" @onOk="handleSubmit"></CommonForm>
   </section>
 </template>
-
 
 <script setup>
 import CommonPage from "@/components/CommonPage.vue";
@@ -234,33 +233,6 @@ await findAll("Route");
 .module-page > .common-table {
   min-height: 0;
   flex: 1 1 auto;
-}
-
-.module-page__heading {
-  margin-bottom: 24px;
-  padding-bottom: 0;
-  border-bottom: 0;
-}
-
-.module-page__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
-
-.module-page__heading h1 {
-  margin: 6px 0 7px;
-  color: var(--app-ink);
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.module-page__heading p {
-  margin: 0;
-  color: var(--app-muted);
-  font-size: 13px;
-  line-height: 1.7;
 }
 
 .module-page__route-table {

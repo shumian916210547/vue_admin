@@ -1,8 +1,8 @@
 <template>
   <section class="operations-dashboard">
-    <header class="operations-dashboard__heading">
+    <header class="operations-dashboard__heading management-page__heading">
       <div>
-        <span class="operations-dashboard__eyebrow">受控运维</span>
+        <span class="management-page__eyebrow">受控运维</span>
         <h1>运维看板</h1>
         <p>仅在受控内部网络中加载内部运维看板，避免将数据库运维入口暴露给业务用户。</p>
       </div>
@@ -34,38 +34,6 @@ const url = window.__SHUMIAN_CONFIG__?.dashboardUrl || process.env.VUE_APP_DASHB
   flex-direction: column;
 }
 
-.operations-dashboard__heading {
-  display: flex;
-  flex: 0 0 auto;
-  margin-bottom: 24px;
-  padding-bottom: 0;
-  border-bottom: 0;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.operations-dashboard__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.13em;
-}
-
-.operations-dashboard h1 {
-  margin: 6px 0 7px;
-  color: var(--app-ink);
-  font-size: 24px;
-  font-weight: 750;
-}
-
-.operations-dashboard p {
-  margin: 0;
-  color: var(--app-muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
 .operations-dashboard__status {
   display: inline-flex;
   flex: 0 0 auto;
@@ -75,7 +43,7 @@ const url = window.__SHUMIAN_CONFIG__?.dashboardUrl || process.env.VUE_APP_DASHB
   font-size: 12px;
   font-weight: 650;
   background: rgba(var(--app-success-rgb), 0.1);
-  border-radius: 999px;
+  border-radius: var(--app-radius-xs);
   align-items: center;
   gap: 7px;
 }
@@ -112,9 +80,6 @@ const url = window.__SHUMIAN_CONFIG__?.dashboardUrl || process.env.VUE_APP_DASHB
 }
 
 @media (max-width: 576px) {
-  .operations-dashboard__heading {
-    display: block;
-  }
 
   .operations-dashboard__status {
     margin-top: 12px;

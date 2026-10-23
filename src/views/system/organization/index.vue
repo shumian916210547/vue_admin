@@ -26,7 +26,7 @@
 
     <div class="list-page__middle organization-page__middle">
       <el-row :gutter="20" class="organization-page__layout">
-      <el-col :xs="24" :xl="10">
+      <el-col :xs="24" :lg="10">
         <el-card class="organization-page__tree-card">
           <template #header>
             <div class="management-page__card-header">
@@ -60,7 +60,7 @@
         </el-card>
       </el-col>
 
-      <el-col :xs="24" :xl="14">
+      <el-col :xs="24" :lg="14">
         <el-card class="organization-page__detail-card">
           <template #header>
             <span class="management-page__card-title"><el-icon><Setting /></el-icon> {{ selectedOrganization ? "组织节点详情" : "组织配置说明" }}</span>
@@ -415,6 +415,7 @@ onMounted(() => {
   width: 100%;
   min-width: 0;
   min-height: 100%;
+  row-gap: var(--app-space);
 }
 
 .organization-page__layout :deep(.el-col) {

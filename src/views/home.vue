@@ -1,12 +1,12 @@
 <template>
   <section class="workspace-dashboard" :aria-busy="dashboardLoading">
-    <header class="workspace-dashboard__header">
+    <header class="workspace-dashboard__header management-page__heading">
       <div>
-        <span class="workspace-dashboard__eyebrow">运营概览</span>
+        <span class="management-page__eyebrow">运营概览</span>
         <h1>{{ greeting }}，{{ userDisplayName }}</h1>
         <p>这里汇总你的登录活跃、天气、常用入口和位置服务状态。</p>
       </div>
-      <div class="workspace-dashboard__header-actions">
+      <div class="workspace-dashboard__header-actions management-page__heading-actions">
         <span class="workspace-dashboard__date">{{ currentDateLabel }}</span>
         <el-button size="small" :loading="refreshing" @click="refreshDashboard">
           <template #icon><el-icon><Refresh /></el-icon></template>
@@ -63,7 +63,7 @@
     <section class="login-stats" aria-label="登录与活跃统计" :aria-busy="dashboardLoading">
       <header class="login-stats__header">
         <div>
-          <span class="workspace-dashboard__eyebrow">个人使用</span>
+          <span class="management-page__eyebrow">个人使用</span>
           <h2>登录统计</h2>
           <p>仅展示当前账号的登录与活跃节奏，数据由服务端会话记录。</p>
         </div>
@@ -540,7 +540,8 @@ onBeforeUnmount(() => {
 .workspace-dashboard {
   display: grid;
   min-width: 0;
-  gap: 24px;
+  gap: var(--app-space-lg);
+  align-content: start;
 }
 
 .workspace-dashboard__header,
@@ -554,7 +555,19 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
-.workspace-dashboard__header,
+.login-stats .dashboard-panel {
+  padding: var(--app-space) 0 0;
+  border: 0;
+  border-top: 1px solid var(--app-border-soft);
+  border-radius: 0;
+}
+
+.workspace-dashboard__header {
+  margin-bottom: 0;
+  justify-content: space-between;
+  gap: var(--app-space);
+}
+
 .dashboard-panel__header {
   justify-content: space-between;
   gap: 16px;
@@ -565,28 +578,19 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.workspace-dashboard__eyebrow,
 .dashboard-panel__eyebrow {
-  color: var(--app-primary);
-  font-size: 11px;
-  font-weight: 750;
-  letter-spacing: 0.13em;
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
-.workspace-dashboard h1,
-.dashboard-panel h2 {
-  margin: 6px 0 7px;
+.dashboard-panel h2,
+.login-stats__header h2,
+.location-panel h2 {
+  margin: 4px 0 6px;
   color: var(--app-ink);
-  font-weight: 750;
-  letter-spacing: -0.025em;
-}
-
-.workspace-dashboard h1 {
-  font-size: clamp(24px, 2.5vw, 30px);
-}
-
-.dashboard-panel h2 {
-  font-size: 18px;
+  font-size: var(--app-section-title-size);
+  font-weight: var(--app-font-weight);
 }
 
 .workspace-dashboard__header p,
@@ -601,9 +605,9 @@ onBeforeUnmount(() => {
 .login-stats {
   display: grid;
   min-width: 0;
-  padding: 24px;
+  padding: var(--app-panel-padding);
   gap: 16px;
-  border: 0;
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius-lg);
   background: var(--app-surface);
   box-shadow: var(--app-shadow-soft);
@@ -627,7 +631,7 @@ onBeforeUnmount(() => {
   font-size: 11px;
   font-weight: 650;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--app-radius-xs);
   background: rgba(var(--app-success-rgb), 0.08);
 }
 
@@ -636,7 +640,6 @@ onBeforeUnmount(() => {
   height: 7px;
   background: currentColor;
   border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(var(--app-success-rgb), 0.1);
 }
 
 .login-stats__status--loading > span {
@@ -647,10 +650,6 @@ onBeforeUnmount(() => {
   color: var(--app-danger);
   border-color: rgba(var(--app-danger-rgb), 0.2);
   background: rgba(var(--app-danger-rgb), 0.08);
-}
-
-.login-stats__status--error > span {
-  box-shadow: 0 0 0 4px rgba(var(--app-danger-rgb), 0.1);
 }
 
 @keyframes login-stats-pulse {
@@ -677,21 +676,15 @@ onBeforeUnmount(() => {
 }
 
 .dashboard-hero {
-  position: relative;
   display: grid;
-  min-height: 214px;
-  padding: clamp(24px, 4vw, 38px);
-  overflow: hidden;
-  color: var(--app-primary-contrast);
-  border: 0;
-  border-radius: var(--app-radius-lg);
-  background:
-    radial-gradient(circle at 15% 115%, rgba(255, 255, 255, 0.24), transparent 24rem),
-    radial-gradient(circle at 102% 0%, rgba(255, 255, 255, 0.2), transparent 20rem),
-    linear-gradient(135deg, var(--app-primary), var(--app-primary-hover));
-  box-shadow: 0 12px 28px rgba(var(--app-primary-rgb), 0.2);
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
-  gap: 28px;
+  min-width: 0;
+  padding: var(--app-panel-padding);
+  color: var(--app-ink);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: var(--app-space-lg);
 }
 
 .dashboard-hero__content,
@@ -703,12 +696,12 @@ onBeforeUnmount(() => {
 .dashboard-hero__badge {
   display: inline-flex;
   padding: 6px 10px;
-  color: inherit;
+  color: var(--app-primary);
   font-size: 12px;
-  font-weight: 650;
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
+  font-weight: 500;
+  background: var(--app-primary-soft);
+  border: 0;
+  border-radius: var(--app-radius-xs);
   align-items: center;
   gap: 6px;
 }
@@ -725,10 +718,9 @@ onBeforeUnmount(() => {
   max-width: 600px;
   margin: 17px 0 10px;
   color: inherit;
-  font-size: clamp(23px, 3vw, 32px);
-  font-weight: 760;
+  font-size: 20px;
+  font-weight: var(--app-font-weight);
   line-height: 1.25;
-  letter-spacing: -0.035em;
 }
 
 .dashboard-hero__content > p {
@@ -737,7 +729,7 @@ onBeforeUnmount(() => {
   color: inherit;
   font-size: 13px;
   line-height: 1.8;
-  opacity: 0.82;
+  color: var(--app-text);
 }
 
 .dashboard-hero__meta {
@@ -745,7 +737,7 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   gap: 13px 18px;
   font-size: 12px;
-  opacity: 0.92;
+  color: var(--app-muted);
 }
 
 .dashboard-hero__meta span {
@@ -758,12 +750,9 @@ onBeforeUnmount(() => {
   align-self: center;
   padding: 18px;
   color: var(--app-ink);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--app-border-soft);
   border-radius: var(--app-radius);
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(17px) saturate(140%);
-  -webkit-backdrop-filter: blur(17px) saturate(140%);
+  background: var(--app-surface-muted);
 }
 
 .weather-card__heading {
@@ -787,8 +776,8 @@ onBeforeUnmount(() => {
   padding: 0;
   color: inherit;
   border: 0;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
   cursor: pointer;
   place-items: center;
 }
@@ -810,9 +799,9 @@ onBeforeUnmount(() => {
   display: grid;
   width: 36px;
   height: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid var(--app-border-soft);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
   place-items: center;
 }
 
@@ -842,7 +831,7 @@ onBeforeUnmount(() => {
   margin: 12px 0 0;
   font-size: 11px;
   line-height: 1.45;
-  opacity: 0.74;
+  color: var(--app-muted);
 }
 
 .stat-grid {
@@ -854,7 +843,7 @@ onBeforeUnmount(() => {
 .stat-card,
 .dashboard-panel,
 .location-panel {
-  border: 0;
+  border: 1px solid var(--app-border-soft);
   background: var(--app-surface);
   box-shadow: var(--app-shadow-soft);
 }
@@ -875,7 +864,7 @@ onBeforeUnmount(() => {
   height: 40px;
   color: var(--app-primary);
   font-size: 18px;
-  border-radius: 12px;
+  border-radius: var(--app-radius);
   background: var(--app-primary-soft);
   place-items: center;
   flex: 0 0 auto;
@@ -949,16 +938,16 @@ onBeforeUnmount(() => {
 .dashboard-panel,
 .location-panel {
   min-width: 0;
-  padding: 20px;
+  padding: var(--app-panel-padding);
   border-radius: var(--app-radius);
 }
 
 .dashboard-panel__header {
-  margin-bottom: 18px;
+  margin-bottom: var(--app-space);
 }
 
 .dashboard-panel__tag {
-  max-width: 42%;
+  max-width: 100%;
   overflow: hidden;
   padding: 5px 9px;
   color: var(--app-primary);
@@ -991,7 +980,6 @@ onBeforeUnmount(() => {
   margin: 4px auto 0;
   background: var(--app-primary);
   border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb), 0.12);
 }
 
 .trend-chart--loading {
@@ -1007,7 +995,7 @@ onBeforeUnmount(() => {
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: var(--app-radius);
   background: linear-gradient(
     90deg,
     rgba(var(--app-primary-rgb), 0.08),
@@ -1084,7 +1072,6 @@ onBeforeUnmount(() => {
   border-color: var(--app-primary);
   background: var(--app-primary-soft);
   box-shadow: var(--app-shadow-soft);
-  transform: translateY(-1px);
 }
 
 .quick-action > span {
@@ -1092,7 +1079,7 @@ onBeforeUnmount(() => {
   width: 28px;
   height: 28px;
   color: var(--app-primary);
-  border-radius: 8px;
+  border-radius: var(--app-radius);
   background: var(--app-primary-soft);
   place-items: center;
   grid-row: span 2;
@@ -1112,7 +1099,7 @@ onBeforeUnmount(() => {
 
 .quick-action small {
   color: var(--app-muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .location-panel__actions {
@@ -1137,7 +1124,6 @@ onBeforeUnmount(() => {
   height: 7px;
   background: currentColor;
   border-radius: 50%;
-  box-shadow: 0 0 0 4px rgba(var(--app-success-rgb), 0.1);
   flex: 0 0 auto;
 }
 
@@ -1184,7 +1170,7 @@ onBeforeUnmount(() => {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .workspace-dashboard__header,
   .login-stats__header,
   .dashboard-panel__header,
